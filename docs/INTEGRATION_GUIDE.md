@@ -119,8 +119,6 @@ node integration-check.cjs
 
 - **실시간 채팅(WebSocket)**: 백엔드 게이트웨이와 `pass-api.js`의 `connectChat()`은 동작하지만
   `frontend/main/feed.html`에는 REST 방식만 연결돼 있다. 상대 메시지는 대화방 재진입 시 갱신된다.
-- **`npm run start:prod`**: 빌드 산출물 경로가 `dist/src/main.js`인데 스크립트는 `dist/main`을
-  가리켜 그대로는 실행되지 않는다. 개발·테스트는 `npm run start`(또는 `start:dev`)를 쓴다.
 - 비로그인 상태로 `frontend/main/feed.html`을 직접 열면 기존 데모 데이터로 동작한다.
 - `package.json`의 NestJS 패키지 버전이 코어(v10)와 어긋나 있어(websockets/socket.io v11)
   v10으로 정렬했다 — 이 수정이 없으면 `npm install`이 실패한다.

@@ -47,6 +47,7 @@ model User {
   conversationsAsB  Conversation[]   @relation("ConvUserB")
   messages          Message[]
   messageReads      MessageRead[]
+  userGraphs        UserGraph[]
 
   @@index([phone])
   @@index([status])
@@ -255,4 +256,22 @@ model MessageRead {
   @@unique([messageId, userId])
   @@index([userId])
   @@map("message_reads")
+}
+
+// ============================================================
+// 관계망 그래프 — 가계도(family) / 모임(group) / 학급(class)
+// 사용자별로 그래프 전체를 JSON 문서로 저장. 비가입 멤버(placeholder) 허용.
+// ============================================================
+model UserGraph {
+  id        String   @id @default(cuid()) @db.VarChar(40)
+  userId    String   @map("user_id") @db.VarChar(40)
+  kind      String   @db.VarChar(20)   // family | group | class
+  data      Json     // MariaDB JSON
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, kind])
+  @@map("user_graphs")
 }
