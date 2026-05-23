@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#FFA000">
 <title>PASS — 메인</title>
-<script src="pass-api.js"></script>
+<script src="../lib/pass-api.js"></script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/static/pretendard.min.css" rel="stylesheet">
 <style>
@@ -1088,7 +1088,7 @@ async function applyUser() {
     } catch (e) {
       if (e.status === 401) {
         PassAPI.clearSession();
-        window.location.href = 'chon-pass-login.html';
+        window.location.href = '../auth/login.html';
         return;
       }
     }
@@ -1144,9 +1144,9 @@ function chooseAuth(type) {
 // Relation modes (3 modes — 가계도 / 모임 / 학급증)
 // ============================================================
 const MODE_FILES = {
-  family: 'chon-family-tree-v13.html',
-  friend: 'chon-friends-v1.html',
-  classid: 'chon-class-id-v4.html'
+  family: '../views/family-tree.html',
+  friend: '../views/friends.html',
+  classid: '../views/class-id.html'
 };
 const MODE_LABELS = {
   family: '🌳 가계도',
@@ -1162,8 +1162,8 @@ function openMode(mode) {
 }
 
 function goRelTool() {
-  // 통합 보기 — PASS v2 (피드·모임·채팅·Trust)
-  window.location.href = 'chon-pass-v2.html';
+  // 통합 보기 — 피드·모임·채팅·Trust
+  window.location.href = './feed.html';
 }
 
 // ============================================================
@@ -1180,7 +1180,7 @@ async function logoutPass() {
   else {
     try { sessionStorage.removeItem('passUser'); sessionStorage.removeItem('passWelcomed'); } catch (e) {}
   }
-  window.location.href = 'chon-pass-login.html';
+  window.location.href = '../auth/login.html';
 }
 
 // ============================================================

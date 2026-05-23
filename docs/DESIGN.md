@@ -330,7 +330,7 @@ CHON 관계 시각화 도구의 4가지 토폴로지:
 | 03 | ⭐ 계층적 수직 (학교) | 내가 중심 | 위계 협력(담임-학부모) + 또래(친구들) |
 | 04 | 🏢 권한수령형 (조직) | 조직 → 내 동의 | 👑 Admin + 계층적 위계 |
 
-상세 명세: `chon-graph-tool-v3.html` 참조.
+상세 명세: `frontend/views/graph-tool.html` 참조.
 
 ---
 
@@ -401,10 +401,10 @@ CHON 관계 시각화 도구의 4가지 토폴로지:
 ### 시각화 도구
 | 파일 | 내용 |
 |------|------|
-| `chon-mobile-family-tree-v13.html` | 가계도 — 3-way 토글, 그래프 액션 패널, 인증현황 카드 |
-| `chon-class-id-v4.html` | 학급증 — 3-way 토글, 그래프 액션 패널, 인증현황 카드 |
-| `chon-relationship-tools-v1.html` | 통합 페이지 (iframe 기반) |
-| `chon-graph-tool-v3.html` | 4 토폴로지 시각화 (Admin 포함) |
+| `frontend/views/family-tree.html` | 가계도 — 3-way 토글, 그래프 액션 패널, 인증현황 카드 |
+| `frontend/views/class-id.html` | 학급증 — 3-way 토글, 그래프 액션 패널, 인증현황 카드 |
+| `frontend/main/feed.html` | 통합 페이지 (iframe 기반) |
+| `frontend/views/graph-tool.html` | 4 토폴로지 시각화 (Admin 포함) |
 
 ### 시스템 문서 (v7)
 | 파일 | 내용 |

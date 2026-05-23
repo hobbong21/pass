@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#FFA000">
-<title>PASS v2 — 관계형 SNS</title>
-<script src="pass-api.js"></script>
+<title>PASS — 피드</title>
+<script src="../lib/pass-api.js"></script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/static/pretendard.min.css" rel="stylesheet">
 <style>
@@ -3024,7 +3024,7 @@ async function logoutPass() {
   else {
     try { sessionStorage.removeItem('passUser'); sessionStorage.removeItem('passWelcomed'); } catch (e) {}
   }
-  window.location.href = 'chon-pass-login.html';
+  window.location.href = '../auth/login.html';
 }
 
 // 세션 없이 직접 접근한 경우(데모)에는 자동 로그인 처리하지 않고 통과
@@ -3087,9 +3087,9 @@ if (backendOn()) {
 <script>
 function openGraphTool(kind) {
   var map = {
-    family: { file: 'chon-family-tree-v13.html', name: '🌳 가계도' },
-    group:  { file: 'chon-friends-v1.html',      name: '🌐 모임' },
-    class:  { file: 'chon-class-id-v4.html',     name: '🏫 학급' }
+    family: { file: '../views/family-tree.html', name: '🌳 가계도' },
+    group:  { file: '../views/friends.html',     name: '🌐 모임' },
+    class:  { file: '../views/class-id.html',    name: '🏫 학급' }
   };
   var t = map[kind];
   if (!t) return;

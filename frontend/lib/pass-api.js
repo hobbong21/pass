@@ -1,5 +1,5 @@
 /* ============================================================
-   PASS API Client — chon-pass-*.html 공통 모듈
+   PASS API Client — frontend/ HTML 공통 모듈
    백엔드: NestJS @ http://localhost:3000/api
    ------------------------------------------------------------
    localStorage 키:

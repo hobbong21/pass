@@ -25,6 +25,7 @@ prisma/migrations/.DS_Store
 # OS
 .DS_Store
 Thumbs.db
+.fuse_hidden*
 
 # Tests
 coverage/

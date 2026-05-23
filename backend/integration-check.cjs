@@ -24,8 +24,8 @@ global.localStorage = makeStorage();
 global.sessionStorage = makeStorage();
 try { global.io = require('socket.io-client').io; } catch (e) { /* WebSocket 점검 생략 */ }
 
-// pass-api.js 는 ../frontend/pass-api.js 에 위치
-require(path.join(__dirname, '..', 'frontend', 'pass-api.js'));
+// pass-api.js 는 ../frontend/lib/pass-api.js 에 위치
+require(path.join(__dirname, '..', 'frontend', 'lib', 'pass-api.js'));
 const API = global.PassAPI;
 
 let pass = 0, fail = 0;

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>PASS 모임 — 모임 + 모임원 추천</title>
-<script src="pass-api.js"></script>
+<script src="../lib/pass-api.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800;900&display=swap" rel="stylesheet">
 <style>
@@ -122,6 +122,7 @@
   }
   .phone {
     width: 380px;
+    max-width: 100%;
     height: 800px;
     background: #C8C2BC;
     border-radius: 48px;
@@ -137,6 +138,25 @@
     position: relative;
     display: flex;
     flex-direction: column;
+  }
+
+  /* 모바일 — 폰 목업 베젤 제거, 도구를 전체 화면으로 */
+  @media (max-width: 480px) {
+    body { background: var(--bg-app); }
+    .demo-wrap { padding: 0; max-width: 100%; }
+    .demo-header, .phone-caption { display: none; }
+    .phones-grid { display: block; gap: 0; }
+    .phone-wrapper { width: 100%; }
+    .phone {
+      width: 100%;
+      height: 100vh;
+      height: 100dvh;
+      border-radius: 0;
+      padding: 0;
+      box-shadow: none;
+      background: var(--bg-app);
+    }
+    .phone-screen { border-radius: 0; }
   }
   .status-bar {
     height: 40px;

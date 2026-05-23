@@ -20,9 +20,9 @@
 
 | 파일/디렉터리 | 내용 |
 |------|------|
-| `chon-mobile-family-tree-v11.html` | 가계도 v11 — 박스 포함 디자인 |
-| `chon-class-id-v2.html` | 학급증 v2 — 간소화 |
-| `chon-viz-topology-v3.html` | 시각화 토폴로지 v3 |
+| `frontend/views/family-tree.html` | 가계도 — 박스 포함 디자인 |
+| `frontend/views/class-id.html` | 학급증 — 3-way 토글 |
+| `frontend/views/topology.html` | 시각화 토폴로지 |
 
 ---
 

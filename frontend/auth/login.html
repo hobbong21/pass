@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#FFA000">
 <title>PASS — 로그인</title>
 <!-- Backend API client -->
-<script src="pass-api.js"></script>
+<script src="../lib/pass-api.js"></script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/static/pretendard.min.css" rel="stylesheet">
 <style>
@@ -411,12 +411,14 @@
      ============================================ */
   .otp-row {
     display: flex;
-    gap: 12px;
+    gap: 8px;
     justify-content: center;
     margin-bottom: 16px;
   }
   .otp-cell {
-    width: 48px;
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 48px;
     height: 56px;
     border: none;
     border-bottom: 2px solid var(--line-default);
@@ -1915,7 +1917,7 @@ function showSuccessLogin(email) {
 
 function goMain() {
   // PASS 메인 페이지로 이동 (Figma 디자인 매칭)
-  window.location.href = 'chon-pass-main.html';
+  window.location.href = '../main/home.html';
 }
 
 
