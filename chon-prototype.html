@@ -1,0 +1,2378 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CHON DID — 디자인 시스템 + 입출력 인터페이스 프로토타입</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Noto+Sans+KR:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+  /* ========================================
+     CHON Design Tokens (from design refs)
+     ======================================== */
+  :root {
+    --chon-orange: #F7931E;
+    --chon-orange-dark: #E87F0A;
+    --chon-orange-light: #FFB45A;
+    --chon-yellow: #FCD34D;
+    --chon-yellow-soft: #FFF3D6;
+
+    --bg-cream: #FFFBF0;
+    --bg-button-cream: #FFF3D6;
+    --bg-card-glass: rgba(255, 200, 130, 0.45);
+
+    --text-primary: #1F1F1F;
+    --text-on-orange: #FFFFFF;
+    --text-secondary: #595959;
+    --text-subtle: rgba(255, 255, 255, 0.85);
+
+    --state-confirmed: #10B981;
+    --state-pending: #F59E0B;
+    --state-rejected: #EF4444;
+    --state-unverified: #BDBDBD;
+
+    --cat-family: #FF7F50;
+    --cat-company: #4A90E2;
+    --cat-school: #7B68EE;
+    --cat-general: #5BBA6F;
+
+    --garden-seed: #8B7355;
+    --garden-sprout: #A3D85F;
+    --garden-stem: #7BC142;
+    --garden-flower: #FFB6D9;
+    --garden-fruit: #FF6B6B;
+    --garden-tree: #2D8B3F;
+    --garden-forest: #1B5E2B;
+
+    --radius-card-lg: 28px;
+    --radius-card-md: 20px;
+    --radius-pill: 999px;
+    --radius-button: 16px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    padding: 24px;
+    font-family: 'Noto Sans KR', sans-serif;
+    background: linear-gradient(135deg, #FFF7E6 0%, #FFE6D0 100%);
+    min-height: 100vh;
+    color: var(--text-primary);
+  }
+
+  /* ===== Top intro ===== */
+  .intro {
+    max-width: 1400px;
+    margin: 0 auto 24px;
+    background: white;
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 4px 20px rgba(247, 147, 30, 0.08);
+  }
+  .intro h1 {
+    margin: 0 0 8px;
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--chon-orange);
+  }
+  .intro p {
+    margin: 4px 0;
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+  .intro .badge {
+    display: inline-block;
+    background: var(--chon-yellow-soft);
+    color: var(--chon-orange-dark);
+    padding: 4px 12px;
+    border-radius: var(--radius-pill);
+    font-size: 12px;
+    font-weight: 700;
+    margin-right: 8px;
+  }
+
+  /* ===== Phones layout ===== */
+  .phones-container {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .phones-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    justify-content: center;
+    margin-bottom: 32px;
+  }
+
+  .phone-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .phone-label {
+    background: var(--chon-orange);
+    color: white;
+    padding: 6px 16px;
+    border-radius: var(--radius-pill);
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 8px rgba(247, 147, 30, 0.3);
+  }
+
+  /* ===== Phone Frame (Galaxy style) ===== */
+  .phone {
+    width: 320px;
+    height: 660px;
+    background: #C8C2BC;
+    border-radius: 44px;
+    padding: 10px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    position: relative;
+  }
+
+  .phone-screen {
+    width: 100%;
+    height: 100%;
+    background: var(--bg-cream);
+    border-radius: 36px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Status bar */
+  .status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 24px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  .status-bar .camera-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #1F1F1F;
+    border: 2px solid #2A2A2A;
+    position: absolute;
+    top: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .status-icons { display: flex; gap: 6px; align-items: center; font-size: 11px; }
+
+  /* Hamburger */
+  .hamburger {
+    width: 24px;
+    height: 18px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    cursor: pointer;
+  }
+  .hamburger span {
+    height: 2px;
+    background: var(--text-primary);
+    border-radius: 2px;
+  }
+
+  /* ===== Screen 1: Splash ===== */
+  .splash-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: calc(100% - 50px);
+    gap: 8px;
+  }
+  .splash-logo {
+    width: 110px;
+    height: 110px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .splash-text-main {
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: 1px;
+  }
+  .splash-text-main .o-1 { color: #2A2A2A; }
+  .splash-text-main .o-2 { color: var(--chon-orange); }
+  .splash-text-sub {
+    font-size: 14px;
+    color: #2A2A2A;
+    font-weight: 400;
+  }
+
+  /* ===== Screen 2: Home ===== */
+  .home-content {
+    padding: 0 20px 20px;
+    height: calc(100% - 50px);
+    display: flex;
+    flex-direction: column;
+  }
+  .home-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 8px;
+  }
+  .home-title {
+    font-size: 24px;
+    font-weight: 800;
+    margin: 20px 0 16px;
+    line-height: 1.3;
+  }
+  .home-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .home-card {
+    border-radius: var(--radius-card-md);
+    padding: 14px 12px;
+    min-height: 140px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+  .home-card:hover { transform: translateY(-2px); }
+  .home-card-orange {
+    background: var(--chon-orange);
+    color: white;
+  }
+  .home-card-yellow {
+    background: var(--chon-yellow);
+    color: var(--text-primary);
+  }
+  .home-card-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+  .home-card-yellow .home-card-icon {
+    background: rgba(255, 255, 255, 0.4);
+  }
+  .home-card-title {
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1.3;
+    margin-top: 12px;
+  }
+  .home-card-desc {
+    font-size: 10px;
+    margin-top: 4px;
+    opacity: 0.95;
+    line-height: 1.4;
+  }
+
+  .home-section-label {
+    font-size: 14px;
+    font-weight: 800;
+    margin: 8px 0 10px;
+  }
+  .info-pill {
+    background: var(--chon-yellow-soft);
+    border-radius: var(--radius-pill);
+    padding: 12px 18px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .info-pill:hover { background: #FFE9B8; }
+  .info-pill .pill-icon {
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+
+  /* AI bar */
+  .ai-bar {
+    position: absolute;
+    bottom: 16px;
+    left: 16px;
+    right: 16px;
+    background: white;
+    border: 2px solid var(--chon-orange);
+    border-radius: var(--radius-pill);
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+  .ai-bar .ai-icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 11px;
+    font-weight: bold;
+  }
+
+  /* ===== Orange Radial Background Screen ===== */
+  .orange-bg-screen {
+    height: 100%;
+    background:
+      radial-gradient(ellipse at 30% 30%, var(--chon-orange-light) 0%, transparent 50%),
+      radial-gradient(ellipse at 70% 70%, var(--chon-orange-dark) 0%, transparent 60%),
+      linear-gradient(135deg, var(--chon-orange) 0%, var(--chon-orange-dark) 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  .orange-bg-screen::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background:
+      linear-gradient(45deg, transparent 48%, rgba(255,255,255,0.05) 50%, transparent 52%),
+      linear-gradient(-45deg, transparent 48%, rgba(255,255,255,0.05) 50%, transparent 52%);
+    background-size: 80px 80px;
+  }
+  .orange-bg-screen .status-bar { color: white; }
+  .orange-bg-screen .camera-dot { background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.3); }
+
+  .back-btn {
+    background: var(--bg-button-cream);
+    border: none;
+    padding: 8px 18px;
+    border-radius: var(--radius-pill);
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 12px 0 0 20px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .top-right-link {
+    position: absolute;
+    top: 50px;
+    right: 24px;
+    font-size: 15px;
+    font-weight: 700;
+    color: white;
+    cursor: pointer;
+  }
+
+  .request-title {
+    color: white;
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1.4;
+    padding: 24px 24px 0;
+    position: relative;
+    z-index: 2;
+  }
+
+  /* ===== Self ID / Family Card ===== */
+  .id-card {
+    background: var(--bg-card-glass);
+    backdrop-filter: blur(10px);
+    border-radius: var(--radius-card-lg);
+    margin: 24px auto;
+    width: 220px;
+    overflow: hidden;
+    position: relative;
+    z-index: 2;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  }
+  .id-card-header {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 16px 0;
+    text-align: center;
+    color: white;
+    font-size: 22px;
+    font-weight: 800;
+  }
+  .id-card-header small {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    opacity: 0.95;
+    margin-top: 2px;
+  }
+  .id-card-body {
+    padding: 20px 16px 24px;
+    text-align: center;
+    color: white;
+    position: relative;
+  }
+  .id-card-body::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at center 200px, rgba(255,255,255,0.15) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .id-photo {
+    width: 88px;
+    height: 110px;
+    border-radius: 12px;
+    background: #D8B591;
+    margin: 0 auto 12px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  .id-photo svg { width: 100%; height: 100%; }
+  .id-name-ko {
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 2px;
+  }
+  .id-name-en {
+    font-size: 13px;
+    opacity: 0.9;
+    margin-bottom: 8px;
+  }
+  .id-rrn {
+    font-size: 13px;
+    letter-spacing: 1px;
+    opacity: 0.95;
+    margin-bottom: 16px;
+  }
+  .id-qr {
+    width: 80px;
+    height: 80px;
+    background: white;
+    margin: 0 auto 8px;
+    border-radius: 4px;
+    padding: 6px;
+  }
+  .id-qr svg { width: 100%; height: 100%; }
+  .id-watermark {
+    font-size: 12px;
+    font-weight: 700;
+    opacity: 0.9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  /* ===== Verify Point Chip (Trust Garden integrated) ===== */
+  .verify-chip {
+    background: var(--bg-button-cream);
+    border-radius: var(--radius-pill);
+    padding: 10px 18px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+  .verify-chip:hover { transform: scale(1.05); }
+  .verify-chip-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--chon-orange);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+  .verify-chip-stage {
+    margin-left: 4px;
+    font-size: 12px;
+    color: var(--chon-orange-dark);
+    font-weight: 800;
+  }
+
+  .bottom-area {
+    position: absolute;
+    bottom: 24px;
+    left: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    z-index: 2;
+  }
+
+  .primary-cta {
+    background: var(--bg-button-cream);
+    color: var(--text-primary);
+    border: none;
+    padding: 14px 0;
+    border-radius: var(--radius-button);
+    font-size: 16px;
+    font-weight: 800;
+    width: 260px;
+    cursor: pointer;
+    font-family: inherit;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+
+  /* ===== Trust Garden Fullscreen ===== */
+  .garden-screen {
+    background: linear-gradient(180deg, #FFF9E6 0%, #FFE9B8 100%);
+    height: 100%;
+    padding: 60px 24px 24px;
+    overflow-y: auto;
+    text-align: center;
+  }
+  .garden-screen .back-btn-absolute {
+    position: absolute;
+    top: 50px;
+    left: 20px;
+  }
+  .garden-title {
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 4px;
+  }
+  .garden-plant {
+    font-size: 100px;
+    margin: 20px 0;
+    animation: sway 3s ease-in-out infinite;
+  }
+  @keyframes sway {
+    0%, 100% { transform: rotate(-3deg); }
+    50% { transform: rotate(3deg); }
+  }
+  .garden-stage-label {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--chon-orange);
+    margin-bottom: 4px;
+  }
+  .garden-progress {
+    background: white;
+    border-radius: 16px;
+    padding: 16px;
+    margin: 16px 0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    text-align: left;
+    font-size: 12px;
+  }
+  .garden-progress strong { display: block; margin-bottom: 8px; }
+  .garden-progress ul { margin: 0; padding-left: 20px; }
+  .garden-progress li { margin: 4px 0; }
+  .garden-progress li.unlocked { color: var(--state-confirmed); font-weight: 700; }
+  .garden-progress li.locked { color: var(--text-secondary); opacity: 0.6; }
+
+  .garden-stages-row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 16px;
+    padding: 0 4px;
+  }
+  .garden-stage-mini {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    flex: 1;
+  }
+  .garden-stage-mini .emoji { font-size: 18px; opacity: 0.4; }
+  .garden-stage-mini.current .emoji { opacity: 1; transform: scale(1.3); }
+  .garden-stage-mini.done .emoji { opacity: 1; }
+  .garden-stage-mini .num { font-size: 9px; color: var(--text-secondary); }
+
+  /* ===== Ego Network View ===== */
+  .ego-screen {
+    background: var(--bg-cream);
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+  }
+  .ego-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 16px 8px;
+  }
+  .view-tabs {
+    display: flex;
+    background: var(--chon-yellow-soft);
+    border-radius: var(--radius-pill);
+    padding: 3px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .view-tab {
+    padding: 6px 12px;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    color: var(--text-secondary);
+  }
+  .view-tab.active {
+    background: var(--chon-orange);
+    color: white;
+  }
+  .ego-mini-garden {
+    background: var(--bg-button-cream);
+    border-radius: var(--radius-pill);
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+  }
+
+  .category-tabs {
+    display: flex;
+    padding: 0 16px 8px;
+    gap: 4px;
+    font-size: 11px;
+  }
+  .cat-tab {
+    padding: 5px 10px;
+    border-radius: var(--radius-pill);
+    background: white;
+    border: 1.5px solid #E5E5E5;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .cat-tab.active {
+    border-color: var(--chon-orange);
+    color: var(--chon-orange-dark);
+    background: var(--chon-yellow-soft);
+  }
+
+  .graph-area {
+    position: relative;
+    height: calc(100% - 100px);
+    width: 100%;
+  }
+  .graph-area svg { width: 100%; height: 100%; }
+
+  .fab {
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    width: 56px;
+    height: 56px;
+    background: var(--chon-orange);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    box-shadow: 0 6px 16px rgba(247,147,30,0.4);
+    cursor: pointer;
+    border: none;
+    z-index: 10;
+  }
+
+  /* Node tooltip */
+  .node-info {
+    position: absolute;
+    bottom: 80px;
+    left: 16px;
+    right: 16px;
+    background: white;
+    border-radius: var(--radius-card-md);
+    padding: 12px 14px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    z-index: 10;
+    display: none;
+    font-size: 12px;
+  }
+  .node-info.visible { display: block; }
+  .node-info .ni-name {
+    font-size: 14px;
+    font-weight: 800;
+    margin-bottom: 4px;
+  }
+  .node-info .ni-meta {
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+  .node-info .ni-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .node-info .ni-actions button {
+    flex: 1;
+    padding: 6px;
+    border-radius: 10px;
+    border: 1.5px solid #E5E5E5;
+    background: white;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .node-info .ni-actions .primary {
+    background: var(--chon-orange);
+    color: white;
+    border: none;
+  }
+
+  /* ===== Toast for celebration ===== */
+  .toast {
+    position: fixed;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: white;
+    color: var(--text-primary);
+    padding: 12px 24px;
+    border-radius: var(--radius-pill);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    font-size: 14px;
+    font-weight: 700;
+    z-index: 1000;
+    transition: transform 0.4s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .toast.visible {
+    transform: translateX(-50%) translateY(0);
+  }
+  .toast .toast-emoji { font-size: 24px; animation: pop 0.6s ease; }
+  @keyframes pop {
+    0% { transform: scale(0); }
+    60% { transform: scale(1.3); }
+    100% { transform: scale(1); }
+  }
+
+  /* ===== Section Label ===== */
+  .section-title {
+    max-width: 1400px;
+    margin: 40px auto 16px;
+    font-size: 20px;
+    font-weight: 900;
+    color: var(--chon-orange);
+    padding-left: 8px;
+    border-left: 4px solid var(--chon-orange);
+  }
+  .section-desc {
+    max-width: 1400px;
+    margin: 0 auto 24px;
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    padding-left: 12px;
+  }
+
+  /* ===== Stage Reference Card ===== */
+  .stage-ref {
+    max-width: 1400px;
+    margin: 32px auto;
+    background: white;
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 4px 20px rgba(247, 147, 30, 0.08);
+  }
+  .stage-ref-title {
+    font-size: 18px;
+    font-weight: 800;
+    margin: 0 0 16px;
+    color: var(--chon-orange);
+  }
+  .stage-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .stage-table th, .stage-table td {
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid #F0F0F0;
+  }
+  .stage-table th {
+    background: var(--chon-yellow-soft);
+    font-weight: 800;
+    color: var(--text-primary);
+  }
+  .stage-table .emoji-cell { font-size: 20px; text-align: center; }
+
+  /* ===== Click hint ===== */
+  .click-hint {
+    position: absolute;
+    top: -30px;
+    background: var(--chon-orange);
+    color: white;
+    padding: 4px 10px;
+    border-radius: var(--radius-pill);
+    font-size: 10px;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(247,147,30,0.3);
+    animation: bounce 1.2s infinite;
+  }
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+  }
+
+  /* ============================================
+     NEW SCREENS — Reference Designs Replacement
+     (Home / CHON ID / Mutual Auth Request / Share)
+     ============================================ */
+
+  /* Common phone screen wrapper for new designs */
+  .ref-screen {
+    width: 100%;
+    height: 100%;
+    background: #FFFFFF;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* ===== Top app header (logo + bell, or back arrow) ===== */
+  .ref-top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 18px 6px;
+    flex-shrink: 0;
+  }
+  .ref-logo {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+  }
+  .ref-logo-icon {
+    width: 26px;
+    height: 26px;
+    display: inline-block;
+  }
+  .ref-logo-text { color: #1F1F1F; }
+  .ref-bell {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1F1F1F;
+    font-size: 18px;
+  }
+  .ref-back {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: #1F1F1F;
+    padding: 8px;
+    cursor: pointer;
+    width: 32px;
+  }
+
+  /* ===== Home screen ===== */
+  .ref-home-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 4px 16px 80px;
+  }
+  .ref-info-banner {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #FFFFFF;
+    border: 1px solid #F1F5F9;
+    border-radius: 14px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .ref-info-banner .check {
+    width: 18px; height: 18px;
+    background: var(--chon-orange);
+    color: white;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 900;
+    flex-shrink: 0;
+  }
+  .ref-info-banner em {
+    color: var(--chon-orange);
+    font-style: normal;
+    font-weight: 900;
+  }
+
+  .ref-tutorial-card {
+    background: linear-gradient(135deg, var(--chon-orange) 0%, var(--chon-orange-dark) 100%);
+    border-radius: 20px;
+    padding: 20px 18px;
+    color: white;
+    position: relative;
+    margin-bottom: 14px;
+    overflow: hidden;
+    min-height: 130px;
+  }
+  .ref-tutorial-card h3 {
+    margin: 0 0 6px;
+    font-size: 17px;
+    font-weight: 900;
+    line-height: 1.3;
+  }
+  .ref-tutorial-card .arrow-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.25);
+    border: 2px solid rgba(255,255,255,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 20px;
+    margin-top: 12px;
+  }
+  .ref-tutorial-card .preview-stack {
+    position: absolute;
+    right: -8px;
+    bottom: 4px;
+    width: 130px;
+    height: 130px;
+  }
+  .ref-tutorial-card .preview-phone {
+    position: absolute;
+    width: 64px;
+    height: 110px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+  }
+  .ref-tutorial-card .preview-phone:first-child {
+    left: 0;
+    top: 10px;
+    transform: rotate(-8deg);
+  }
+  .ref-tutorial-card .preview-phone:last-child {
+    right: 0;
+    top: 0;
+    transform: rotate(8deg);
+  }
+
+  .ref-mutual-card {
+    background: white;
+    border-radius: 20px;
+    padding: 20px 18px;
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+    min-height: 130px;
+  }
+  .ref-mutual-card-text h3 {
+    margin: 0 0 14px;
+    font-size: 20px;
+    font-weight: 900;
+  }
+  .ref-mutual-card-text p {
+    margin: 0;
+    font-size: 12px;
+    color: #94A3B8;
+    line-height: 1.5;
+  }
+  .ref-mutual-card-thumb {
+    width: 86px;
+    height: 110px;
+    background: linear-gradient(135deg, var(--chon-yellow) 0%, var(--chon-orange) 100%);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 9px;
+    font-weight: 800;
+    padding: 8px 4px;
+    box-shadow: 0 4px 10px rgba(247,147,30,0.3);
+  }
+  .ref-mutual-card-thumb .thumb-icon {
+    width: 32px; height: 32px;
+    background: rgba(255,255,255,0.3);
+    border-radius: 50%;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+  .ref-mutual-card-thumb .thumb-qr {
+    width: 30px;
+    height: 30px;
+    background:
+      linear-gradient(white, white) padding-box,
+      linear-gradient(45deg, transparent 25%, white 25%, white 50%, transparent 50%, transparent 75%, white 75%) border-box;
+    background-size: 4px 4px;
+    margin-top: 2px;
+    border-radius: 4px;
+  }
+
+  .ref-section-label {
+    font-size: 12px;
+    color: #94A3B8;
+    margin: 14px 0 10px;
+    font-weight: 700;
+  }
+  .ref-pill-list {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+  }
+  .ref-pill-item {
+    flex: 1;
+    min-width: 60px;
+    text-align: center;
+  }
+  .ref-pill-icon {
+    width: 36px;
+    height: 36px;
+    background: var(--chon-orange);
+    color: white;
+    border-radius: 50%;
+    margin: 0 auto 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+  .ref-pill-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #1F1F1F;
+    line-height: 1.3;
+  }
+
+  /* ===== Bottom Navigation (shared) ===== */
+  .ref-bottom-nav {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: white;
+    border-top: 1px solid #F1F5F9;
+    padding: 6px 0 14px;
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-end;
+    box-shadow: 0 -2px 8px rgba(0,0,0,0.04);
+  }
+  .ref-nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    font-size: 10px;
+    font-weight: 700;
+    color: #94A3B8;
+    padding: 6px 0;
+    cursor: pointer;
+  }
+  .ref-nav-item.active { color: #1F1F1F; }
+  .ref-nav-icon {
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+  .ref-nav-item.center {
+    flex: 0 0 auto;
+    padding: 0;
+    margin-top: -16px;
+  }
+  .ref-nav-center-circle {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--chon-yellow), var(--chon-orange));
+    box-shadow: 0 6px 18px rgba(247,147,30,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 22px;
+    margin-bottom: 4px;
+  }
+  .ref-nav-center-label {
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--chon-orange);
+  }
+
+  /* ===== CHON ID Card screen ===== */
+  .ref-chonid-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 4px 16px 80px;
+  }
+  .ref-chonid-title {
+    font-size: 22px;
+    font-weight: 900;
+    line-height: 1.3;
+    margin: 8px 0 24px;
+    color: #1F1F1F;
+  }
+  .ref-chonid-card {
+    width: 78%;
+    margin: 16px auto 20px;
+    background: linear-gradient(180deg, var(--chon-yellow) 0%, var(--chon-orange) 100%);
+    border-radius: 20px;
+    padding: 22px 18px 18px;
+    color: white;
+    text-align: center;
+    box-shadow: 0 12px 28px rgba(247,147,30,0.35);
+    position: relative;
+    overflow: hidden;
+  }
+  .ref-chonid-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 80% 20%, rgba(255,255,255,0.15) 0%, transparent 30%),
+      radial-gradient(circle at 20% 80%, rgba(255,255,255,0.1) 0%, transparent 25%);
+    pointer-events: none;
+  }
+  .ref-chonid-cardtitle {
+    font-size: 20px;
+    font-weight: 900;
+    margin-bottom: 14px;
+    letter-spacing: 1px;
+  }
+  .ref-chonid-photo {
+    width: 96px;
+    height: 96px;
+    background: linear-gradient(135deg, #FFD89B, #FFB97B);
+    border-radius: 14px;
+    margin: 0 auto 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid rgba(255,255,255,0.4);
+    color: rgba(255,255,255,0.7);
+    font-size: 40px;
+  }
+  .ref-chonid-name {
+    font-size: 18px;
+    font-weight: 900;
+    margin-bottom: 2px;
+  }
+  .ref-chonid-name-en {
+    font-size: 11px;
+    color: rgba(255,255,255,0.8);
+    margin-bottom: 16px;
+  }
+  .ref-chonid-qr {
+    width: 110px;
+    height: 110px;
+    margin: 0 auto 10px;
+    background: white;
+    border-radius: 8px;
+    padding: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  .ref-chonid-qr svg { width: 100%; height: 100%; }
+  .ref-chonid-foot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 800;
+    color: rgba(255,255,255,0.9);
+  }
+
+  /* ===== Mutual Auth Request screen ===== */
+  .ref-auth-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 4px 16px 100px;
+  }
+  .ref-auth-title {
+    font-size: 18px;
+    font-weight: 900;
+    line-height: 1.4;
+    margin: 8px 0 28px;
+    color: #1F1F1F;
+  }
+  .ref-auth-field {
+    margin-bottom: 16px;
+  }
+  .ref-auth-field-label {
+    font-size: 13px;
+    color: #94A3B8;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+  .ref-auth-field-input {
+    background: #F1F5F9;
+    border-radius: 999px;
+    padding: 14px 24px;
+    font-size: 14px;
+    color: #1F1F1F;
+    text-align: center;
+    font-weight: 700;
+  }
+  .ref-auth-cta {
+    position: absolute;
+    bottom: 90px;
+    left: 16px;
+    right: 16px;
+    background: var(--chon-orange);
+    color: white;
+    border: none;
+    padding: 14px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 900;
+    font-family: inherit;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(247,147,30,0.35);
+  }
+
+  /* ===== Share Modal screen ===== */
+  .ref-share-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    z-index: 2;
+    pointer-events: none;
+  }
+  .ref-share-sheet {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: white;
+    border-radius: 20px 20px 0 0;
+    padding: 16px 16px 80px;
+    z-index: 3;
+    box-shadow: 0 -8px 24px rgba(0,0,0,0.12);
+  }
+  .ref-share-handle {
+    width: 36px;
+    height: 4px;
+    background: #CBD5E1;
+    border-radius: 2px;
+    margin: 0 auto 12px;
+  }
+  .ref-share-title {
+    font-size: 13px;
+    color: #94A3B8;
+    margin-bottom: 8px;
+    font-weight: 700;
+  }
+  .ref-share-link {
+    background: #F8FAFC;
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .ref-share-link-icon {
+    width: 32px; height: 32px;
+    background: #E2E8F0;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 14px;
+  }
+  .ref-share-link-info { flex: 1; min-width: 0; }
+  .ref-share-link-title { font-size: 12px; font-weight: 800; }
+  .ref-share-link-url {
+    font-size: 10px;
+    color: #94A3B8;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .ref-share-copy {
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    background: #E2E8F0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+  }
+  .ref-share-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-top: 6px;
+  }
+  .ref-share-item {
+    text-align: center;
+  }
+  .ref-share-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    margin: 0 auto 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 900;
+    color: white;
+  }
+  .ref-share-icon.s1 { background: linear-gradient(135deg, #4FC3F7, #29B6F6); }
+  .ref-share-icon.s2 { background: linear-gradient(135deg, #4FC3F7, #29B6F6); }
+  .ref-share-icon.s3 { background: #1D2D6E; font-size: 14px; }
+  .ref-share-icon.s4 { background: #FAE100; color: #1F1F1F; }
+  .ref-share-icon.s5 { background: #94A3B8; }
+  .ref-share-icon.s6 {
+    background: linear-gradient(135deg, #6366F1, #4F46E5);
+    font-size: 11px;
+    color: white;
+  }
+  .ref-share-icon.s7 { background: #FAE100; color: #1F1F1F; }
+  .ref-share-icon.s8 {
+    background: white;
+    color: #EA4335;
+    border: 1px solid #E2E8F0;
+  }
+  .ref-share-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: #1F1F1F;
+  }
+  .ref-share-sublabel {
+    font-size: 9px;
+    color: #94A3B8;
+    margin-top: 1px;
+  }
+
+  /* ============================================
+     SECTION 2-1: Integrated Relationship Tools
+     (Embedded from chon-relationship-tools-v1)
+     ============================================ */
+  .rt-section {
+    margin: 24px 0 48px;
+  }
+  .rt-section-title {
+    font-size: 20px;
+    font-weight: 900;
+    margin: 0 0 6px;
+    padding: 0 4px;
+  }
+  .rt-section-desc {
+    color: var(--text-secondary);
+    font-size: 13px;
+    margin: 0 0 16px;
+    padding: 0 4px;
+    line-height: 1.6;
+  }
+  .rt-wrap {
+    background: #F5F7FB;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    border: 1px solid #E2E8F0;
+  }
+  .rt-header {
+    background: white;
+    border-bottom: 1px solid #E2E8F0;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .rt-logo-dot {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, var(--chon-yellow), var(--chon-orange));
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 20px;
+    font-weight: 900;
+  }
+  .rt-title {
+    font-size: 18px;
+    font-weight: 800;
+    color: #1F1F1F;
+  }
+  .rt-subtitle {
+    font-size: 11px;
+    color: #94A3B8;
+    margin-top: 2px;
+  }
+  .rt-tabs {
+    display: flex;
+    gap: 10px;
+    padding: 16px 24px;
+    background: white;
+    border-bottom: 1px solid #E2E8F0;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .rt-tab {
+    padding: 12px 28px;
+    border-radius: 999px;
+    border: 2px solid #E2E8F0;
+    background: white;
+    color: #5C6B7C;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .rt-tab:hover { border-color: rgba(247, 147, 30, 0.4); }
+  .rt-tab.active {
+    color: white;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+  }
+  .rt-tab[data-rt-tool="family_tree"].active {
+    background: var(--chon-orange);
+    border-color: var(--chon-orange);
+  }
+  .rt-tab[data-rt-tool="class_id"].active {
+    background: #2563EB;
+    border-color: #2563EB;
+  }
+  .rt-tab[data-rt-tool="friends"].active {
+    background: #5BBA6F;
+    border-color: #5BBA6F;
+  }
+  .rt-container {
+    padding: 24px;
+    display: flex;
+    justify-content: center;
+  }
+  .rt-frame {
+    width: 100%;
+    max-width: 1200px;
+    height: 820px;
+    background: white;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    border: 1px solid #E2E8F0;
+  }
+  .rt-frame iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+  }
+  .rt-footer {
+    text-align: center;
+    padding: 14px;
+    font-size: 11px;
+    color: #94A3B8;
+  }
+
+  @media (max-width: 700px) {
+    .rt-container { padding: 12px; }
+    .rt-frame { height: calc(100vh - 220px); min-height: 600px; border-radius: 16px; }
+    .rt-tab { padding: 10px 18px; font-size: 13px; }
+    .rt-header { padding: 12px 16px; }
+  }
+
+  /* ============================================
+     SECTION 2: Graph Topology Tool (iframe embed)
+     ============================================ */
+  .gt-section {
+    margin: 24px 0 48px;
+  }
+  .gt-wrap {
+    background: #F5F7FB;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    border: 1px solid #E2E8F0;
+  }
+  .gt-frame {
+    width: 100%;
+    height: 1900px;
+    background: white;
+    overflow: hidden;
+  }
+  .gt-frame iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+  }
+  .gt-footer {
+    text-align: center;
+    padding: 14px;
+    font-size: 11px;
+    color: #94A3B8;
+  }
+  @media (max-width: 1100px) {
+    .gt-frame { height: 1950px; }
+  }
+  @media (max-width: 700px) {
+    .gt-frame { height: 2000px; }
+    .gt-wrap { border-radius: 16px; }
+  }
+
+</style>
+</head>
+<body>
+
+<div class="intro">
+  <h1>🌳 CHON DID — 디자인 시스템 + 입출력 인터페이스 프로토타입</h1>
+  <p style="margin-top: 12px;">
+    <span class="badge">v5</span>
+    <span class="badge">4단계 모델</span>
+    <span class="badge">관계 기반 신원</span>
+    <span class="badge">디자인 양식 v1</span>
+  </p>
+  <p>제공된 디자인 양식 4종(홈 · CHON ID · 인증 요청 · 링크 공유)을 기반으로 디자인 토큰을 추출하고, 3-way 토글(관계도/추가하기/인증현황) 패턴을 적용한 관계도 통합 인터페이스를 제공하는 인터랙티브 프로토타입입니다.</p>
+  <p style="margin-top: 8px;"><strong>인터랙션 안내:</strong> 섹션 2의 통합 페이지에서 가계도/학급증/모임 탭을 전환하여 각 관계 도구를 직접 사용해볼 수 있습니다.</p>
+</div>
+
+<!-- ============================================= -->
+<!-- SECTION 1: Design Reference (4 base screens) -->
+<!-- ============================================= -->
+<div class="section-title">1. 디자인 양식 충실 재현 (4개 화면)</div>
+<div class="section-desc">제공받은 디자인 양식 4종(홈 · CHON ID · 인증 요청 · 링크 공유)을 HTML/CSS로 그대로 재현했습니다. 디자인 시스템 토큰(색상·간격·모양·하단 네비)이 본 프로토타입의 단일 출처입니다.</div>
+
+<div class="phones-container">
+  <div class="phones-row">
+
+    <!-- Screen 1: Home -->
+    <div class="phone-wrapper">
+      <div class="phone-label">홈 화면</div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="status-bar">
+            <span>9:30</span>
+            <div class="camera-dot"></div>
+            <div class="status-icons">▲ ◢ █</div>
+          </div>
+
+          <div class="ref-screen" style="background:#FFFBF5;">
+            <div class="ref-top-bar">
+              <div class="ref-logo">
+                <span class="ref-logo-icon">
+                  <svg viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                      <linearGradient id="hexGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#FCD34D"/>
+                        <stop offset="100%" stop-color="#F7931E"/>
+                      </linearGradient>
+                    </defs>
+                    <g fill="url(#hexGrad1)">
+                      <polygon points="6,4 12,4 15,9 12,14 6,14 3,9"/>
+                      <polygon points="14,4 20,4 23,9 20,14 14,14 17,9" opacity="0.85"/>
+                      <polygon points="2,12 8,12 11,17 8,22 2,22 -1,17"/>
+                      <polygon points="10,12 16,12 19,17 16,22 10,22 13,17" opacity="0.8"/>
+                    </g>
+                  </svg>
+                </span>
+                <span class="ref-logo-text">CHON</span>
+              </div>
+              <div class="ref-bell">🔔</div>
+            </div>
+
+            <div class="ref-home-body">
+              <div class="ref-info-banner">
+                <span class="check">✓</span>
+                <span><em>상호인증</em>으로 CHON ID를 만들어보세요.</span>
+              </div>
+
+              <div class="ref-tutorial-card">
+                <h3>나를 확인 받는<br>CHON DID 튜토리얼</h3>
+                <div class="arrow-btn">→</div>
+                <div class="preview-stack">
+                  <div class="preview-phone">⊛</div>
+                  <div class="preview-phone">👤</div>
+                </div>
+              </div>
+
+              <div class="ref-mutual-card">
+                <div class="ref-mutual-card-text">
+                  <h3>상호 인증</h3>
+                  <p>가족, 인척과<br>서로를 확인받기</p>
+                </div>
+                <div class="ref-mutual-card-thumb">
+                  <div class="thumb-icon">👤</div>
+                  <div style="font-size:9px;font-weight:900;">나의 ID</div>
+                  <div style="font-size:7px;opacity:0.8;">My CHON ID</div>
+                  <div class="thumb-qr"></div>
+                </div>
+              </div>
+
+              <div class="ref-section-label">입력 정보</div>
+              <div class="ref-pill-list">
+                <div class="ref-pill-item">
+                  <div class="ref-pill-icon">📞</div>
+                  <div class="ref-pill-label">연락하기<br>(가계도)</div>
+                </div>
+                <div class="ref-pill-item">
+                  <div class="ref-pill-icon" style="background:#FFFFFF;color:var(--chon-orange);border:2px solid var(--chon-orange);">⌗</div>
+                  <div class="ref-pill-label">QR 코드</div>
+                </div>
+                <div class="ref-pill-item">
+                  <div class="ref-pill-icon">👤</div>
+                  <div class="ref-pill-label">프로필 수정</div>
+                </div>
+                <div class="ref-pill-item">
+                  <div class="ref-pill-icon">?</div>
+                  <div class="ref-pill-label">고객센터</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="ref-bottom-nav">
+              <div class="ref-nav-item active">
+                <div class="ref-nav-icon">🏠</div>
+                <span>홈</span>
+              </div>
+              <div class="ref-nav-item">
+                <div class="ref-nav-icon" style="font-weight:900;color:#1F1F1F;">A<sup style="font-size:8px;">+</sup></div>
+                <span>CHON</span>
+              </div>
+              <div class="ref-nav-item center">
+                <div class="ref-nav-center-circle">⊛</div>
+                <div class="ref-nav-center-label">신분증</div>
+              </div>
+              <div class="ref-nav-item">
+                <div class="ref-nav-icon">🛡</div>
+                <span>상호인증</span>
+              </div>
+              <div class="ref-nav-item">
+                <div class="ref-nav-icon">🌐</div>
+                <span>가계도</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 2: CHON ID Card -->
+    <div class="phone-wrapper">
+      <div class="phone-label">CHON ID (신분증)</div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="status-bar">
+            <span>9:30</span>
+            <div class="camera-dot"></div>
+            <div class="status-icons">▲ ◢ █</div>
+          </div>
+
+          <div class="ref-screen">
+            <div class="ref-top-bar">
+              <button class="ref-back">←</button>
+              <div></div>
+              <div style="width:32px;"></div>
+            </div>
+
+            <div class="ref-chonid-body">
+              <div class="ref-chonid-title">
+                상호인증을 통하여<br>나를 확인 받으세요
+              </div>
+
+              <div class="ref-chonid-card">
+                <div class="ref-chonid-cardtitle">CHON ID</div>
+                <div class="ref-chonid-photo">👤</div>
+                <div class="ref-chonid-name">홍길순</div>
+                <div class="ref-chonid-name-en">Hong gil soon</div>
+                <div class="ref-chonid-qr">
+                  <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                      <pattern id="qrPat1" width="10" height="10" patternUnits="userSpaceOnUse">
+                        <rect width="10" height="10" fill="#FFF"/>
+                        <rect x="0" y="0" width="5" height="5" fill="#1F1F1F"/>
+                        <rect x="5" y="5" width="5" height="5" fill="#1F1F1F"/>
+                      </pattern>
+                    </defs>
+                    <rect width="100" height="100" fill="url(#qrPat1)"/>
+                    <rect x="0" y="0" width="30" height="30" fill="#FFF"/>
+                    <rect x="3" y="3" width="24" height="24" fill="#1F1F1F"/>
+                    <rect x="7" y="7" width="16" height="16" fill="#FFF"/>
+                    <rect x="11" y="11" width="8" height="8" fill="#1F1F1F"/>
+                    <rect x="70" y="0" width="30" height="30" fill="#FFF"/>
+                    <rect x="73" y="3" width="24" height="24" fill="#1F1F1F"/>
+                    <rect x="77" y="7" width="16" height="16" fill="#FFF"/>
+                    <rect x="81" y="11" width="8" height="8" fill="#1F1F1F"/>
+                    <rect x="0" y="70" width="30" height="30" fill="#FFF"/>
+                    <rect x="3" y="73" width="24" height="24" fill="#1F1F1F"/>
+                    <rect x="7" y="77" width="16" height="16" fill="#FFF"/>
+                    <rect x="11" y="81" width="8" height="8" fill="#1F1F1F"/>
+                  </svg>
+                </div>
+                <div class="ref-chonid-foot">
+                  <span style="font-size:14px;">⊛</span>
+                  <span>CHON</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="ref-bottom-nav">
+              <div class="ref-nav-item">
+                <div class="ref-nav-icon">🏠</div>
+                <span>홈</span>
+              </div>
+              <div class="ref-nav-item">
+                <div class="ref-nav-icon" style="font-weight:900;color:#1F1F1F;">A<sup style="font-size:8px;">+</sup></div>
+                <span>CHON</span>
+              </div>
+              <div class="ref-nav-item center">
+                <div class="ref-nav-center-circle">⊛</div>
+                <div class="ref-nav-center-label">신분증</div>
+              </div>
+              <div class="ref-nav-item active">
+                <div class="ref-nav-icon">🛡</div>
+                <span>상호인증</span>
+              </div>
+              <div class="ref-nav-item">
+                <div class="ref-nav-icon">🌐</div>
+                <span>가계도</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 3: Mutual Auth Request -->
+    <div class="phone-wrapper">
+      <div class="phone-label">상호인증 요청</div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="status-bar">
+            <span>9:30</span>
+            <div class="camera-dot"></div>
+            <div class="status-icons">▲ ◢ █</div>
+          </div>
+
+          <div class="ref-screen">
+            <div class="ref-top-bar">
+              <button class="ref-back">←</button>
+              <div></div>
+              <div style="width:32px;"></div>
+            </div>
+
+            <div class="ref-auth-body">
+              <div class="ref-auth-title">
+                상호인증 요청하기를 눌러<br>나를 확인 받으세요
+              </div>
+
+              <div class="ref-auth-field">
+                <div class="ref-auth-field-label">나를 확인할 사람</div>
+                <div class="ref-auth-field-input">홍길남</div>
+              </div>
+
+              <div class="ref-auth-field">
+                <div class="ref-auth-field-label">나와의 관계</div>
+                <div class="ref-auth-field-input">오빠</div>
+              </div>
+            </div>
+
+            <button class="ref-auth-cta">상호인증 요청하기</button>
+
+            <div class="ref-bottom-nav">
+              <div class="ref-nav-item">
+                <div class="ref-nav-icon">🏠</div>
+                <span>홈</span>
+              </div>
+              <div class="ref-nav-item">
+                <div class="ref-nav-icon" style="font-weight:900;color:#1F1F1F;">A<sup style="font-size:8px;">+</sup></div>
+                <span>CHON</span>
+              </div>
+              <div class="ref-nav-item center">
+                <div class="ref-nav-center-circle">⊛</div>
+                <div class="ref-nav-center-label">신분증</div>
+              </div>
+              <div class="ref-nav-item active">
+                <div class="ref-nav-icon">🛡</div>
+                <span>상호인증</span>
+              </div>
+              <div class="ref-nav-item">
+                <div class="ref-nav-icon">🌐</div>
+                <span>가계도</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 4: Share Link Modal -->
+    <div class="phone-wrapper">
+      <div class="phone-label">링크 공유 (모달)</div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="status-bar">
+            <span>9:30</span>
+            <div class="camera-dot"></div>
+            <div class="status-icons">▲ ◢ █</div>
+          </div>
+
+          <div class="ref-screen">
+            <div class="ref-top-bar">
+              <button class="ref-back">←</button>
+              <div></div>
+              <div style="width:32px;"></div>
+            </div>
+
+            <div class="ref-auth-body" style="opacity:0.4;">
+              <div class="ref-auth-title">
+                상호인증 요청하기를 눌러<br>나를 확인 받으세요
+              </div>
+              <div class="ref-auth-field">
+                <div class="ref-auth-field-label">나를 확인할 사람</div>
+                <div class="ref-auth-field-input">홍길남</div>
+              </div>
+              <div class="ref-auth-field">
+                <div class="ref-auth-field-label">나와의 관계</div>
+                <div class="ref-auth-field-input">오빠</div>
+              </div>
+            </div>
+
+            <div class="ref-share-overlay"></div>
+            <div class="ref-share-sheet">
+              <div class="ref-share-handle"></div>
+              <div class="ref-share-title">링크 공유</div>
+              <div class="ref-share-link">
+                <div class="ref-share-link-icon">📄</div>
+                <div class="ref-share-link-info">
+                  <div class="ref-share-link-title">CHON App</div>
+                  <div class="ref-share-link-url">https://parking.vdss.com.vn/mcrs-api/share/verify-link?token=…</div>
+                </div>
+                <div class="ref-share-copy">⎘</div>
+              </div>
+
+              <div class="ref-share-grid">
+                <div class="ref-share-item">
+                  <div class="ref-share-icon s1">김</div>
+                  <div class="ref-share-label">김남율</div>
+                </div>
+                <div class="ref-share-item">
+                  <div class="ref-share-icon s2">M</div>
+                  <div class="ref-share-label">MORO</div>
+                </div>
+                <div class="ref-share-item">
+                  <div class="ref-share-icon s3">kt</div>
+                  <div class="ref-share-label">KT</div>
+                </div>
+                <div class="ref-share-item">
+                  <div class="ref-share-icon s4">나</div>
+                  <div class="ref-share-label">나와의 채팅</div>
+                </div>
+                <div class="ref-share-item">
+                  <div class="ref-share-icon s5">👤</div>
+                  <div class="ref-share-label">민가영</div>
+                </div>
+                <div class="ref-share-item">
+                  <div class="ref-share-icon s6">Q</div>
+                  <div class="ref-share-label">Quick</div>
+                  <div class="ref-share-sublabel">Share</div>
+                </div>
+                <div class="ref-share-item">
+                  <div class="ref-share-icon s7">💬</div>
+                  <div class="ref-share-label">메시지</div>
+                </div>
+                <div class="ref-share-item">
+                  <div class="ref-share-icon s8">M</div>
+                  <div class="ref-share-label">Gmail</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="ref-bottom-nav">
+              <div class="ref-nav-item">
+                <div class="ref-nav-icon">🏠</div>
+                <span>홈</span>
+              </div>
+              <div class="ref-nav-item">
+                <div class="ref-nav-icon" style="font-weight:900;color:#1F1F1F;">A<sup style="font-size:8px;">+</sup></div>
+                <span>CHON</span>
+              </div>
+              <div class="ref-nav-item center">
+                <div class="ref-nav-center-circle">⊛</div>
+                <div class="ref-nav-center-label">신분증</div>
+              </div>
+              <div class="ref-nav-item active">
+                <div class="ref-nav-icon">🛡</div>
+                <span>상호인증</span>
+              </div>
+              <div class="ref-nav-item">
+                <div class="ref-nav-icon">🌐</div>
+                <span>가계도</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ============================================= -->
+<!-- SECTION 2: Graph Topology Tool (v3)            -->
+<!-- ============================================= -->
+<div class="section-title">2. 4가지 관계 토폴로지 시각화</div>
+<div class="section-desc">CHON 시스템이 지원하는 4가지 관계 토폴로지(가계도/일반 네트워크/계층적 수직/권한수령형)를 한눈에 비교하고 직접 조작할 수 있는 시각화 도구입니다.</div>
+
+<div class="gt-section">
+  <div class="gt-wrap">
+    <div class="gt-frame">
+      <iframe id="gtFrame" src="chon-graph-tool-v4.html"></iframe>
+    </div>
+  </div>
+  <div class="gt-footer">
+    CHON · 관계도 시각화 도구 v4 · 4가지 토폴로지 + 실제 도구 통합
+  </div>
+</div>
+
+<!-- ============================================= -->
+<!-- SECTION 3: Integrated Relationship Tools      -->
+<!-- ============================================= -->
+<div class="section-title" style="margin-top: 48px;">3. 관계도 통합 인터페이스</div>
+<div class="section-desc">3-way 토글(관계도/추가하기/인증현황) 패턴을 적용한 관계 기반 인증 도구 통합 페이지입니다.</div>
+
+<!-- ============================================= -->
+<!-- SECTION 3-1: Integrated Relationship Tools    -->
+<!-- ============================================= -->
+<div class="rt-section">
+  <div class="rt-section-title">3-1. 관계도 통합 — 가계도 + 학급증 + 모임</div>
+  <div class="rt-section-desc">3가지 관계 도구를 한 페이지에서 메인 탭으로 전환합니다. 각 도구는 동일한 3-way 토글(관계도/추가하기/인증현황) 패턴을 따릅니다.</div>
+
+  <div class="rt-wrap">
+    <div class="rt-header">
+      <div class="rt-logo-dot">C</div>
+      <div>
+        <div class="rt-title">CHON 관계도 통합</div>
+        <div class="rt-subtitle">가계도 + 학급증 + 모임 한 페이지에서 전환</div>
+      </div>
+    </div>
+
+    <div class="rt-tabs">
+      <button class="rt-tab active" data-rt-tool="family_tree" onclick="rtSwitchTool('family_tree')">
+        🌳 가계도
+      </button>
+      <button class="rt-tab" data-rt-tool="class_id" onclick="rtSwitchTool('class_id')">
+        🏫 학급증
+      </button>
+      <button class="rt-tab" data-rt-tool="friends" onclick="rtSwitchTool('friends')">
+        🌐 모임
+      </button>
+    </div>
+
+    <div class="rt-container">
+      <div class="rt-frame">
+        <iframe id="rtFrame" src="chon-mobile-family-tree-v13.html"></iframe>
+      </div>
+    </div>
+
+    <div class="rt-footer">
+      CHON · 관계 기반 신원 인증 · v1.0 통합 페이지
+    </div>
+  </div>
+</div>
+
+
+<!-- Toast for celebration -->
+<div class="toast" id="toast">
+  <span class="toast-emoji" id="toastEmoji">🌿</span>
+  <span id="toastText">관계가 인증되었어요!</span>
+</div>
+
+<script>
+  // ====== State ======
+  const state = {
+    confirmedCount: 0,
+    stage: 'seed',
+    category: 'family',
+    nodes: [
+      { id: 'me', name: '나', x: 160, y: 230, status: 'self', cat: 'family' },
+      { id: 'mom', name: '어머니', x: 80, y: 140, status: 'pending', cat: 'family' },
+      { id: 'dad', name: '아버지', x: 240, y: 140, status: 'pending', cat: 'family' },
+      { id: 'bro', name: '형', x: 60, y: 280, status: 'unverified', cat: 'family' },
+      { id: 'sis', name: '동생', x: 260, y: 280, status: 'unverified', cat: 'family' },
+      { id: 'gma', name: '할머니', x: 50, y: 60, status: 'unverified', cat: 'family' },
+      { id: 'gpa', name: '할아버지', x: 150, y: 60, status: 'unverified', cat: 'family' },
+    ],
+    edges: [
+      { from: 'me', to: 'mom', status: 'pending' },
+      { from: 'me', to: 'dad', status: 'pending' },
+      { from: 'me', to: 'bro', status: 'unverified' },
+      { from: 'me', to: 'sis', status: 'unverified' },
+      { from: 'mom', to: 'gma', status: 'unverified' },
+      { from: 'mom', to: 'gpa', status: 'unverified' },
+    ]
+  };
+
+  const STAGES = [
+    { name: 'seed', emoji: '🌱', label: '씨앗', threshold: 0, next: 1, nextLabel: '새싹' },
+    { name: 'sprout', emoji: '🌿', label: '새싹', threshold: 1, next: 3, nextLabel: '줄기' },
+    { name: 'stem', emoji: '🌾', label: '줄기', threshold: 3, next: 5, nextLabel: '꽃' },
+    { name: 'flower', emoji: '🌸', label: '꽃', threshold: 5, next: 10, nextLabel: '열매' },
+    { name: 'fruit', emoji: '🍎', label: '열매', threshold: 10, next: 20, nextLabel: '나무' },
+    { name: 'tree', emoji: '🌳', label: '나무', threshold: 20, next: 50, nextLabel: '숲' },
+    { name: 'forest', emoji: '🌲', label: '숲', threshold: 50, next: null, nextLabel: null },
+  ];
+
+  const CAT_COLORS = {
+    family: '#FF7F50',
+    company: '#4A90E2',
+    school: '#7B68EE',
+    general: '#5BBA6F'
+  };
+
+  const STATUS_COLORS = {
+    self: '#FFFFFF',
+    confirmed: '#FF7F50',
+    pending: '#FCD34D',
+    unverified: '#E5E5E5'
+  };
+
+  // ====== Render Graph ======
+  function renderGraph() {
+    const svg = document.getElementById('graphSvg');
+    const edgesG = document.getElementById('edges');
+    const nodesG = document.getElementById('nodes');
+
+    // Clear
+    edgesG.innerHTML = '';
+    nodesG.innerHTML = '';
+
+    // Filter by category
+    const visibleNodes = state.nodes.filter(n => n.cat === state.category || n.id === 'me');
+    const visibleIds = new Set(visibleNodes.map(n => n.id));
+    const visibleEdges = state.edges.filter(e => visibleIds.has(e.from) && visibleIds.has(e.to));
+
+    // Render edges
+    visibleEdges.forEach(edge => {
+      const from = state.nodes.find(n => n.id === edge.from);
+      const to = state.nodes.find(n => n.id === edge.to);
+      if (!from || !to) return;
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.setAttribute('x1', from.x);
+      line.setAttribute('y1', from.y);
+      line.setAttribute('x2', to.x);
+      line.setAttribute('y2', to.y);
+      if (edge.status === 'confirmed') {
+        line.setAttribute('stroke', '#F7931E');
+        line.setAttribute('stroke-width', '2.5');
+      } else if (edge.status === 'pending') {
+        line.setAttribute('stroke', '#F59E0B');
+        line.setAttribute('stroke-width', '2');
+        line.setAttribute('stroke-dasharray', '5 3');
+      } else {
+        line.setAttribute('stroke', '#D0D0D0');
+        line.setAttribute('stroke-width', '1.5');
+        line.setAttribute('stroke-dasharray', '3 3');
+      }
+      edgesG.appendChild(line);
+    });
+
+    // Render nodes
+    visibleNodes.forEach(node => {
+      const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      g.style.cursor = 'pointer';
+      g.addEventListener('click', () => onNodeClick(node));
+
+      const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      const size = node.id === 'me' ? 44 : 38;
+      rect.setAttribute('x', node.x - size/2);
+      rect.setAttribute('y', node.y - size/2);
+      rect.setAttribute('width', size);
+      rect.setAttribute('height', size);
+      rect.setAttribute('rx', '12');
+
+      if (node.id === 'me') {
+        rect.setAttribute('fill', '#FFFFFF');
+        rect.setAttribute('stroke', '#FCD34D');
+        rect.setAttribute('stroke-width', '3');
+      } else if (node.status === 'confirmed') {
+        rect.setAttribute('fill', CAT_COLORS[node.cat]);
+      } else if (node.status === 'pending') {
+        rect.setAttribute('fill', '#FCD34D');
+        rect.setAttribute('opacity', '0.85');
+      } else {
+        rect.setAttribute('fill', '#FFFFFF');
+        rect.setAttribute('stroke', '#BDBDBD');
+        rect.setAttribute('stroke-width', '1.5');
+        rect.setAttribute('stroke-dasharray', '3 2');
+      }
+
+      g.appendChild(rect);
+
+      // Label
+      const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      text.setAttribute('x', node.x);
+      text.setAttribute('y', node.y + size/2 + 14);
+      text.setAttribute('text-anchor', 'middle');
+      text.setAttribute('font-size', node.id === 'me' ? '12' : '11');
+      text.setAttribute('font-weight', node.id === 'me' ? '900' : '700');
+      text.setAttribute('fill', '#1F1F1F');
+      text.textContent = node.name;
+      g.appendChild(text);
+
+      // Inner text for "me"
+      if (node.id === 'me') {
+        const innerText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        innerText.setAttribute('x', node.x);
+        innerText.setAttribute('y', node.y + 5);
+        innerText.setAttribute('text-anchor', 'middle');
+        innerText.setAttribute('font-size', '14');
+        innerText.setAttribute('font-weight', '900');
+        innerText.setAttribute('fill', '#F7931E');
+        innerText.textContent = '나';
+        g.appendChild(innerText);
+        // Remove outer text (already shown inside)
+        g.removeChild(text);
+      }
+
+      // Pending badge
+      if (node.status === 'pending') {
+        const badge = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        badge.setAttribute('cx', node.x + size/2 - 4);
+        badge.setAttribute('cy', node.y - size/2 + 4);
+        badge.setAttribute('r', '5');
+        badge.setAttribute('fill', '#F7931E');
+        g.appendChild(badge);
+        const badgeText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        badgeText.setAttribute('x', node.x + size/2 - 4);
+        badgeText.setAttribute('y', node.y - size/2 + 7);
+        badgeText.setAttribute('text-anchor', 'middle');
+        badgeText.setAttribute('font-size', '8');
+        badgeText.setAttribute('font-weight', '900');
+        badgeText.setAttribute('fill', 'white');
+        badgeText.textContent = '!';
+        g.appendChild(badgeText);
+      }
+
+      nodesG.appendChild(g);
+    });
+  }
+
+  // ====== Node Click ======
+  function onNodeClick(node) {
+    if (node.id === 'me') {
+      showInfo('나', `Trust Garden: ${getCurrentStage().emoji} ${getCurrentStage().label} (${state.confirmedCount}건)`, []);
+      return;
+    }
+
+    let meta = '';
+    let actions = [];
+
+    if (node.status === 'pending') {
+      meta = `상태: <strong style="color: #F59E0B;">대기 중</strong><br>주소록에서 자동 매칭된 후보입니다`;
+      actions = [
+        { label: '인증 요청', primary: true, onClick: () => confirmRelation(node) },
+        { label: '나중에', onClick: () => hideInfo() }
+      ];
+    } else if (node.status === 'confirmed') {
+      meta = `상태: <strong style="color: #10B981;">인증됨</strong><br>카테고리: ${node.cat}`;
+      actions = [
+        { label: '관계 정보', onClick: () => hideInfo() }
+      ];
+    } else {
+      meta = `상태: 미인증<br>먼저 인증 요청을 보내세요`;
+      actions = [
+        { label: '인증 요청', primary: true, onClick: () => confirmRelation(node) }
+      ];
+    }
+
+    showInfo(node.name, meta, actions);
+  }
+
+  function showInfo(name, meta, actions) {
+    document.getElementById('niName').textContent = name;
+    document.getElementById('niMeta').innerHTML = meta;
+    const actionsEl = document.getElementById('niActions');
+    actionsEl.innerHTML = '';
+    actions.forEach(a => {
+      const btn = document.createElement('button');
+      btn.textContent = a.label;
+      if (a.primary) btn.classList.add('primary');
+      btn.onclick = a.onClick;
+      actionsEl.appendChild(btn);
+    });
+    document.getElementById('nodeInfo').classList.add('visible');
+  }
+
+  function hideInfo() {
+    document.getElementById('nodeInfo').classList.remove('visible');
+  }
+
+  function confirmRelation(node) {
+    node.status = 'confirmed';
+    // Update edges
+    state.edges.forEach(e => {
+      if ((e.from === 'me' && e.to === node.id) || (e.to === 'me' && e.from === node.id)) {
+        e.status = 'confirmed';
+      }
+    });
+    state.confirmedCount++;
+    const prevStage = state.stage;
+    state.stage = computeStage();
+
+    hideInfo();
+    renderGraph();
+    updateGardenUI();
+
+    // Celebration
+    const stageInfo = STAGES.find(s => s.name === state.stage);
+    if (state.stage !== prevStage) {
+      showToast(stageInfo.emoji, `🎉 ${stageInfo.label} 단계 도달!`);
+    } else {
+      showToast('🌿', `${node.name}와 관계가 인증되었어요!`);
+    }
+  }
+
+  function showToast(emoji, text) {
+    const toast = document.getElementById('toast');
+    document.getElementById('toastEmoji').textContent = emoji;
+    document.getElementById('toastText').textContent = text;
+    toast.classList.add('visible');
+    setTimeout(() => toast.classList.remove('visible'), 2800);
+  }
+
+  // ====== Garden ======
+  function computeStage() {
+    let stage = STAGES[0];
+    for (const s of STAGES) {
+      if (state.confirmedCount >= s.threshold) stage = s;
+    }
+    return stage.name;
+  }
+
+  function getCurrentStage() {
+    return STAGES.find(s => s.name === state.stage);
+  }
+
+  function updateGardenUI() {
+    const stage = getCurrentStage();
+    document.getElementById('miniGardenEmoji').textContent = stage.emoji;
+    document.getElementById('miniGardenCount').textContent = state.confirmedCount;
+    document.getElementById('gardenPlant').textContent = stage.emoji;
+    document.getElementById('gardenStageLabel').textContent = `${stage.label} 단계`;
+    document.getElementById('gardenCount').textContent = state.confirmedCount;
+    if (stage.next) {
+      document.getElementById('gardenNext').innerHTML = `다음: ${STAGES.find(s => s.threshold === stage.next).emoji} ${stage.nextLabel}까지 ${stage.next - state.confirmedCount}건 더!`;
+    } else {
+      document.getElementById('gardenNext').innerHTML = '최고 단계 도달! 🎉';
+    }
+
+    // Update unlock list
+    const list = document.getElementById('unlockList');
+    list.querySelectorAll('li').forEach((li, i) => {
+      const threshold = [1, 3, 5, 10, 20, 50][i];
+      if (state.confirmedCount >= threshold) {
+        li.className = 'unlocked';
+        li.innerHTML = li.innerHTML.replace(/^[^<]*/, '').replace(/✓ /, '');
+        if (!li.innerHTML.startsWith('✓')) li.innerHTML = '✓ ' + li.innerHTML;
+      }
+    });
+
+    // Update stage mini row
+    document.querySelectorAll('.garden-stage-mini').forEach(el => {
+      const stageNum = parseInt(el.dataset.stage);
+      el.classList.remove('current', 'done');
+      if (state.confirmedCount >= stageNum) el.classList.add('done');
+      if (state.confirmedCount >= stageNum && (stageNum === 0 || state.confirmedCount < (parseInt(el.nextElementSibling?.dataset.stage || 9999)))) {
+        el.classList.add('current');
+      }
+    });
+  }
+
+  // ====== Category ======
+  function filterCategory(cat, el) {
+    state.category = cat;
+    document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    renderGraph();
+    hideInfo();
+  }
+
+  // ====== Other ======
+  function switchView(view) { /* placeholder */ }
+  function openGarden() { document.querySelector('.garden-screen').scrollIntoView({behavior: 'smooth'}); }
+  function openEgoView() { document.getElementById('graphArea').scrollIntoView({behavior: 'smooth'}); }
+  function openIDRequest() { /* placeholder */ }
+  function addNewRelation() {
+    showToast('➕', '새 관계 추가는 곧 제공됩니다');
+  }
+
+  // ============================================
+  // SECTION 3-1: Integrated Relationship Tools
+  // ============================================
+  const RT_TOOLS = {
+    family_tree: { src: 'chon-mobile-family-tree-v13.html', title: 'CHON 가계도' },
+    class_id: { src: 'chon-class-id-v4.html', title: 'CHON 학급증' },
+    friends: { src: 'chon-friends-v1.html', title: 'CHON 모임' }
+  };
+  let rtCurrentTool = 'family_tree';
+  function rtSwitchTool(tool) {
+    if (tool === rtCurrentTool) return;
+    rtCurrentTool = tool;
+    document.querySelectorAll('.rt-tab').forEach(t => {
+      t.classList.toggle('active', t.dataset.rtTool === tool);
+    });
+    const iframe = document.getElementById('rtFrame');
+    if (iframe) iframe.src = RT_TOOLS[tool].src;
+  }
+
+  // Init (DOM 요소가 있을 때만 호출)
+  if (document.getElementById('graphSvg')) renderGraph();
+  if (document.getElementById('miniGardenEmoji')) updateGardenUI();
+</script>
+
+</body>
+</html>

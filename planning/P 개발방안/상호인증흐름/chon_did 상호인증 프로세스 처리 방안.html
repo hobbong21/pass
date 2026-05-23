@@ -1,0 +1,1540 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CHON 상호인증 요청 흐름 — Before / After 설계</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --accent: #F7931E;
+    --accent-dark: #C97200;
+    --text: #1F1F1F;
+    --text-2: #555555;
+    --text-3: #888888;
+    --rule: #E5E5E5;
+    --rule-soft: #F0F0F0;
+    --bg: #FFFFFF;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    font-weight: 400;
+  }
+
+  .doc {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 64px 32px 120px;
+  }
+  @media (max-width: 720px) {
+    .doc { padding: 40px 20px 80px; }
+  }
+
+  /* ============ Hero ============ */
+  .hero {
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 40px;
+    margin-bottom: 48px;
+  }
+  .eyebrow {
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    color: var(--text-3);
+    margin-bottom: 16px;
+    font-weight: 500;
+  }
+  .hero h1 {
+    margin: 0 0 20px;
+    font-size: clamp(28px, 4.5vw, 40px);
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    font-weight: 700;
+  }
+  .hero-lede {
+    font-size: 16px;
+    color: var(--text-2);
+    max-width: 720px;
+    line-height: 1.75;
+    margin: 0;
+  }
+  .meta-row {
+    display: flex;
+    gap: 40px;
+    margin-top: 28px;
+    flex-wrap: wrap;
+  }
+  .meta-item {
+    font-size: 12px;
+    color: var(--text-3);
+    font-weight: 500;
+  }
+  .meta-item strong {
+    display: block;
+    color: var(--text);
+    font-weight: 600;
+    margin-top: 4px;
+    font-size: 13px;
+  }
+
+  /* ============ TL;DR ============ */
+  .tldr {
+    border: 1px solid var(--rule);
+    border-left: 3px solid var(--accent);
+    padding: 28px 32px;
+    margin-bottom: 64px;
+  }
+  .tldr .label {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--text-3);
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .tldr h2 {
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.6;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  /* ============ TOC ============ */
+  .toc {
+    border: 1px solid var(--rule);
+    padding: 24px 28px;
+    margin-bottom: 64px;
+  }
+  .toc-label {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--text-3);
+    font-weight: 600;
+    margin-bottom: 14px;
+  }
+  .toc ol {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    columns: 2;
+    column-gap: 40px;
+  }
+  @media (max-width: 600px) { .toc ol { columns: 1; } }
+  .toc li {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--rule-soft);
+    break-inside: avoid;
+    font-size: 14px;
+  }
+  .toc a {
+    color: var(--text);
+    text-decoration: none;
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .toc a:hover { color: var(--accent); }
+  .toc a span:first-child {
+    color: var(--text-3);
+    font-weight: 500;
+    width: 28px;
+  }
+  .toc a span:last-child { flex: 1; }
+
+  /* ============ Section ============ */
+  section { margin-bottom: 80px; }
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 28px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .section-num {
+    font-size: 12px;
+    color: var(--accent);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+  .section-head h2 {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+  .section-head .sub {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--text-3);
+  }
+  .section-intro {
+    max-width: 720px;
+    color: var(--text-2);
+    margin: 0 0 8px;
+  }
+
+  /* ============ Issues ============ */
+  .issue-list { list-style: none; padding: 0; margin: 0; }
+  .issue-list li {
+    padding: 18px 0;
+    border-top: 1px solid var(--rule-soft);
+    display: grid;
+    grid-template-columns: 36px 1fr auto;
+    gap: 16px;
+    align-items: start;
+  }
+  .issue-list li:first-child { border-top: none; padding-top: 0; }
+  .issue-num {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-3);
+    line-height: 1.6;
+  }
+  .issue-text strong {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--text);
+    font-weight: 600;
+  }
+  .issue-text span {
+    font-size: 14px;
+    color: var(--text-2);
+    line-height: 1.65;
+  }
+  .severity {
+    font-size: 10px;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+    padding: 3px 8px;
+    border: 1px solid var(--rule);
+    align-self: start;
+    margin-top: 2px;
+    color: var(--text-2);
+  }
+  .severity.hi { color: #B91C1C; border-color: rgba(239, 68, 68, 0.4); }
+  .severity.md { color: #B45309; border-color: rgba(245, 158, 11, 0.5); }
+  .severity.lo { color: #047857; border-color: rgba(16, 185, 129, 0.4); }
+
+  /* ============ Wireframe ============ */
+  .wireframe {
+    background: white;
+    border: 1px solid var(--rule);
+    padding: 18px;
+    font-family: 'Noto Sans KR', monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--text-2);
+    white-space: pre;
+    overflow-x: auto;
+    margin: 20px 0 0;
+    font-weight: 400;
+  }
+
+  /* ============ Phone ============ */
+  .phone-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 28px;
+    margin-top: 28px;
+    justify-content: center;
+  }
+  .phone-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .phone-card .cap {
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    color: var(--text-3);
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+  .phone-card .pname {
+    font-size: 14px;
+    margin-bottom: 14px;
+    text-align: center;
+    font-weight: 600;
+  }
+  .phone-frame {
+    width: 240px;
+    height: 470px;
+    background: #DDDDDD;
+    border-radius: 28px;
+    padding: 7px;
+  }
+  .phone-screen {
+    width: 100%;
+    height: 100%;
+    background: white;
+    border: 1px solid var(--rule);
+    border-radius: 22px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+  .phone-status {
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 14px 0;
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--text);
+    position: relative;
+  }
+  .phone-cam {
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--text);
+  }
+  .phone-top {
+    padding: 8px 12px 4px;
+    display: flex;
+    align-items: center;
+    font-size: 10px;
+    color: var(--text-2);
+    gap: 6px;
+  }
+  .phone-top .back {
+    width: 18px; height: 18px;
+    border: 1px solid var(--rule);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text);
+    font-size: 10px;
+  }
+  .phone-body {
+    flex: 1;
+    padding: 10px 14px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .phone-h1 {
+    font-size: 13px;
+    line-height: 1.4;
+    color: var(--text);
+    margin: 4px 0 6px;
+    font-weight: 600;
+  }
+  .phone-field {
+    border: 1px solid var(--rule);
+    padding: 8px 10px;
+  }
+  .phone-field-label {
+    font-size: 9px;
+    color: var(--text-3);
+    margin-bottom: 2px;
+    font-weight: 500;
+  }
+  .phone-field-val {
+    font-size: 11px;
+    color: var(--text);
+    font-weight: 500;
+  }
+  .phone-cta {
+    margin-top: auto;
+    background: var(--text);
+    color: white;
+    text-align: center;
+    padding: 10px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .phone-note {
+    font-size: 10px;
+    color: var(--text-3);
+    margin-top: 10px;
+    text-align: center;
+  }
+
+  .pf-method-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5px;
+  }
+  .pf-method {
+    border: 1px solid var(--rule);
+    padding: 7px 4px;
+    text-align: center;
+    font-size: 9px;
+    font-weight: 600;
+  }
+  .pf-method.primary {
+    border-color: var(--accent);
+    color: var(--accent-dark);
+  }
+  .pf-method .icon { display: block; font-size: 16px; margin-bottom: 2px; }
+
+  .pf-candidate {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px;
+    border: 1px solid var(--rule);
+    font-size: 10px;
+  }
+  .pf-candidate .av {
+    width: 22px; height: 22px;
+    background: var(--text);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .pf-candidate-info { flex: 1; min-width: 0; }
+  .pf-candidate-name { font-weight: 600; color: var(--text); font-size: 10px; }
+  .pf-candidate-meta { font-size: 9px; color: var(--text-3); }
+  .pf-candidate .badge {
+    font-size: 8px;
+    border: 1px solid #10B981;
+    color: #10B981;
+    padding: 1px 5px;
+    font-weight: 600;
+  }
+
+  .pf-chip-row { display: flex; gap: 4px; flex-wrap: wrap; }
+  .pf-chip {
+    border: 1px solid var(--rule);
+    padding: 4px 8px;
+    font-size: 9px;
+    font-weight: 500;
+    color: var(--text-2);
+  }
+  .pf-chip.sel {
+    border-color: var(--accent);
+    color: var(--accent-dark);
+    font-weight: 600;
+  }
+
+  .pf-relation-vis {
+    border: 1px solid var(--rule);
+    padding: 10px;
+    text-align: center;
+    font-size: 9px;
+  }
+  .pf-relation-vis .pair {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+  .pf-pair-node {
+    width: 28px; height: 28px;
+    border: 1.5px solid var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--accent-dark);
+  }
+  .pf-pair-node.other {
+    border-color: var(--text-2);
+    color: var(--text);
+  }
+  .pf-pair-arrow {
+    font-size: 14px;
+    color: var(--accent);
+  }
+  .pf-pair-label {
+    font-size: 9px;
+    color: var(--text-3);
+    font-weight: 500;
+    margin-top: 3px;
+  }
+
+  .pf-share-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid var(--rule);
+    padding: 6px 10px;
+    font-size: 10px;
+  }
+  .pf-share-row .toggle {
+    width: 22px; height: 12px;
+    background: var(--text);
+    position: relative;
+  }
+  .pf-share-row .toggle::after {
+    content: '';
+    position: absolute;
+    right: 1px;
+    top: 1px;
+    width: 10px; height: 10px;
+    background: white;
+  }
+  .pf-share-row .toggle.off { background: #DDDDDD; }
+  .pf-share-row .toggle.off::after { right: auto; left: 1px; }
+
+  .pf-celebration { text-align: center; margin: auto 0; }
+  .pf-celebration .emoji { font-size: 44px; margin: 10px 0; }
+  .pf-celebration .title { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .pf-celebration .sub { font-size: 10px; color: var(--text-3); }
+
+  /* ============ Flow ============ */
+  .flow-block {
+    margin: 28px 0;
+    padding: 24px;
+    border: 1px solid var(--rule);
+    overflow-x: auto;
+  }
+  .flow-block .flow-cap {
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    color: var(--text-3);
+    margin-bottom: 16px;
+    font-weight: 500;
+  }
+  .flow-block svg {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* ============ Principles ============ */
+  .principles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 0;
+    margin-top: 16px;
+    border-top: 1px solid var(--rule);
+    border-left: 1px solid var(--rule);
+  }
+  .principle {
+    padding: 22px;
+    border-right: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+  }
+  .principle .num {
+    font-size: 11px;
+    color: var(--text-3);
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  .principle h4 {
+    margin: 0 0 10px;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+  .principle p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--text-2);
+    line-height: 1.65;
+  }
+  .principle code {
+    font-family: 'Noto Sans KR', monospace;
+    font-size: 12px;
+    background: #F5F5F5;
+    padding: 1px 5px;
+    color: var(--accent-dark);
+    font-weight: 500;
+  }
+
+  /* ============ Step ============ */
+  .step {
+    display: grid;
+    grid-template-columns: 60px 1fr;
+    gap: 28px;
+    padding: 36px 0;
+    border-top: 1px solid var(--rule);
+  }
+  .step:first-of-type { border-top: none; padding-top: 0; }
+  @media (max-width: 720px) {
+    .step { grid-template-columns: 1fr; gap: 16px; }
+  }
+  .step-meta {
+    position: sticky;
+    top: 24px;
+    height: fit-content;
+  }
+  .step-num {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1;
+  }
+  .step-tag {
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: var(--text-3);
+    margin-top: 6px;
+    font-weight: 500;
+  }
+  .step-body h3 {
+    margin: 0 0 12px;
+    font-size: 19px;
+    font-weight: 700;
+    line-height: 1.4;
+  }
+  .step-body .step-lede {
+    color: var(--text-2);
+    font-size: 14px;
+    line-height: 1.75;
+    margin: 0 0 18px;
+  }
+  .step-elements {
+    list-style: none;
+    padding: 0;
+    margin: 18px 0 0;
+    border-top: 1px solid var(--rule-soft);
+  }
+  .step-elements li {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--rule-soft);
+    font-size: 13px;
+    display: grid;
+    grid-template-columns: 70px 1fr;
+    gap: 12px;
+    align-items: baseline;
+  }
+  .step-elements code {
+    font-family: 'Noto Sans KR', monospace;
+    font-size: 11px;
+    color: var(--accent-dark);
+    font-weight: 600;
+  }
+  .step-elements li span {
+    color: var(--text-2);
+    line-height: 1.6;
+  }
+
+  /* ============ Table ============ */
+  .table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--rule);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    background: white;
+  }
+  th, td {
+    text-align: left;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+  }
+  th {
+    font-weight: 600;
+    font-size: 11px;
+    color: var(--text-3);
+    letter-spacing: 0.05em;
+  }
+  td code {
+    font-family: 'Noto Sans KR', monospace;
+    font-size: 11px;
+    background: #F5F5F5;
+    padding: 2px 6px;
+    color: var(--accent-dark);
+    font-weight: 500;
+  }
+  tr:last-child td { border-bottom: none; }
+  td strong { font-weight: 600; }
+
+  /* ============ Footer ============ */
+  footer {
+    margin-top: 100px;
+    padding-top: 28px;
+    border-top: 1px solid var(--rule);
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--text-3);
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+</style>
+</head>
+<body>
+
+<div class="doc">
+
+  <header class="hero">
+    <div class="eyebrow">CHON DID · UX 재설계안</div>
+    <h1>상호인증 요청 흐름의<br>처음부터 끝까지 다시 그리기</h1>
+    <p class="hero-lede">
+      현재 화면은 2개의 입력 필드와 1개의 버튼으로 끝납니다.
+      그런데 이건 CHON의 가장 중요한 인터랙션 — "두 사람이 서로의 신원을 보증한다"는 행위입니다.
+      이 문서는 진입부터 수락 후 보상까지 6단계로 재설계된 흐름을 정리합니다.
+    </p>
+    <div class="meta-row">
+      <div class="meta-item">DOCUMENT<strong>설계안 v1 · 구현 전</strong></div>
+      <div class="meta-item">SCOPE<strong>상호인증 요청 1개 화면 → 6단계 흐름</strong></div>
+      <div class="meta-item">FOR<strong>kiyoung · CHON 팀</strong></div>
+    </div>
+  </header>
+
+  <div class="tldr">
+    <div class="label">한 줄 요약</div>
+    <h2>
+      "보내기 버튼 누르면 끝"인 정적 폼을, 상대 선택 → 관계 정의 → 공유 범위 → 발송 → 추적 → 수락 보상으로 이어지는
+      살아있는 흐름으로 바꿉니다. 입력 시간은 늘리지 않고, 신뢰 정보는 더 풍부하게.
+    </h2>
+  </div>
+
+  <div class="toc">
+    <div class="toc-label">목차</div>
+    <ol>
+      <li><a href="#sec-before"><span>01</span><span>현재 흐름 (Before)</span></a></li>
+      <li><a href="#sec-issues"><span>02</span><span>발견된 7가지 이슈</span></a></li>
+      <li><a href="#sec-principles"><span>03</span><span>재설계 5원칙</span></a></li>
+      <li><a href="#sec-after-flow"><span>04</span><span>새 흐름 한눈에</span></a></li>
+      <li><a href="#sec-steps"><span>05</span><span>6단계 화면 설계</span></a></li>
+      <li><a href="#sec-lifecycle"><span>06</span><span>요청 라이프사이클</span></a></li>
+      <li><a href="#sec-edge"><span>07</span><span>엣지 케이스 처리</span></a></li>
+      <li><a href="#sec-next"><span>08</span><span>다음 단계</span></a></li>
+    </ol>
+  </div>
+
+  <section id="sec-before">
+    <div class="section-head">
+      <span class="section-num">01</span>
+      <h2>현재 흐름 — Before</h2>
+      <span class="sub">chon-prototype.html · Screen 3</span>
+    </div>
+
+    <p class="section-intro">
+      현재 "상호인증 요청" 화면은 다음과 같이 구성되어 있습니다.
+      두 개의 필드와 한 개의 CTA — 단순하지만, 너무 많은 결정이 사용자에게 떠넘겨져 있습니다.
+    </p>
+
+    <div class="flow-block">
+      <div class="flow-cap">현재 흐름 — 진입부터 발송까지</div>
+      <svg viewBox="0 0 900 220" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arr-before" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M0,0 L10,5 L0,10 z" fill="#888888"/>
+          </marker>
+        </defs>
+        <g font-family="Noto Sans KR" font-size="13" fill="#1F1F1F">
+          <rect x="20" y="60" width="160" height="80" fill="white" stroke="#E5E5E5"/>
+          <text x="100" y="92" text-anchor="middle" font-weight="600">진입</text>
+          <text x="100" y="112" text-anchor="middle" font-size="10" fill="#888888">(컨텍스트 없음)</text>
+
+          <rect x="220" y="60" width="200" height="80" fill="white" stroke="#E5E5E5"/>
+          <text x="320" y="88" text-anchor="middle" font-weight="600">상호인증 요청</text>
+          <text x="320" y="106" text-anchor="middle" font-size="10" fill="#888888">"홍길남" 직접 입력</text>
+          <text x="320" y="120" text-anchor="middle" font-size="10" fill="#888888">"오빠" 직접 입력</text>
+
+          <rect x="460" y="60" width="160" height="80" fill="#1F1F1F"/>
+          <text x="540" y="98" text-anchor="middle" font-weight="600" fill="white">상호인증 요청하기</text>
+          <text x="540" y="116" text-anchor="middle" font-size="10" fill="white" opacity="0.7">(버튼 클릭)</text>
+
+          <rect x="660" y="60" width="220" height="80" fill="white" stroke="#EF4444" stroke-dasharray="4,4"/>
+          <text x="770" y="92" text-anchor="middle" font-weight="600" fill="#B91C1C">?</text>
+          <text x="770" y="112" text-anchor="middle" font-size="10" fill="#B91C1C">사용자는 다음 화면을 모름</text>
+          <text x="770" y="126" text-anchor="middle" font-size="10" fill="#B91C1C">상태 / 알림 / 만료 미정의</text>
+        </g>
+        <line x1="180" y1="100" x2="218" y2="100" stroke="#888888" stroke-width="1.5" marker-end="url(#arr-before)"/>
+        <line x1="420" y1="100" x2="458" y2="100" stroke="#888888" stroke-width="1.5" marker-end="url(#arr-before)"/>
+        <line x1="620" y1="100" x2="658" y2="100" stroke="#888888" stroke-width="1.5" marker-end="url(#arr-before)"/>
+
+        <text x="450" y="40" text-anchor="middle" font-family="Noto Sans KR" font-size="11" fill="#888888" font-weight="500">CURRENT STATE — 3 STEPS, FLAT, BLACK-BOX ENDING</text>
+      </svg>
+    </div>
+
+    <div class="phone-row">
+      <div class="phone-card">
+        <div class="cap">CURRENT</div>
+        <div class="pname">상호인증 요청</div>
+        <div class="phone-frame">
+          <div class="phone-screen">
+            <div class="phone-status">
+              <span>9:30</span>
+              <div class="phone-cam"></div>
+              <span>▲ ◢</span>
+            </div>
+            <div class="phone-top">
+              <div class="back">←</div>
+            </div>
+            <div class="phone-body">
+              <div class="phone-h1">상호인증 요청하기를 눌러<br>나를 확인 받으세요</div>
+              <div class="phone-field">
+                <div class="phone-field-label">나를 확인할 사람</div>
+                <div class="phone-field-val">홍길남</div>
+              </div>
+              <div class="phone-field">
+                <div class="phone-field-label">나와의 관계</div>
+                <div class="phone-field-val">오빠</div>
+              </div>
+              <div class="phone-cta">상호인증 요청하기</div>
+            </div>
+          </div>
+        </div>
+        <div class="phone-note">2 fields · 1 CTA · 0 feedback</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="sec-issues">
+    <div class="section-head">
+      <span class="section-num">02</span>
+      <h2>이 화면이 만드는 7가지 문제</h2>
+    </div>
+
+    <ol class="issue-list">
+      <li>
+        <span class="issue-num">01</span>
+        <div class="issue-text">
+          <strong>상대방을 어떻게 고르는지 알 수 없다</strong>
+          <span>"나를 확인할 사람" 필드를 탭하면 무슨 일이 일어나나요? 주소록? QR 스캔? 직접 입력? 단서가 없습니다. 가장 중요한 결정인데 진입로가 안 보입니다.</span>
+        </div>
+        <span class="severity hi">치명</span>
+      </li>
+      <li>
+        <span class="issue-num">02</span>
+        <div class="issue-text">
+          <strong>관계가 자유 입력이라 일관성이 깨진다</strong>
+          <span>가계도·학급증·모임은 chip으로 관계를 고르는데 여기는 freeform 텍스트. 같은 사람이 두 곳에서 "오빠" / "친오빠"로 입력되면 동일인 매칭이 안 됩니다.</span>
+        </div>
+        <span class="severity hi">치명</span>
+      </li>
+      <li>
+        <span class="issue-num">03</span>
+        <div class="issue-text">
+          <strong>발송 후의 상태가 사용자에게 보이지 않는다</strong>
+          <span>요청이 보내진 다음 — 대기 중인지, 상대가 봤는지, 거절했는지, 만료됐는지 — 어디서 확인하나요? 라이프사이클 자체가 정의되지 않았습니다.</span>
+        </div>
+        <span class="severity hi">치명</span>
+      </li>
+      <li>
+        <span class="issue-num">04</span>
+        <div class="issue-text">
+          <strong>상호인증이 무엇을 보장하는지 설명이 없다</strong>
+          <span>"왜 이걸 하는지" 한 줄도 없습니다. CHON ID 만들기, Trust Garden 성장, 가계도 인증 — 이 행위가 어떤 가치로 이어지는지 사용자가 모릅니다.</span>
+        </div>
+        <span class="severity md">중요</span>
+      </li>
+      <li>
+        <span class="issue-num">05</span>
+        <div class="issue-text">
+          <strong>공유 범위 / 권한 설정이 없다</strong>
+          <span>인증할 때 내 정보 중 무엇이 상대에게 노출되나요? 이름만? 생년월일도? 가계도 전체? DID(Decentralized Identity)의 핵심은 "선택적 공개"인데, 그 UX가 빠져있습니다.</span>
+        </div>
+        <span class="severity md">중요</span>
+      </li>
+      <li>
+        <span class="issue-num">06</span>
+        <div class="issue-text">
+          <strong>여러 명을 한 번에 요청할 수 없다</strong>
+          <span>가족 5명에게 모두 인증 요청을 보내려면 같은 화면을 5번 반복해야 합니다. 신규 사용자의 onboarding 마찰이 큽니다.</span>
+        </div>
+        <span class="severity md">중요</span>
+      </li>
+      <li>
+        <span class="issue-num">07</span>
+        <div class="issue-text">
+          <strong>수락 후의 보상 순간이 없다</strong>
+          <span>상대가 수락하면 무슨 일이 일어나나요? Trust Garden 단계가 올라가는 핵심 순간인데 — 토스트 한 번으로 끝나면 의미가 휘발됩니다.</span>
+        </div>
+        <span class="severity lo">개선</span>
+      </li>
+    </ol>
+  </section>
+
+  <section id="sec-principles">
+    <div class="section-head">
+      <span class="section-num">03</span>
+      <h2>재설계 5원칙</h2>
+      <span class="sub">모든 결정의 판단 기준</span>
+    </div>
+
+    <div class="principles">
+      <div class="principle">
+        <div class="num">01</div>
+        <h4>관계는 양방향이다</h4>
+        <p>"내가 그쪽한테 오빠"라면 "그쪽은 나한테 여동생". 일방향 라벨링이 아닌 쌍방향 관계 그래프로 다룹니다.</p>
+      </div>
+      <div class="principle">
+        <div class="num">02</div>
+        <h4>점진적 공개 (Progressive Disclosure)</h4>
+        <p>한 화면에 다 욱여넣지 않습니다. 각 단계는 한 가지 결정만 요구하고, 다음 단계가 자연스럽게 이어집니다.</p>
+      </div>
+      <div class="principle">
+        <div class="num">03</div>
+        <h4>네이티브가 아닌 CHON 모달</h4>
+        <p><code>prompt()</code>·<code>confirm()</code> 같은 브라우저 다이얼로그를 모두 제거합니다. 모든 입력은 이미 만들어둔 <code>modal-fs</code> 패턴으로 통일.</p>
+      </div>
+      <div class="principle">
+        <div class="num">04</div>
+        <h4>맥락은 자동, 결정은 사용자</h4>
+        <p>가계도·학급증·모임에 이미 추가된 사람이면 관계가 prefill 됩니다. 사용자는 확인만 — 새로 입력 안 함.</p>
+      </div>
+      <div class="principle">
+        <div class="num">05</div>
+        <h4>요청은 살아있는 객체다</h4>
+        <p>발송한 요청은 "전송됨"으로 끝나지 않고, 대기·수락·거절·만료의 라이프사이클을 가집니다. 사용자는 언제든 그 상태를 볼 수 있어야 합니다.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="sec-after-flow">
+    <div class="section-head">
+      <span class="section-num">04</span>
+      <h2>새 흐름 한눈에 — After</h2>
+      <span class="sub">6 steps + 라이프사이클</span>
+    </div>
+
+    <div class="flow-block">
+      <div class="flow-cap">6단계 흐름 — 진입부터 보상까지</div>
+      <svg viewBox="0 0 920 320" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arr-after" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+            <path d="M0,0 L10,5 L0,10 z" fill="#1F1F1F"/>
+          </marker>
+          <marker id="arr-after-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+            <path d="M0,0 L10,5 L0,10 z" fill="#10B981"/>
+          </marker>
+        </defs>
+
+        <g font-family="Noto Sans KR" font-size="10" fill="#555555">
+          <text x="20" y="22" font-weight="600" font-size="10" fill="#888888">ENTRY POINTS</text>
+          <rect x="20" y="34" width="80" height="22" fill="white" stroke="#E5E5E5"/>
+          <text x="60" y="49" text-anchor="middle">📞 주소록</text>
+          <rect x="20" y="62" width="80" height="22" fill="white" stroke="#E5E5E5"/>
+          <text x="60" y="77" text-anchor="middle">📱 QR 스캔</text>
+          <rect x="20" y="90" width="80" height="22" fill="white" stroke="#E5E5E5"/>
+          <text x="60" y="105" text-anchor="middle">🔗 링크</text>
+          <rect x="20" y="118" width="80" height="22" fill="white" stroke="#E5E5E5"/>
+          <text x="60" y="133" text-anchor="middle">🌳 관계도</text>
+          <rect x="20" y="146" width="80" height="22" fill="white" stroke="#E5E5E5"/>
+          <text x="60" y="161" text-anchor="middle">🔔 받은 요청</text>
+        </g>
+
+        <path d="M 100 100 Q 130 100 145 100" fill="none" stroke="#1F1F1F" stroke-width="1.5" marker-end="url(#arr-after)"/>
+
+        <g font-family="Noto Sans KR" font-size="11" fill="#1F1F1F">
+          <rect x="155" y="72" width="110" height="56" fill="white" stroke="#E5E5E5"/>
+          <text x="210" y="88" text-anchor="middle" font-size="10" fill="#888888" font-weight="600">01</text>
+          <text x="210" y="103" text-anchor="middle" font-weight="600">상대 선택</text>
+          <text x="210" y="118" text-anchor="middle" font-size="9" fill="#888888">5개 방법 통합</text>
+
+          <rect x="280" y="72" width="110" height="56" fill="white" stroke="#E5E5E5"/>
+          <text x="335" y="88" text-anchor="middle" font-size="10" fill="#888888" font-weight="600">02</text>
+          <text x="335" y="103" text-anchor="middle" font-weight="600">관계 정의</text>
+          <text x="335" y="118" text-anchor="middle" font-size="9" fill="#888888">양방향 chip</text>
+
+          <rect x="405" y="72" width="110" height="56" fill="white" stroke="#E5E5E5"/>
+          <text x="460" y="88" text-anchor="middle" font-size="10" fill="#888888" font-weight="600">03</text>
+          <text x="460" y="103" text-anchor="middle" font-weight="600">공유 범위</text>
+          <text x="460" y="118" text-anchor="middle" font-size="9" fill="#888888">선택적 공개</text>
+
+          <rect x="530" y="72" width="110" height="56" fill="#F7931E"/>
+          <text x="585" y="88" text-anchor="middle" font-size="10" fill="white" opacity="0.85" font-weight="600">04</text>
+          <text x="585" y="103" text-anchor="middle" font-weight="600" fill="white">검토 &amp; 발송</text>
+          <text x="585" y="118" text-anchor="middle" font-size="9" fill="white" opacity="0.9">미리보기 + 확인</text>
+
+          <rect x="655" y="72" width="110" height="56" fill="white" stroke="#E5E5E5"/>
+          <text x="710" y="88" text-anchor="middle" font-size="10" fill="#888888" font-weight="600">05</text>
+          <text x="710" y="103" text-anchor="middle" font-weight="600">상태 추적</text>
+          <text x="710" y="118" text-anchor="middle" font-size="9" fill="#888888">대기/수락/거절/만료</text>
+
+          <rect x="780" y="72" width="120" height="56" fill="#1F1F1F"/>
+          <text x="840" y="88" text-anchor="middle" font-size="10" fill="white" opacity="0.7" font-weight="600">06</text>
+          <text x="840" y="103" text-anchor="middle" font-weight="600" fill="white">수락 후 보상</text>
+          <text x="840" y="118" text-anchor="middle" font-size="9" fill="white" opacity="0.8">Garden 성장 + 추천</text>
+
+          <line x1="265" y1="100" x2="278" y2="100" stroke="#1F1F1F" stroke-width="1.5" marker-end="url(#arr-after)"/>
+          <line x1="390" y1="100" x2="403" y2="100" stroke="#1F1F1F" stroke-width="1.5" marker-end="url(#arr-after)"/>
+          <line x1="515" y1="100" x2="528" y2="100" stroke="#1F1F1F" stroke-width="1.5" marker-end="url(#arr-after)"/>
+          <line x1="640" y1="100" x2="653" y2="100" stroke="#1F1F1F" stroke-width="1.5" marker-end="url(#arr-after)"/>
+          <line x1="765" y1="100" x2="778" y2="100" stroke="#1F1F1F" stroke-width="1.5" marker-end="url(#arr-after)"/>
+        </g>
+
+        <g font-family="Noto Sans KR" font-size="10" fill="#888888">
+          <line x1="710" y1="128" x2="710" y2="165" stroke="#BDBDBD" stroke-dasharray="3,3"/>
+          <text x="710" y="180" text-anchor="middle" font-weight="500">LIFECYCLE</text>
+          <rect x="610" y="190" width="50" height="22" fill="white" stroke="#F59E0B"/>
+          <text x="635" y="205" text-anchor="middle" fill="#B45309" font-weight="600">대기</text>
+          <rect x="668" y="190" width="50" height="22" fill="white" stroke="#10B981"/>
+          <text x="693" y="205" text-anchor="middle" fill="#047857" font-weight="600">수락</text>
+          <rect x="726" y="190" width="50" height="22" fill="white" stroke="#EF4444"/>
+          <text x="751" y="205" text-anchor="middle" fill="#B91C1C" font-weight="600">거절</text>
+          <rect x="784" y="190" width="50" height="22" fill="white" stroke="#9CA3AF"/>
+          <text x="809" y="205" text-anchor="middle" fill="#4B5563" font-weight="600">만료</text>
+        </g>
+
+        <path d="M 693 213 Q 693 270 840 270 L 840 132"
+              fill="none" stroke="#10B981" stroke-width="1.5" stroke-dasharray="4,4"
+              marker-end="url(#arr-after-green)"/>
+        <text x="770" y="290" font-family="Noto Sans KR" font-size="10" fill="#047857" font-weight="500">수락 시 보상 트리거</text>
+      </svg>
+    </div>
+
+    <p class="section-intro" style="margin-top: 16px;">
+      입력 시간은 늘리지 않습니다. <strong style="color: var(--text);">대부분의 사용자는 1번 단계에서 90%가 결정됩니다</strong> —
+      주소록 매칭이나 관계도에서 이미 후보가 떠있으면 2단계 이후는 prefill로 통과. 새로 입력하는 케이스만 풀 코스를 거칩니다.
+    </p>
+  </section>
+
+  <section id="sec-steps">
+    <div class="section-head">
+      <span class="section-num">05</span>
+      <h2>6단계 화면 설계</h2>
+      <span class="sub">각 단계: 목적 · 핵심 요소 · 화면</span>
+    </div>
+
+    <div class="step">
+      <div class="step-meta">
+        <div class="step-num">01</div>
+        <div class="step-tag">선택 / SELECT</div>
+      </div>
+      <div class="step-body">
+        <h3>"누구한테 요청할까?" — 진입로 5개를 한 화면에</h3>
+        <p class="step-lede">
+          현재 화면의 가장 큰 구멍이 여기서 메워집니다.
+          상대방을 찾는 5가지 방법을 카드로 노출하고, <strong>주소록 자동 매칭</strong>으로 이미 CHON을 쓰는 지인을 상단에 띄웁니다.
+          사용자의 대부분은 이 한 화면에서 끝납니다.
+        </p>
+        <ul class="step-elements">
+          <li><code>방법 1</code><span><strong>주소록 매칭</strong> — 내 연락처 중 이미 CHON 사용자인 사람을 ✓ 뱃지와 함께 상단에 표시. 가장 친한 사이일 확률이 높음.</span></li>
+          <li><code>방법 2</code><span><strong>QR 스캔</strong> — 대면 상황 (가족 모임, 학급 첫날, 동호회). 카메라 권한은 진입 시점에만 요청.</span></li>
+          <li><code>방법 3</code><span><strong>링크 공유</strong> — 카톡·문자로 1회용 인증 링크 발송. 상대가 CHON 미사용자여도 가능 (앱 설치 onboarding으로 이어짐).</span></li>
+          <li><code>방법 4</code><span><strong>관계도에서</strong> — 가계도/학급증/모임에 이미 추가했지만 미인증 상태인 노드 목록.</span></li>
+          <li><code>방법 5</code><span><strong>받은 요청</strong> — 누군가 나에게 요청을 보냈으면 여기에서 응답.</span></li>
+        </ul>
+
+        <div class="phone-row">
+          <div class="phone-card">
+            <div class="cap">AFTER · STEP 1</div>
+            <div class="pname">상대방 선택</div>
+            <div class="phone-frame">
+              <div class="phone-screen">
+                <div class="phone-status">
+                  <span>9:30</span>
+                  <div class="phone-cam"></div>
+                  <span>▲ ◢</span>
+                </div>
+                <div class="phone-top">
+                  <div class="back">←</div>
+                  <span style="margin-left:auto; font-weight:600; color:var(--text); font-size:11px;">상호인증 요청</span>
+                </div>
+                <div class="phone-body">
+                  <div class="phone-h1">누구한테 요청하시나요?</div>
+
+                  <div class="pf-method-grid">
+                    <div class="pf-method primary">
+                      <span class="icon">📞</span>주소록
+                    </div>
+                    <div class="pf-method">
+                      <span class="icon">📱</span>QR 스캔
+                    </div>
+                    <div class="pf-method">
+                      <span class="icon">🔗</span>링크 공유
+                    </div>
+                    <div class="pf-method">
+                      <span class="icon">🌳</span>관계도에서
+                    </div>
+                  </div>
+
+                  <div style="font-size:9px; color:var(--text-3); margin-top:8px; font-weight:600;">CHON을 쓰는 지인 · 3명</div>
+                  <div class="pf-candidate">
+                    <div class="av">홍</div>
+                    <div class="pf-candidate-info">
+                      <div class="pf-candidate-name">홍길남</div>
+                      <div class="pf-candidate-meta">010-****-5678</div>
+                    </div>
+                    <span class="badge">CHON ✓</span>
+                  </div>
+                  <div class="pf-candidate">
+                    <div class="av">박</div>
+                    <div class="pf-candidate-info">
+                      <div class="pf-candidate-name">박지영</div>
+                      <div class="pf-candidate-meta">010-****-1234</div>
+                    </div>
+                    <span class="badge">CHON ✓</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="phone-note">5 entries · auto-matched contacts at top</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-meta">
+        <div class="step-num">02</div>
+        <div class="step-tag">관계 / RELATION</div>
+      </div>
+      <div class="step-body">
+        <h3>"우리는 어떤 사이?" — 양방향 chip + 시각적 확인</h3>
+        <p class="step-lede">
+          freeform 입력 대신 카테고리별 chip을 보여줍니다.
+          가계도에서 이미 등록된 사람이면 관계가 미리 채워지고 <strong>"이 관계가 맞나요?"</strong>로 단순 확인만 요구합니다.
+          핵심은 <strong>관계의 양방향 시각화</strong> — 내가 그 사람에게 무엇이고, 그 사람이 나에게 무엇인지를 한 화면에 보여줍니다.
+        </p>
+        <ul class="step-elements">
+          <li><code>카테고리 탭</code><span>가족 / 학교 / 회사 / 모임 — 컨텍스트에 맞는 chip 세트가 활성화됨.</span></li>
+          <li><code>양방향 표시</code><span>"나 → 길남: 여동생" / "길남 → 나: 오빠" 둘 다 노출. 가계도의 isInLawIn / isPaternalBlood와 연결.</span></li>
+          <li><code>Prefill</code><span>가계도·학급증·모임에서 이미 등록된 인물이면 자동 채움. 사용자는 "그대로 두기" 한 번만 누름.</span></li>
+          <li><code>Skip 옵션</code><span>"관계를 지금 정하지 않기" — 단순 인증만 원하는 사용자를 위한 탈출구. SecLev 1 인증으로 처리.</span></li>
+        </ul>
+
+        <div class="phone-row">
+          <div class="phone-card">
+            <div class="cap">AFTER · STEP 2</div>
+            <div class="pname">관계 정의</div>
+            <div class="phone-frame">
+              <div class="phone-screen">
+                <div class="phone-status">
+                  <span>9:30</span>
+                  <div class="phone-cam"></div>
+                  <span>▲ ◢</span>
+                </div>
+                <div class="phone-top">
+                  <div class="back">←</div>
+                  <span style="margin-left:auto; font-weight:600; font-size:11px;">홍길남 님과의 관계</span>
+                </div>
+                <div class="phone-body">
+                  <div class="pf-relation-vis">
+                    <div class="pair">
+                      <div>
+                        <div class="pf-pair-node">나</div>
+                        <div class="pf-pair-label">나</div>
+                      </div>
+                      <span class="pf-pair-arrow">↔</span>
+                      <div>
+                        <div class="pf-pair-node other">홍</div>
+                        <div class="pf-pair-label">홍길남</div>
+                      </div>
+                    </div>
+                    <div style="font-size:9px; color:var(--text-2); font-weight:500;">
+                      나 → 여동생 · 길남 → 오빠
+                    </div>
+                  </div>
+
+                  <div style="font-size:9px; color:var(--text-3); margin-top:6px; font-weight:600;">카테고리</div>
+                  <div class="pf-chip-row">
+                    <div class="pf-chip sel">👨‍👩 가족</div>
+                    <div class="pf-chip">🎓 학교</div>
+                    <div class="pf-chip">🏢 회사</div>
+                    <div class="pf-chip">🌐 모임</div>
+                  </div>
+
+                  <div style="font-size:9px; color:var(--text-3); margin-top:6px; font-weight:600;">길남이 나한테는?</div>
+                  <div class="pf-chip-row">
+                    <div class="pf-chip">아버지</div>
+                    <div class="pf-chip sel">오빠</div>
+                    <div class="pf-chip">남동생</div>
+                    <div class="pf-chip">큰아버지</div>
+                  </div>
+
+                  <div class="phone-cta">다음 →</div>
+                </div>
+              </div>
+            </div>
+            <div class="phone-note">bi-directional · chip-based · pre-filled when possible</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-meta">
+        <div class="step-num">03</div>
+        <div class="step-tag">공유 / SCOPE</div>
+      </div>
+      <div class="step-body">
+        <h3>"무엇을 보여줄까?" — DID의 핵심, 선택적 공개</h3>
+        <p class="step-lede">
+          분산신원의 차별점은 "내 정보 중 무엇을 누구에게 보여줄지 내가 정한다"는 것입니다.
+          이 화면은 그 약속을 사용자가 직접 느낄 수 있게 만듭니다.
+          기본값은 <strong>안전한 최소 공유</strong> — 이름과 인증 사실만. 나머지는 토글로 추가.
+        </p>
+        <ul class="step-elements">
+          <li><code>기본 ON</code><span>이름, CHON ID, 인증 사실, Trust Garden 단계.</span></li>
+          <li><code>기본 OFF</code><span>전화번호, 가계도 전체, 다른 인증 내역, 연락처.</span></li>
+          <li><code>권장 프리셋</code><span>가족 → 가계도 노출 / 학급 → 학교+학년 / 모임 → 모임명만. 사용자가 "권장으로 한 번에" 적용 가능.</span></li>
+          <li><code>만료 설정</code><span>1일 / 7일 / 무기한. 짧을수록 안전, 길수록 편함을 명시.</span></li>
+        </ul>
+
+        <div class="phone-row">
+          <div class="phone-card">
+            <div class="cap">AFTER · STEP 3</div>
+            <div class="pname">공유 범위</div>
+            <div class="phone-frame">
+              <div class="phone-screen">
+                <div class="phone-status">
+                  <span>9:30</span>
+                  <div class="phone-cam"></div>
+                  <span>▲ ◢</span>
+                </div>
+                <div class="phone-top">
+                  <div class="back">←</div>
+                  <span style="margin-left:auto; font-weight:600; font-size:11px;">무엇을 공유할까요?</span>
+                </div>
+                <div class="phone-body">
+                  <div style="border:1px solid var(--accent); padding:6px 10px; font-size:9px; color:var(--accent-dark); font-weight:600;">
+                    💡 가족 관계 권장 프리셋
+                  </div>
+
+                  <div class="pf-share-row">
+                    <span style="font-weight:600;">이름 · 홍길순</span>
+                    <div class="toggle"></div>
+                  </div>
+                  <div class="pf-share-row">
+                    <span style="font-weight:600;">인증 사실</span>
+                    <div class="toggle"></div>
+                  </div>
+                  <div class="pf-share-row">
+                    <span style="font-weight:600;">Trust Garden 🌿</span>
+                    <div class="toggle"></div>
+                  </div>
+                  <div class="pf-share-row">
+                    <span style="color:var(--text-2);">가계도 (조부모까지)</span>
+                    <div class="toggle"></div>
+                  </div>
+                  <div class="pf-share-row">
+                    <span style="color:var(--text-3);">전화번호</span>
+                    <div class="toggle off"></div>
+                  </div>
+
+                  <div style="font-size:9px; color:var(--text-3); margin-top:4px; font-weight:600;">유효 기간</div>
+                  <div class="pf-chip-row">
+                    <div class="pf-chip">1일</div>
+                    <div class="pf-chip sel">7일</div>
+                    <div class="pf-chip">무기한</div>
+                  </div>
+
+                  <div class="phone-cta">미리보기 →</div>
+                </div>
+              </div>
+            </div>
+            <div class="phone-note">safe minimum default · presets · expiry</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-meta">
+        <div class="step-num">04</div>
+        <div class="step-tag">검토 / REVIEW</div>
+      </div>
+      <div class="step-body">
+        <h3>"이대로 보낼까?" — 상대가 받을 화면 미리보기</h3>
+        <p class="step-lede">
+          이 단계는 "확인용 한 화면"이지만 디테일이 중요합니다.
+          <strong>상대방이 받을 화면을 그대로 시뮬레이션</strong>해서 사용자가 "내가 무엇을 공유하는지" 시각적으로 이해하게 합니다.
+          여기서 처음으로 메모(선택)를 추가할 수 있습니다.
+        </p>
+        <ul class="step-elements">
+          <li><code>미리보기</code><span>"홍길남 님께 이렇게 보입니다" — 상대 시점에서 카드 형태로 전체 정보 노출.</span></li>
+          <li><code>수정 진입로</code><span>각 정보 항목 옆에 "수정" 링크 — 이전 단계로 자유롭게 점프. 단방향 wizard 강제하지 않음.</span></li>
+          <li><code>메모</code><span>"오랜만이야, 우리집 가계도 같이 만들고 싶어 — 인증 부탁!" 같은 한 줄 메시지. 인간적인 톤 유지.</span></li>
+          <li><code>발송 CTA</code><span>"인증 요청 보내기" — 명확한 행위 동사.</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-meta">
+        <div class="step-num">05</div>
+        <div class="step-tag">추적 / TRACK</div>
+      </div>
+      <div class="step-body">
+        <h3>"보냈는데 어떻게 됐지?" — 보낸 요청 / 받은 요청 통합 뷰</h3>
+        <p class="step-lede">
+          발송 즉시 사용자는 <strong>"보낸 요청" 리스트</strong>로 이동합니다 — 막다른 화면이 아닌 살아있는 공간.
+          모든 요청은 <strong>대기 / 수락됨 / 거절됨 / 만료됨</strong> 4가지 상태를 가지고,
+          사용자는 언제든 재발송·취소·만료 연장이 가능합니다.
+          하단 네비의 "상호인증" 탭이 이 화면을 디폴트로 띄웁니다.
+        </p>
+        <ul class="step-elements">
+          <li><code>2-탭</code><span>보낸 요청 (Sent) / 받은 요청 (Received). 받은 쪽이 처리 우선이므로 미응답 시 뱃지 표시.</span></li>
+          <li><code>상태 필터</code><span>전체 · 대기 · 수락 · 거절 · 만료. 사용자가 진행상황을 한눈에 모니터링.</span></li>
+          <li><code>액션</code><span>대기 → 재발송 / 취소. 거절 → 사유 확인 / 다른 사람 요청. 만료 → 1탭 재발송.</span></li>
+          <li><code>실시간 카운트</code><span>"길남 님이 요청을 확인했습니다" 같은 read receipt — 모호한 침묵을 줄임.</span></li>
+        </ul>
+
+        <div class="wireframe">┌────────────── 상호인증 ──────────────┐
+│  [보낸 요청 (2)]  받은 요청 (1) 🔴   │
+│                                       │
+│  필터: [전체] [대기] [수락] [거절]    │
+│                                       │
+│  ┌─────────────────────────────────┐ │
+│  │ 홍길남 (오빠)             ⏱ 대기 │ │
+│  │ 보냄: 2일 전 · 확인: 어제        │ │
+│  │ [재발송]  [취소]                 │ │
+│  └─────────────────────────────────┘ │
+│  ┌─────────────────────────────────┐ │
+│  │ 박지영 (학교친구)         ✓ 수락 │ │
+│  │ 수락: 30분 전 · 🌿 새싹 도달     │ │
+│  │ [관계 보기 →]                    │ │
+│  └─────────────────────────────────┘ │
+└───────────────────────────────────────┘</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-meta">
+        <div class="step-num">06</div>
+        <div class="step-tag">보상 / REWARD</div>
+      </div>
+      <div class="step-body">
+        <h3>"수락됐다!" — 모멘텀을 만드는 한 화면</h3>
+        <p class="step-lede">
+          상대가 수락한 순간은 <strong>이 앱의 가장 중요한 정서적 사건</strong>입니다.
+          토스트 한 번으로 끝내지 않고, 별도 화면(또는 풀스크린 모달)으로 띄워서
+          <strong>Trust Garden 단계 변화 → 다음 추천 → 공유</strong>로 흐름을 이어줍니다.
+        </p>
+        <ul class="step-elements">
+          <li><code>축하 모션</code><span>Trust Garden 단계가 올라갔다면 식물 성장 애니메이션 (3초). 단계 유지면 잎 흔들림 정도.</span></li>
+          <li><code>관계 카드</code><span>"홍길남 님과 상호인증되었습니다" — 카드 형태로 박제, 캡처 가능.</span></li>
+          <li><code>다음 추천</code><span>"길남 님과 가족이라면 어머니/할머니도 인증 가능합니다" — 가계도/학급증/모임에서 미인증 후보 자동 제안.</span></li>
+          <li><code>공유 옵션</code><span>"새싹 단계 도달!" 같은 마일스톤 카드를 인스타·카톡으로 공유 (off-by-default).</span></li>
+        </ul>
+
+        <div class="phone-row">
+          <div class="phone-card">
+            <div class="cap">AFTER · STEP 6</div>
+            <div class="pname">수락 직후</div>
+            <div class="phone-frame">
+              <div class="phone-screen">
+                <div class="phone-status">
+                  <span>9:30</span>
+                  <div class="phone-cam"></div>
+                  <span>▲ ◢</span>
+                </div>
+                <div class="phone-top">
+                  <div class="back">✕</div>
+                </div>
+                <div class="phone-body">
+                  <div class="pf-celebration">
+                    <div style="font-size:9px; color:var(--text-3); letter-spacing:0.1em; font-weight:600;">상호인증 완료</div>
+                    <div class="emoji">🌿</div>
+                    <div class="title">새싹 단계 도달!</div>
+                    <div class="sub">홍길남 님과 인증됨 · 총 1건</div>
+                  </div>
+
+                  <div style="border:1px solid var(--rule); padding:8px 10px; font-size:9px;">
+                    <div style="color:var(--text-3); font-weight:600; margin-bottom:3px;">다음 추천</div>
+                    <div style="color:var(--text); font-weight:600;">어머니 (오빠의 어머니)</div>
+                    <div style="color:var(--text-2); margin-top:2px;">길남 님이 인증한 분이에요</div>
+                  </div>
+
+                  <div class="phone-cta">계속 인증하기</div>
+                  <div style="text-align:center; font-size:9px; color:var(--text-3); margin-top:4px;">또는 <span style="color:var(--text-2); text-decoration:underline;">홈으로</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="phone-note">milestone moment · next suggestion · momentum</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="sec-lifecycle">
+    <div class="section-head">
+      <span class="section-num">06</span>
+      <h2>요청 라이프사이클</h2>
+      <span class="sub">상태 머신</span>
+    </div>
+
+    <p class="section-intro">
+      모든 요청은 발송 즉시 객체가 되어 데이터베이스에 살아남습니다. 사용자는 언제든 그 객체의 상태를 보고, 조작할 수 있습니다.
+    </p>
+
+    <div class="flow-block">
+      <div class="flow-cap">요청 객체의 5가지 상태 + 전이</div>
+      <svg viewBox="0 0 880 360" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arr-state" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+            <path d="M0,0 L10,5 L0,10 z" fill="#555555"/>
+          </marker>
+          <marker id="arr-state-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+            <path d="M0,0 L10,5 L0,10 z" fill="#10B981"/>
+          </marker>
+          <marker id="arr-state-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+            <path d="M0,0 L10,5 L0,10 z" fill="#EF4444"/>
+          </marker>
+          <marker id="arr-state-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+            <path d="M0,0 L10,5 L0,10 z" fill="#F7931E"/>
+          </marker>
+        </defs>
+
+        <g font-family="Noto Sans KR" font-size="13">
+          <circle cx="80" cy="180" r="40" fill="white" stroke="#BDBDBD" stroke-width="1.5" stroke-dasharray="4,3"/>
+          <text x="80" y="178" text-anchor="middle" font-weight="600">초안</text>
+          <text x="80" y="194" text-anchor="middle" font-size="9" fill="#888888">DRAFT</text>
+
+          <circle cx="280" cy="180" r="48" fill="white" stroke="#F59E0B" stroke-width="1.5"/>
+          <text x="280" y="174" text-anchor="middle" font-weight="600" fill="#B45309">대기</text>
+          <text x="280" y="190" text-anchor="middle" font-size="9" fill="#B45309">PENDING</text>
+          <text x="280" y="206" text-anchor="middle" font-size="9" fill="#92400E">7일 카운트다운</text>
+
+          <circle cx="500" cy="80" r="48" fill="white" stroke="#10B981" stroke-width="1.5"/>
+          <text x="500" y="74" text-anchor="middle" font-weight="600" fill="#047857">수락</text>
+          <text x="500" y="90" text-anchor="middle" font-size="9" fill="#047857">ACCEPTED</text>
+          <text x="500" y="106" text-anchor="middle" font-size="9" fill="#065F46">→ Garden 성장</text>
+
+          <circle cx="500" cy="280" r="48" fill="white" stroke="#EF4444" stroke-width="1.5"/>
+          <text x="500" y="274" text-anchor="middle" font-weight="600" fill="#B91C1C">거절</text>
+          <text x="500" y="290" text-anchor="middle" font-size="9" fill="#B91C1C">REJECTED</text>
+          <text x="500" y="306" text-anchor="middle" font-size="9" fill="#7F1D1D">사유 옵션</text>
+
+          <circle cx="720" cy="180" r="44" fill="white" stroke="#9CA3AF" stroke-width="1.5"/>
+          <text x="720" y="174" text-anchor="middle" font-weight="600" fill="#4B5563">만료</text>
+          <text x="720" y="190" text-anchor="middle" font-size="9" fill="#4B5563">EXPIRED</text>
+          <text x="720" y="206" text-anchor="middle" font-size="9" fill="#374151">재발송 가능</text>
+        </g>
+
+        <g font-family="Noto Sans KR" font-size="11" fill="#555555">
+          <line x1="120" y1="180" x2="230" y2="180" stroke="#555555" stroke-width="1.5" marker-end="url(#arr-state)"/>
+          <text x="175" y="172" text-anchor="middle">발송</text>
+
+          <path d="M 310 142 Q 380 90 458 90" fill="none" stroke="#10B981" stroke-width="1.5" marker-end="url(#arr-state-green)"/>
+          <text x="385" y="105" text-anchor="middle" fill="#047857">상대 수락</text>
+
+          <path d="M 310 218 Q 380 270 458 280" fill="none" stroke="#EF4444" stroke-width="1.5" marker-end="url(#arr-state-red)"/>
+          <text x="385" y="263" text-anchor="middle" fill="#B91C1C">상대 거절</text>
+
+          <line x1="328" y1="180" x2="676" y2="180" stroke="#555555" stroke-width="1.5" stroke-dasharray="3,3" marker-end="url(#arr-state)"/>
+          <text x="500" y="174" text-anchor="middle">7일 경과</text>
+
+          <path d="M 240 200 Q 180 240 100 220" fill="none" stroke="#555555" stroke-width="1.5" stroke-dasharray="3,3" marker-end="url(#arr-state)"/>
+          <text x="160" y="244" text-anchor="middle">취소</text>
+
+          <path d="M 700 144 Q 600 70 540 100" fill="none" stroke="#F7931E" stroke-width="1.5" stroke-dasharray="3,3" marker-end="url(#arr-state-orange)"/>
+          <text x="640" y="100" text-anchor="middle" fill="#C97200">재발송</text>
+        </g>
+
+        <g font-family="Noto Sans KR" font-size="10" fill="#888888">
+          <text x="20" y="340">— 실선: 사용자 액션 / 점선: 시스템 자동</text>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <section id="sec-edge">
+    <div class="section-head">
+      <span class="section-num">07</span>
+      <h2>엣지 케이스 처리</h2>
+      <span class="sub">예외 상황 9가지</span>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 32%;">상황</th>
+            <th>처리</th>
+            <th style="width: 14%;">단계</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>상대가 CHON 앱 미사용자</strong></td>
+            <td>링크 공유 모드로 자동 전환. 카톡/문자로 1회용 초대 링크 발송. 상대가 가입 후 자동으로 요청 매칭.</td>
+            <td><code>Step 1, 4</code></td>
+          </tr>
+          <tr>
+            <td><strong>관계가 충돌 (내가 "오빠"라 했는데 상대가 "남편"으로 응답)</strong></td>
+            <td>"관계 불일치" 화면으로 양쪽 모두 진입. 둘 중 하나 선택 또는 별도 협의 모드. 인증은 보류.</td>
+            <td><code>Step 6</code></td>
+          </tr>
+          <tr>
+            <td><strong>이미 인증된 사람한테 또 요청</strong></td>
+            <td>Step 1 후보 리스트에서 이미 인증된 사람은 ✓ 마크로 표시, 탭하면 "이미 인증된 관계입니다"와 함께 관계도로 이동.</td>
+            <td><code>Step 1</code></td>
+          </tr>
+          <tr>
+            <td><strong>같은 사람에게 중복 요청 발송 시도</strong></td>
+            <td>"대기 중인 요청이 있어요. 재발송할까요?"로 안내. 새 객체가 아닌 기존 요청의 timestamp를 갱신.</td>
+            <td><code>Step 4</code></td>
+          </tr>
+          <tr>
+            <td><strong>요청 7일 동안 응답 없음</strong></td>
+            <td>자동 EXPIRED 전환. 만료 24시간 전 발신자에게 푸시 알림 ("길남 님께 보낸 요청이 곧 만료돼요").</td>
+            <td><code>Step 5</code></td>
+          </tr>
+          <tr>
+            <td><strong>거절당했을 때</strong></td>
+            <td>거절 사유는 선택사항 (잘못된 사람/관계 잘못됨/기타). 발신자에게는 사유만 노출, 차단 옵션은 미제공 (관계 회복 여지).</td>
+            <td><code>Step 5</code></td>
+          </tr>
+          <tr>
+            <td><strong>일괄 요청 (가족 5명 한 번에)</strong></td>
+            <td>Step 1에서 multi-select 모드 진입. 같은 카테고리(가족)일 때만 가능. Step 2의 관계 정의는 각 대상마다 별도 화면.</td>
+            <td><code>Step 1, 2</code></td>
+          </tr>
+          <tr>
+            <td><strong>발송자가 도중에 앱 종료</strong></td>
+            <td>모든 단계의 입력값을 <code>DRAFT</code> 상태로 자동 저장. 다음 진입 시 "이어서 작성하기" 카드 제공. 24시간 뒤 자동 삭제.</td>
+            <td>전 단계</td>
+          </tr>
+          <tr>
+            <td><strong>오프라인 / 발송 실패</strong></td>
+            <td>요청은 로컬 큐에 저장 후 자동 재시도. 사용자에게는 "곧 발송됩니다" 인디케이터 + 수동 재시도 버튼.</td>
+            <td><code>Step 4</code></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="sec-next">
+    <div class="section-head">
+      <span class="section-num">08</span>
+      <h2>다음 단계 — 이 설계를 어떻게 검증할까</h2>
+    </div>
+
+    <div class="principles" style="grid-template-columns: 1fr 1fr 1fr;">
+      <div class="principle">
+        <div class="num">A</div>
+        <h4>설계 검토</h4>
+        <p>먼저 이 문서를 팀원/이해관계자와 리뷰. 6단계가 너무 긴지, prefill 가정이 현실적인지, 보상 단계의 톤이 적절한지 의견 수렴.</p>
+      </div>
+      <div class="principle">
+        <div class="num">B</div>
+        <h4>고충실도 프로토타입</h4>
+        <p>승인 후 chon-prototype.html에 새 흐름을 인터랙티브하게 구현. modal-fs 패턴 위에서 Step 1~6 wizard 형태로 동작하도록.</p>
+      </div>
+      <div class="principle">
+        <div class="num">C</div>
+        <h4>사용성 테스트</h4>
+        <p>5명에게 "처음 가족 3명을 인증해보세요" 시나리오 부여. Step 1에서 어떤 진입로를 고르는지, Step 3 공유 범위에서 망설이는지 관찰.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>CHON DID · 상호인증 흐름 재설계안 v1</span>
+    <span>설계: Before/After · 구현: TBD</span>
+  </footer>
+
+</div>
+
+</body>
+</html>

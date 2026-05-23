@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CHON 시각화 토폴로지 v3 — 정렬 일반화</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --chon-orange: #F7931E;
+    --chon-orange-dark: #E87F0A;
+    --chon-yellow-soft: #FFF3D6;
+    --bg-app: #FFFBF0;
+    --bg-empty: #F8FAFC;
+    --text-primary: #1F1F1F;
+    --text-secondary: #64748B;
+    --text-tertiary: #94A3B8;
+
+    --node-male: #A8D5F2;
+    --node-female: #F5C2CC;
+    --node-self-border: #F7931E;
+
+    --clan-purple: #C4B5FD;
+    --clan-purple-dark: #8B5CF6;
+    --clan-gold: #FCD34D;
+    --clan-gold-dark: #D97706;
+
+    --org-blue: #60A5FA;
+    --org-blue-dark: #2563EB;
+    --org-green: #34D399;
+    --org-green-dark: #059669;
+    --org-gray: #94A3B8;
+
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+    --shadow-md: 0 4px 14px rgba(0,0,0,0.08);
+    --shadow-lg: 0 10px 30px rgba(0,0,0,0.14);
+
+    --radius-sm: 8px;
+    --radius-md: 14px;
+    --radius-lg: 20px;
+    --radius-pill: 999px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: 'Noto Sans KR', -apple-system, sans-serif;
+    background: linear-gradient(135deg, #FFF7E6 0%, #FFE6D0 100%);
+    color: var(--text-primary);
+    min-height: 100vh;
+  }
+
+  .wrap {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 32px 24px;
+  }
+
+  .doc-header {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: 28px 32px;
+    margin-bottom: 32px;
+    box-shadow: var(--shadow-md);
+  }
+  .doc-header h1 {
+    margin: 0 0 12px;
+    font-size: 28px;
+    color: var(--chon-orange);
+    font-weight: 900;
+  }
+  .doc-header .subtitle {
+    color: var(--text-secondary);
+    font-size: 15px;
+    line-height: 1.6;
+    margin: 8px 0;
+  }
+  .badge-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+  }
+  .badge {
+    background: var(--chon-yellow-soft);
+    color: var(--chon-orange-dark);
+    padding: 4px 12px;
+    border-radius: var(--radius-pill);
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .badge.purple { background: #EDE9FE; color: #6D28D9; }
+  .badge.blue { background: #DBEAFE; color: #1E40AF; }
+  .badge.green { background: #D1FAE5; color: #047857; }
+
+  /* ============================================
+     Principle Card
+     ============================================ */
+  .principle-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow-md);
+    border-left: 5px solid var(--chon-orange);
+  }
+  .principle-card h2 {
+    margin: 0 0 12px;
+    font-size: 18px;
+    color: var(--chon-orange-dark);
+  }
+  .principle-card p {
+    margin: 6px 0;
+    color: var(--text-secondary);
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  .principle-card code {
+    background: #F1F5F9;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: var(--chon-orange-dark);
+    font-weight: 700;
+  }
+
+  .principle-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+    font-size: 12px;
+  }
+  .principle-table th, .principle-table td {
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid #F1F5F9;
+  }
+  .principle-table th {
+    background: var(--bg-empty);
+    color: var(--text-secondary);
+    font-weight: 800;
+    text-transform: uppercase;
+    font-size: 10px;
+    letter-spacing: 0.5px;
+  }
+  .principle-table tr.fam { border-left: 3px solid var(--chon-orange); }
+  .principle-table tr.clan { border-left: 3px solid var(--clan-purple-dark); }
+  .principle-table tr.org { border-left: 3px solid var(--org-blue-dark); }
+
+  /* ============================================
+     Topology Toggle
+     ============================================ */
+  .topology-tabs {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: 8px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-md);
+    display: flex;
+    gap: 4px;
+  }
+  .topology-tab {
+    flex: 1;
+    padding: 14px 16px;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .topology-tab.active {
+    color: white;
+  }
+  .topology-tab.active.fam { background: var(--chon-orange); }
+  .topology-tab.active.clan { background: var(--clan-purple-dark); }
+  .topology-tab.active.org { background: var(--org-blue-dark); }
+  .topology-tab:hover:not(.active) {
+    background: var(--bg-empty);
+    color: var(--text-primary);
+  }
+  .topology-tab .tt-icon { font-size: 20px; }
+
+  /* ============================================
+     Viz container
+     ============================================ */
+  .viz-section {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow-md);
+    display: none;
+  }
+  .viz-section.active {
+    display: block;
+  }
+
+  .viz-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .viz-title {
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .viz-info {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+  .viz-info strong {
+    color: var(--text-primary);
+  }
+
+  .sort-toggle {
+    display: flex;
+    gap: 6px;
+    background: var(--bg-empty);
+    padding: 4px;
+    border-radius: var(--radius-pill);
+  }
+  .sort-toggle button {
+    background: transparent;
+    border: none;
+    padding: 6px 14px;
+    border-radius: var(--radius-pill);
+    font-size: 11px;
+    font-weight: 800;
+    cursor: pointer;
+    color: var(--text-secondary);
+    font-family: inherit;
+  }
+  .sort-toggle button.active {
+    background: white;
+    color: var(--chon-orange-dark);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .viz-canvas {
+    background: var(--bg-empty);
+    border-radius: var(--radius-md);
+    padding: 24px 16px;
+    overflow-x: auto;
+  }
+  .viz-canvas svg {
+    display: block;
+    min-width: 100%;
+  }
+
+  /* ============================================
+     Sort Rule Display
+     ============================================ */
+  .sort-rule {
+    background: #EEF2FF;
+    border: 1px solid #C7D2FE;
+    border-radius: var(--radius-md);
+    padding: 12px 16px;
+    margin-top: 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 12px;
+    line-height: 1.6;
+  }
+  .sort-rule .sr-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .sort-rule strong {
+    display: block;
+    color: #3730A3;
+    margin-bottom: 2px;
+  }
+  .sort-rule code {
+    background: white;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+    color: #3730A3;
+    font-weight: 700;
+  }
+
+  /* ============================================
+     Data model display
+     ============================================ */
+  .code-block {
+    background: #1E293B;
+    color: #E2E8F0;
+    padding: 16px;
+    border-radius: var(--radius-md);
+    font-family: 'SF Mono', Consolas, monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    overflow-x: auto;
+    margin: 12px 0;
+  }
+  .code-block .keyword { color: #93C5FD; }
+  .code-block .string { color: #FCD34D; }
+  .code-block .comment { color: #64748B; font-style: italic; }
+  .code-block .field { color: #86EFAC; }
+
+  /* SVG node click visual */
+  .v-node-group { cursor: pointer; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="doc-header">
+    <h1>🎨 CHON 시각화 토폴로지 v3 — 정렬 원칙 일반화</h1>
+    <p class="subtitle"><strong>출생 순서 정렬 원칙을 가족 → 종친회 → 조직도로 확장.</strong></p>
+    <p class="subtitle">한 페이지에서 <strong>3개 토폴로지를 토글</strong>하며 동일한 정렬 규칙이 어떻게 적용되는지 확인하실 수 있습니다. 모든 토폴로지가 <code style="background:#F1F5F9;padding:2px 6px;border-radius:3px;color:var(--chon-orange-dark);">sortOrder</code> 필드 하나로 통일.</p>
+    <div class="badge-row">
+      <span class="badge">v3</span>
+      <span class="badge">정렬 일반화</span>
+      <span class="badge purple">Clan (종친회)</span>
+      <span class="badge blue">Org (조직)</span>
+      <span class="badge green">Family (가족)</span>
+    </div>
+  </div>
+
+  <!-- ============================================
+       PRINCIPLE
+       ============================================ -->
+  <div class="principle-card">
+    <h2>🎯 통일된 정렬 원칙</h2>
+    <p><strong>같은 부모(상위 노드)를 공유하는 노드들 = 형제 그룹</strong>. 형제 그룹은 항상 <code>sortOrder</code> 오름차순으로 <strong>왼쪽 → 오른쪽</strong> 정렬됩니다.</p>
+
+    <table class="principle-table">
+      <thead>
+        <tr>
+          <th>토폴로지</th>
+          <th>"형제 그룹" 정의</th>
+          <th>정렬 기준</th>
+          <th>좌측 = 우선순위</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="fam">
+          <td><strong>👨‍👩‍👧 Family</strong></td>
+          <td>같은 부모의 자녀</td>
+          <td><code>birthOrder</code></td>
+          <td>맏이 → 막내</td>
+        </tr>
+        <tr class="clan">
+          <td><strong>🏛 Clan (종친회)</strong></td>
+          <td>같은 시조의 자손 (항렬별)</td>
+          <td><code>birthOrder</code> (항렬 내)</td>
+          <td>맏이 → 막내</td>
+        </tr>
+        <tr class="org">
+          <td><strong>🏢 Org (조직)</strong></td>
+          <td>같은 상사의 부하</td>
+          <td><code>rank</code> → <code>hireDate</code></td>
+          <td>상위직 / 선임자 → 후임</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="code-block">
+<span class="comment">// 통일된 정렬 함수 — 모든 토폴로지에서 재사용</span>
+<span class="keyword">function</span> sortSiblings(group, topology) {
+  <span class="keyword">return</span> [...group].sort((a, b) =&gt; {
+    <span class="keyword">if</span> (topology === <span class="string">'org'</span>) {
+      <span class="comment">// 1) 직급 순서, 2) 입사일 순서</span>
+      <span class="keyword">const</span> rankDiff = (a.<span class="field">rankLevel</span> || 99) - (b.<span class="field">rankLevel</span> || 99);
+      <span class="keyword">if</span> (rankDiff !== 0) <span class="keyword">return</span> rankDiff;
+      <span class="keyword">return</span> (a.<span class="field">hireDate</span> || <span class="string">'9999'</span>).localeCompare(b.<span class="field">hireDate</span> || <span class="string">'9999'</span>);
+    }
+    <span class="comment">// family / clan: birthOrder만 사용</span>
+    <span class="keyword">return</span> (a.<span class="field">sortOrder</span> || 999) - (b.<span class="field">sortOrder</span> || 999);
+  });
+}</div>
+  </div>
+
+  <!-- ============================================
+       TOPOLOGY TABS
+       ============================================ -->
+  <div class="topology-tabs">
+    <button class="topology-tab fam active" onclick="switchTopology('fam')">
+      <span class="tt-icon">👨‍👩‍👧</span>
+      <span>Family (가족)</span>
+    </button>
+    <button class="topology-tab clan" onclick="switchTopology('clan')">
+      <span class="tt-icon">🏛</span>
+      <span>Clan (종친회)</span>
+    </button>
+    <button class="topology-tab org" onclick="switchTopology('org')">
+      <span class="tt-icon">🏢</span>
+      <span>Org (조직도)</span>
+    </button>
+  </div>
+
+  <!-- ============================================
+       FAMILY VIZ
+       ============================================ -->
+  <div class="viz-section active" id="vizFam">
+    <div class="viz-header">
+      <div class="viz-title">
+        <span>👨‍👩‍👧</span>
+        <span>Family — 출생 순서 정렬</span>
+      </div>
+      <div class="sort-toggle">
+        <button class="active" onclick="toggleFamSort(this, 'sorted')">정렬 ON</button>
+        <button onclick="toggleFamSort(this, 'unsorted')">정렬 OFF</button>
+      </div>
+    </div>
+    <div class="viz-info">
+      <strong>아버지가 셋째</strong>, <strong>나도 셋째</strong>인 경우 예시. 같은 부모의 자녀들은 출생 순서대로 좌→우 정렬됩니다.
+    </div>
+
+    <div class="viz-canvas">
+      <svg id="famSvg" viewBox="0 0 700 350"></svg>
+    </div>
+
+    <div class="sort-rule">
+      <span class="sr-icon">📐</span>
+      <div>
+        <strong>가족 정렬 규칙</strong>
+        같은 부모(<code>parentId</code>가 같은) 노드들 = 형제 그룹 → <code>birthOrder</code> 오름차순 좌→우 정렬<br>
+        예: 큰아버지(1) → 작은아버지(2) → 아버지(3) → 고모(4)
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       CLAN VIZ
+       ============================================ -->
+  <div class="viz-section" id="vizClan">
+    <div class="viz-header">
+      <div class="viz-title">
+        <span>🏛</span>
+        <span>Clan — 항렬 × 출생 순서</span>
+      </div>
+      <div class="sort-toggle">
+        <button class="active" onclick="toggleClanSort(this, 'sorted')">정렬 ON</button>
+        <button onclick="toggleClanSort(this, 'unsorted')">정렬 OFF</button>
+      </div>
+    </div>
+    <div class="viz-info">
+      <strong>김씨 종친회</strong> 예시. 항렬(세대)이 같은 사람들끼리 모이며, 각 항렬 내에서 다시 출생 순서로 정렬.<br>
+      <strong>항렬</strong> = 같은 세대의 종친에게 사용되는 한자 (예: 광(光)·진(振)·수(秀)).
+    </div>
+
+    <div class="viz-canvas">
+      <svg id="clanSvg" viewBox="0 0 700 380"></svg>
+    </div>
+
+    <div class="sort-rule">
+      <span class="sr-icon">📐</span>
+      <div>
+        <strong>종친회 정렬 규칙 (2단계)</strong>
+        <code>generation</code> (항렬) 그룹화 → 각 항렬 내 <code>birthOrder</code>로 좌→우 정렬<br>
+        예: 광(光) 항렬 → 김광수(1), 김광호(2), 김광민(3) | 진(振) 항렬 → 김진수(1), 김진호(2)
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       ORG VIZ
+       ============================================ -->
+  <div class="viz-section" id="vizOrg">
+    <div class="viz-header">
+      <div class="viz-title">
+        <span>🏢</span>
+        <span>Org — 직급 × 입사일 정렬</span>
+      </div>
+      <div class="sort-toggle">
+        <button class="active" onclick="toggleOrgSort(this, 'sorted')">정렬 ON</button>
+        <button onclick="toggleOrgSort(this, 'unsorted')">정렬 OFF</button>
+      </div>
+    </div>
+    <div class="viz-info">
+      <strong>개발팀</strong> 예시. 같은 상사를 가진 동료들은 <strong>직급 순서</strong> 우선, 같은 직급 내에서는 <strong>입사일 순서</strong>로 정렬.
+    </div>
+
+    <div class="viz-canvas">
+      <svg id="orgSvg" viewBox="0 0 700 400"></svg>
+    </div>
+
+    <div class="sort-rule">
+      <span class="sr-icon">📐</span>
+      <div>
+        <strong>조직 정렬 규칙 (2단계)</strong>
+        같은 <code>managerId</code> 그룹화 → 1차 <code>rankLevel</code> (높을수록 왼쪽), 2차 <code>hireDate</code> (이를수록 왼쪽)<br>
+        예: 시니어(2022) → 시니어(2023) → 미들(2021) → 미들(2024) → 주니어(2024)
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       Data Model
+       ============================================ -->
+  <div class="principle-card">
+    <h2>💾 통일된 데이터 모델</h2>
+    <p>모든 토폴로지의 노드가 공통 인터페이스를 따릅니다. 토폴로지별 추가 필드만 다름:</p>
+
+    <div class="code-block">
+<span class="keyword">interface</span> <span class="field">SortableNode</span> {
+  <span class="comment">// 공통 필드 (모든 토폴로지)</span>
+  <span class="field">id</span>: <span class="string">string</span>;
+  <span class="field">name</span>: <span class="string">string</span>;
+  <span class="field">parentId</span>?: <span class="string">string</span>;       <span class="comment">// 상위 노드 (이를 공유하면 형제)</span>
+  <span class="field">sortOrder</span>: <span class="string">number</span>;       <span class="comment">// 형제 그룹 내 정렬 (1, 2, 3...)</span>
+
+  <span class="comment">// Family</span>
+  <span class="field">birthOrder</span>?: <span class="string">number</span>;     <span class="comment">// = sortOrder 별명</span>
+
+  <span class="comment">// Clan (종친회)</span>
+  <span class="field">generation</span>?: <span class="string">number</span>;     <span class="comment">// 항렬 (위에서부터 0, 1, 2...)</span>
+  <span class="field">generationName</span>?: <span class="string">string</span>;  <span class="comment">// "광", "진" 등 항렬자</span>
+
+  <span class="comment">// Org</span>
+  <span class="field">rankLevel</span>?: <span class="string">number</span>;      <span class="comment">// 직급 (1=대표, 2=임원, 3=팀장, 4=시니어...)</span>
+  <span class="field">rankName</span>?: <span class="string">string</span>;       <span class="comment">// "팀장", "시니어 개발자" 등</span>
+  <span class="field">hireDate</span>?: <span class="string">string</span>;       <span class="comment">// ISO date (입사일)</span>
+  <span class="field">managerId</span>?: <span class="string">string</span>;      <span class="comment">// = parentId 별명</span>
+}</div>
+
+    <p style="margin-top: 16px;"><strong>핵심 통찰</strong>: 가족의 <code>birthOrder</code>, 종친회의 <code>generation+birthOrder</code>, 조직의 <code>rankLevel+hireDate</code>는 모두 <strong>"같은 상위 노드 아래에서 어떻게 형제들을 정렬할 것인가"</strong>라는 동일한 문제의 답입니다.</p>
+  </div>
+
+  <div class="principle-card" style="border-left-color: var(--clan-purple-dark);">
+    <h2>🔄 토폴로지 간 변환 일관성</h2>
+    <p>같은 사람이 여러 토폴로지에 속할 때 정렬 규칙은 각각 독립적으로 적용됩니다:</p>
+    <ul style="font-size: 13px; color: var(--text-secondary); line-height: 1.8;">
+      <li><strong>김광수</strong> (가족에선 부모의 셋째 자녀) ← <code>birthOrder=3</code></li>
+      <li><strong>김광수</strong> (종친회에선 광 항렬의 둘째) ← <code>generation+birthOrder=(2,2)</code></li>
+      <li><strong>김광수</strong> (회사에선 팀장) ← <code>rankLevel=3</code></li>
+    </ul>
+    <p>→ <strong>한 사람의 sortOrder가 토폴로지별로 독립</strong>이므로, 같은 노드가 다른 그래프에서 다른 위치에 표시됩니다. 자연스러운 컨텍스트 적응.</p>
+  </div>
+
+  <!-- ============================================
+       Next Steps
+       ============================================ -->
+  <div class="principle-card" style="border-left-color: var(--org-green-dark);">
+    <h2>⏭️ 다음 단계</h2>
+    <ul style="font-size: 13px; color: var(--text-secondary); line-height: 1.8;">
+      <li><strong>DESIGN.md v6 §6.10</strong>에 <code>SortableNode</code> 인터페이스 정식 반영</li>
+      <li><strong>DB 스키마</strong>: <code>sort_order INTEGER</code>, <code>generation INTEGER</code>, <code>rank_level INTEGER</code> 필드 추가</li>
+      <li><strong>Memgraph 쿼리</strong>: <code>ORDER BY sort_order ASC</code> 자동 추가</li>
+      <li><strong>Drag & Drop</strong>으로 직관적 순서 변경 (모든 토폴로지)</li>
+      <li><strong>토폴로지별 알고리즘</strong>: 가족=평면, 종친회=방사형, 조직=계층 트리</li>
+    </ul>
+  </div>
+
+</div>
+
+<script>
+// ============================================================
+// Sample Data
+// ============================================================
+
+// FAMILY data — 아버지 셋째, 나 셋째
+const famData = {
+  generations: [
+    {
+      yLevel: 50,
+      label: '조부모',
+      members: [
+        { id: 'gpa', name: '할아버지', gender: 'male', parentId: null, sortOrder: 2 },
+        { id: 'gma', name: '할머니', gender: 'female', parentId: null, sortOrder: 0, isInLaw: true }
+      ]
+    },
+    {
+      yLevel: 150,
+      label: '부모',
+      members: [
+        { id: 'uncle1', name: '큰아버지', gender: 'male', parentId: 'gpa', sortOrder: 1 },
+        { id: 'aunt1', name: '고모', gender: 'female', parentId: 'gpa', sortOrder: 2 },
+        { id: 'dad', name: '아버지', gender: 'male', parentId: 'gpa', sortOrder: 3, isMe: false },
+        { id: 'mom', name: '어머니', gender: 'female', parentId: null, sortOrder: 0, isInLaw: true }
+      ]
+    },
+    {
+      yLevel: 270,
+      label: '나의 세대',
+      members: [
+        { id: 'sib1', name: '큰형', gender: 'male', parentId: 'dad', sortOrder: 1 },
+        { id: 'sib2', name: '누나', gender: 'female', parentId: 'dad', sortOrder: 2 },
+        { id: 'me', name: '나', gender: 'female', parentId: 'dad', sortOrder: 3, isMe: true },
+        { id: 'sib3', name: '남동생', gender: 'male', parentId: 'dad', sortOrder: 4 }
+      ]
+    }
+  ]
+};
+
+// CLAN data — 김씨 종친회, 3개 항렬
+const clanData = {
+  generations: [
+    {
+      yLevel: 50,
+      label: '시조',
+      generationName: '시조',
+      members: [
+        { id: 'founder', name: '김시조', generation: 0, sortOrder: 1 }
+      ]
+    },
+    {
+      yLevel: 150,
+      label: '광(光) 항렬',
+      generationName: '광',
+      members: [
+        { id: 'k_g1', name: '김광수', generation: 1, sortOrder: 1, parentId: 'founder' },
+        { id: 'k_g2', name: '김광호', generation: 1, sortOrder: 2, parentId: 'founder' },
+        { id: 'k_g3', name: '김광민', generation: 1, sortOrder: 3, parentId: 'founder' }
+      ]
+    },
+    {
+      yLevel: 250,
+      label: '진(振) 항렬',
+      generationName: '진',
+      members: [
+        { id: 'k_j1', name: '김진수', generation: 2, sortOrder: 1, parentId: 'k_g1' },
+        { id: 'k_j2', name: '김진호', generation: 2, sortOrder: 2, parentId: 'k_g1' },
+        { id: 'k_j3', name: '김진영', generation: 2, sortOrder: 1, parentId: 'k_g2' },
+        { id: 'k_j4', name: '김진우', generation: 2, sortOrder: 1, parentId: 'k_g3' }
+      ]
+    },
+    {
+      yLevel: 350,
+      label: '수(秀) 항렬',
+      generationName: '수',
+      members: [
+        { id: 'k_s1', name: '김수민', generation: 3, sortOrder: 1, parentId: 'k_j1' },
+        { id: 'k_s2', name: '김수영', generation: 3, sortOrder: 2, parentId: 'k_j1' },
+        { id: 'k_s3', name: '김수진', generation: 3, sortOrder: 1, parentId: 'k_j3' }
+      ]
+    }
+  ]
+};
+
+// ORG data — 회사 조직도, 3개 레벨
+const orgData = {
+  levels: [
+    {
+      yLevel: 50,
+      members: [
+        { id: 'ceo', name: '대표이사', rankName: '대표', rankLevel: 1, hireDate: '2018-01-01', parentId: null }
+      ]
+    },
+    {
+      yLevel: 150,
+      members: [
+        { id: 'cto', name: 'CTO 박철수', rankName: 'CTO', rankLevel: 2, hireDate: '2019-03-15', parentId: 'ceo' },
+        { id: 'coo', name: 'COO 김영희', rankName: 'COO', rankLevel: 2, hireDate: '2020-06-01', parentId: 'ceo' }
+      ]
+    },
+    {
+      yLevel: 250,
+      members: [
+        // Under CTO
+        { id: 'tl1', name: '팀장 이수민', rankName: '팀장', rankLevel: 3, hireDate: '2020-02-01', parentId: 'cto' },
+        { id: 'tl2', name: '팀장 정태호', rankName: '팀장', rankLevel: 3, hireDate: '2021-09-15', parentId: 'cto' },
+        // Under COO
+        { id: 'tl3', name: '팀장 최서연', rankName: '팀장', rankLevel: 3, hireDate: '2020-11-01', parentId: 'coo' }
+      ]
+    },
+    {
+      yLevel: 350,
+      members: [
+        // Under tl1 — mix of ranks
+        { id: 'd1', name: '시니어 한지영', rankName: '시니어', rankLevel: 4, hireDate: '2022-03-01', parentId: 'tl1' },
+        { id: 'd2', name: '시니어 윤재현', rankName: '시니어', rankLevel: 4, hireDate: '2023-01-15', parentId: 'tl1' },
+        { id: 'd3', name: '미들 조민준', rankName: '미들', rankLevel: 5, hireDate: '2021-08-01', parentId: 'tl1' },
+        { id: 'd4', name: '미들 강혜린', rankName: '미들', rankLevel: 5, hireDate: '2024-02-01', parentId: 'tl1' },
+        { id: 'd5', name: '주니어 임서준', rankName: '주니어', rankLevel: 6, hireDate: '2024-09-01', parentId: 'tl1' }
+      ]
+    }
+  ]
+};
+
+// ============================================================
+// Topology switching
+// ============================================================
+let famSorted = true;
+let clanSorted = true;
+let orgSorted = true;
+
+function switchTopology(t) {
+  document.querySelectorAll('.topology-tab').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.topology-tab.${t}`).classList.add('active');
+  document.querySelectorAll('.viz-section').forEach(s => s.classList.remove('active'));
+  const vmap = { fam: 'vizFam', clan: 'vizClan', org: 'vizOrg' };
+  document.getElementById(vmap[t]).classList.add('active');
+  if (t === 'fam') renderFam();
+  if (t === 'clan') renderClan();
+  if (t === 'org') renderOrg();
+}
+
+function toggleFamSort(btn, mode) {
+  btn.parentElement.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  famSorted = (mode === 'sorted');
+  renderFam();
+}
+
+function toggleClanSort(btn, mode) {
+  btn.parentElement.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  clanSorted = (mode === 'sorted');
+  renderClan();
+}
+
+function toggleOrgSort(btn, mode) {
+  btn.parentElement.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  orgSorted = (mode === 'sorted');
+  renderOrg();
+}
+
+// ============================================================
+// Sort utilities
+// ============================================================
+function sortByOrder(arr) {
+  return [...arr].sort((a, b) => (a.sortOrder || 999) - (b.sortOrder || 999));
+}
+
+function sortByRankAndHire(arr) {
+  return [...arr].sort((a, b) => {
+    const r = (a.rankLevel || 99) - (b.rankLevel || 99);
+    if (r !== 0) return r;
+    return (a.hireDate || '9999').localeCompare(b.hireDate || '9999');
+  });
+}
+
+function shuffleForUnsorted(arr) {
+  // Reverse order to clearly show "unsorted" looks wrong
+  return [...arr].reverse();
+}
+
+// ============================================================
+// SVG drawing primitives
+// ============================================================
+const NS = 'http://www.w3.org/2000/svg';
+
+function clearSvg(svg) {
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+}
+
+function drawGenLabel(svg, x, y, text, color) {
+  const t = document.createElementNS(NS, 'text');
+  t.setAttribute('x', x);
+  t.setAttribute('y', y);
+  t.setAttribute('font-size', '10');
+  t.setAttribute('font-weight', '800');
+  t.setAttribute('fill', color);
+  t.textContent = text;
+  svg.appendChild(t);
+}
+
+function drawDividerLine(svg, x1, x2, y, color) {
+  const line = document.createElementNS(NS, 'line');
+  line.setAttribute('x1', x1);
+  line.setAttribute('x2', x2);
+  line.setAttribute('y1', y);
+  line.setAttribute('y2', y);
+  line.setAttribute('stroke', color);
+  line.setAttribute('stroke-width', '1');
+  line.setAttribute('stroke-dasharray', '3 4');
+  svg.appendChild(line);
+}
+
+function drawNode(svg, x, y, w, h, opts) {
+  const g = document.createElementNS(NS, 'g');
+  g.classList.add('v-node-group');
+
+  // Optional order pill (top-left)
+  if (opts.orderText) {
+    const pillW = 22, pillH = 12;
+    const rect = document.createElementNS(NS, 'rect');
+    rect.setAttribute('x', x - w/2 - 4);
+    rect.setAttribute('y', y - h/2 - 4);
+    rect.setAttribute('width', pillW);
+    rect.setAttribute('height', pillH);
+    rect.setAttribute('rx', 6);
+    rect.setAttribute('fill', opts.orderColor || '#6366F1');
+    rect.setAttribute('stroke', 'white');
+    rect.setAttribute('stroke-width', '1.5');
+    g.appendChild(rect);
+
+    const t = document.createElementNS(NS, 'text');
+    t.setAttribute('x', x - w/2 - 4 + pillW/2);
+    t.setAttribute('y', y - h/2 - 4 + pillH/2 + 3);
+    t.setAttribute('text-anchor', 'middle');
+    t.setAttribute('font-size', '8');
+    t.setAttribute('font-weight', '900');
+    t.setAttribute('fill', 'white');
+    t.textContent = opts.orderText;
+    g.appendChild(t);
+  }
+
+  const rect = document.createElementNS(NS, 'rect');
+  rect.setAttribute('x', x - w/2);
+  rect.setAttribute('y', y - h/2);
+  rect.setAttribute('width', w);
+  rect.setAttribute('height', h);
+  rect.setAttribute('rx', 8);
+  rect.setAttribute('fill', opts.fill);
+  rect.setAttribute('stroke', opts.stroke);
+  rect.setAttribute('stroke-width', opts.strokeWidth || 1.5);
+  if (opts.dashed) rect.setAttribute('stroke-dasharray', '3 2');
+  g.appendChild(rect);
+
+  const t = document.createElementNS(NS, 'text');
+  t.setAttribute('x', x);
+  t.setAttribute('y', y + 4);
+  t.setAttribute('text-anchor', 'middle');
+  t.setAttribute('font-size', '10');
+  t.setAttribute('font-weight', opts.bold ? '900' : '700');
+  t.setAttribute('fill', opts.textColor || '#1F1F1F');
+  t.setAttribute('pointer-events', 'none');
+  t.textContent = opts.label.length > 7 ? opts.label.substring(0, 6) + '…' : opts.label;
+  g.appendChild(t);
+
+  // Optional sub-label
+  if (opts.subLabel) {
+    const st = document.createElementNS(NS, 'text');
+    st.setAttribute('x', x);
+    st.setAttribute('y', y + h/2 + 11);
+    st.setAttribute('text-anchor', 'middle');
+    st.setAttribute('font-size', '8');
+    st.setAttribute('font-weight', '700');
+    st.setAttribute('fill', '#64748B');
+    st.setAttribute('pointer-events', 'none');
+    st.textContent = opts.subLabel;
+    g.appendChild(st);
+  }
+
+  svg.appendChild(g);
+}
+
+function drawArrow(svg, fromX, fromY, toX, toY, color) {
+  const line = document.createElementNS(NS, 'path');
+  const midY = (fromY + toY) / 2;
+  const d = `M ${fromX} ${fromY + 15} L ${fromX} ${midY} L ${toX} ${midY} L ${toX} ${toY - 15}`;
+  line.setAttribute('d', d);
+  line.setAttribute('fill', 'none');
+  line.setAttribute('stroke', color || '#94A3B8');
+  line.setAttribute('stroke-width', '1.2');
+  line.setAttribute('stroke-linejoin', 'round');
+  svg.appendChild(line);
+}
+
+function drawHorizSiblingArrow(svg, fromX, toX, y, color, label) {
+  const arrow = document.createElementNS(NS, 'g');
+  const line = document.createElementNS(NS, 'path');
+  line.setAttribute('d', `M ${fromX} ${y} L ${toX} ${y}`);
+  line.setAttribute('stroke', color);
+  line.setAttribute('stroke-width', '2');
+  line.setAttribute('fill', 'none');
+  line.setAttribute('marker-end', 'url(#arrowhead)');
+  arrow.appendChild(line);
+
+  if (label) {
+    const t = document.createElementNS(NS, 'text');
+    t.setAttribute('x', (fromX + toX) / 2);
+    t.setAttribute('y', y - 4);
+    t.setAttribute('text-anchor', 'middle');
+    t.setAttribute('font-size', '9');
+    t.setAttribute('font-weight', '700');
+    t.setAttribute('fill', color);
+    t.textContent = label;
+    arrow.appendChild(t);
+  }
+  svg.appendChild(arrow);
+}
+
+function addArrowMarker(svg, color) {
+  const defs = document.createElementNS(NS, 'defs');
+  const marker = document.createElementNS(NS, 'marker');
+  marker.setAttribute('id', 'arrowhead');
+  marker.setAttribute('viewBox', '0 0 10 10');
+  marker.setAttribute('refX', '8');
+  marker.setAttribute('refY', '5');
+  marker.setAttribute('markerWidth', '6');
+  marker.setAttribute('markerHeight', '6');
+  marker.setAttribute('orient', 'auto');
+  const path = document.createElementNS(NS, 'path');
+  path.setAttribute('d', 'M 0 0 L 10 5 L 0 10 z');
+  path.setAttribute('fill', color);
+  marker.appendChild(path);
+  defs.appendChild(marker);
+  svg.appendChild(defs);
+}
+
+// ============================================================
+// RENDER FAMILY
+// ============================================================
+function renderFam() {
+  const svg = document.getElementById('famSvg');
+  clearSvg(svg);
+  addArrowMarker(svg, '#F7931E');
+
+  const nodeW = 56, nodeH = 30;
+  const positions = {};
+
+  famData.generations.forEach(gen => {
+    // Group members by parentId (siblings)
+    const groups = new Map();
+    gen.members.forEach(m => {
+      const key = m.parentId || '__null__';
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(m);
+    });
+
+    // Determine x positions for each group
+    let xCursor = 80;
+    groups.forEach((members, parentKey) => {
+      const sorted = famSorted ? sortByOrder(members) : shuffleForUnsorted(members);
+      sorted.forEach(m => {
+        positions[m.id] = { x: xCursor, y: gen.yLevel };
+        xCursor += 68;
+      });
+      xCursor += 24; // gap between groups
+    });
+
+    // Generation label
+    drawGenLabel(svg, 12, gen.yLevel - 22, gen.label, '#F7931E');
+    drawDividerLine(svg, 12, 690, gen.yLevel - 30, '#E2E8F0');
+  });
+
+  // Edges
+  famData.generations.forEach(gen => {
+    gen.members.forEach(m => {
+      if (m.parentId && positions[m.parentId]) {
+        drawArrow(svg, positions[m.parentId].x, positions[m.parentId].y, positions[m.id].x, positions[m.id].y, '#F7931E');
+      }
+    });
+  });
+
+  // Nodes
+  famData.generations.forEach(gen => {
+    gen.members.forEach(m => {
+      const pos = positions[m.id];
+      const isInLaw = m.isInLaw;
+      const fill = m.isMe ? '#FFFFFF' : (m.gender === 'male' ? '#A8D5F2' : '#F5C2CC');
+      const stroke = m.isMe ? '#F7931E' : (m.gender === 'male' ? '#6FA8DC' : '#E89BAA');
+
+      // Compute order text (only if has siblings)
+      let orderText = '';
+      if (famSorted && !isInLaw && m.sortOrder > 0) {
+        const sibs = famData.generations.flatMap(g => g.members).filter(x => x.parentId === m.parentId && !x.isInLaw);
+        if (sibs.length > 1) orderText = `${m.sortOrder}`;
+      }
+
+      drawNode(svg, pos.x, pos.y, nodeW, nodeH, {
+        label: m.name,
+        fill, stroke,
+        strokeWidth: m.isMe ? 2.5 : 1.5,
+        bold: m.isMe,
+        textColor: m.isMe ? '#F7931E' : '#1F1F1F',
+        dashed: isInLaw,
+        orderText,
+        orderColor: '#6366F1'
+      });
+    });
+  });
+
+  // Show sorting arrow at top
+  if (famSorted) {
+    drawHorizSiblingArrow(svg, 130, 380, 200, '#6366F1', '맏이 → 막내');
+  }
+}
+
+// ============================================================
+// RENDER CLAN
+// ============================================================
+function renderClan() {
+  const svg = document.getElementById('clanSvg');
+  clearSvg(svg);
+  addArrowMarker(svg, '#8B5CF6');
+
+  const nodeW = 56, nodeH = 30;
+  const positions = {};
+
+  clanData.generations.forEach(gen => {
+    // Group by parentId (within same generation)
+    const groups = new Map();
+    gen.members.forEach(m => {
+      const key = m.parentId || '__root__';
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(m);
+    });
+
+    // Position each group
+    let xCursor = 80;
+    if (gen.generation === 0 || !gen.members[0].parentId) {
+      // root level — center
+      gen.members.forEach((m, i) => {
+        positions[m.id] = { x: 350, y: gen.yLevel };
+      });
+    } else {
+      groups.forEach((members, parentKey) => {
+        const sorted = clanSorted ? sortByOrder(members) : shuffleForUnsorted(members);
+        // Center under parent
+        const parentX = positions[parentKey]?.x || xCursor;
+        const totalW = (sorted.length - 1) * 68;
+        sorted.forEach((m, i) => {
+          positions[m.id] = { x: parentX - totalW/2 + i * 68, y: gen.yLevel };
+        });
+        xCursor += sorted.length * 68 + 20;
+      });
+    }
+
+    // Generation label with hangul
+    drawGenLabel(svg, 12, gen.yLevel - 22, gen.label, '#8B5CF6');
+    drawDividerLine(svg, 12, 690, gen.yLevel - 30, '#DDD6FE');
+  });
+
+  // Edges
+  clanData.generations.forEach(gen => {
+    gen.members.forEach(m => {
+      if (m.parentId && positions[m.parentId]) {
+        drawArrow(svg, positions[m.parentId].x, positions[m.parentId].y, positions[m.id].x, positions[m.id].y, '#A78BFA');
+      }
+    });
+  });
+
+  // Nodes
+  clanData.generations.forEach(gen => {
+    gen.members.forEach(m => {
+      const pos = positions[m.id];
+      const isFounder = m.generation === 0;
+
+      let orderText = '';
+      if (clanSorted && m.sortOrder > 0) {
+        const sibs = gen.members.filter(x => x.parentId === m.parentId);
+        if (sibs.length > 1) orderText = `${m.sortOrder}`;
+      }
+
+      drawNode(svg, pos.x, pos.y, nodeW, nodeH, {
+        label: m.name,
+        fill: isFounder ? '#FCD34D' : '#C4B5FD',
+        stroke: isFounder ? '#D97706' : '#8B5CF6',
+        strokeWidth: isFounder ? 2.5 : 1.5,
+        bold: isFounder,
+        orderText,
+        orderColor: '#8B5CF6'
+      });
+    });
+  });
+
+  if (clanSorted) {
+    drawHorizSiblingArrow(svg, 130, 320, 130, '#8B5CF6', '항렬 내 맏이 → 막내');
+  }
+}
+
+// ============================================================
+// RENDER ORG
+// ============================================================
+function renderOrg() {
+  const svg = document.getElementById('orgSvg');
+  clearSvg(svg);
+  addArrowMarker(svg, '#2563EB');
+
+  const nodeW = 76, nodeH = 32;
+  const positions = {};
+
+  orgData.levels.forEach((level, levelIdx) => {
+    // Group by manager (parentId)
+    const groups = new Map();
+    level.members.forEach(m => {
+      const key = m.parentId || '__root__';
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(m);
+    });
+
+    if (levelIdx === 0) {
+      level.members.forEach(m => {
+        positions[m.id] = { x: 350, y: level.yLevel };
+      });
+    } else {
+      // For each manager, sort their reports by rank+hireDate
+      let usedX = new Set();
+      groups.forEach((members, mgrId) => {
+        const sorted = orgSorted ? sortByRankAndHire(members) : shuffleForUnsorted(members);
+        const mgrX = positions[mgrId]?.x || 350;
+        const totalW = (sorted.length - 1) * 88;
+        sorted.forEach((m, i) => {
+          let x = mgrX - totalW/2 + i * 88;
+          // Avoid overlap with sibling groups
+          while (usedX.has(Math.round(x))) x += 10;
+          usedX.add(Math.round(x));
+          positions[m.id] = { x, y: level.yLevel };
+        });
+      });
+    }
+  });
+
+  // Background labels for ranks (left side)
+  const rankNames = { 1: '대표', 2: '임원', 3: '팀장', 4: '시니어/미들/주니어' };
+  orgData.levels.forEach((level, i) => {
+    drawGenLabel(svg, 12, level.yLevel - 22, `L${i+1}`, '#2563EB');
+    drawDividerLine(svg, 12, 690, level.yLevel - 30, '#BFDBFE');
+  });
+
+  // Edges
+  orgData.levels.forEach(level => {
+    level.members.forEach(m => {
+      if (m.parentId && positions[m.parentId]) {
+        drawArrow(svg, positions[m.parentId].x, positions[m.parentId].y, positions[m.id].x, positions[m.id].y, '#60A5FA');
+      }
+    });
+  });
+
+  // Nodes
+  orgData.levels.forEach(level => {
+    level.members.forEach(m => {
+      const pos = positions[m.id];
+
+      // Color by rank
+      const rankColors = {
+        1: { fill: '#FCA5A5', stroke: '#DC2626' },        // CEO
+        2: { fill: '#FCD34D', stroke: '#D97706' },        // C-level
+        3: { fill: '#A7F3D0', stroke: '#059669' },        // Team lead
+        4: { fill: '#A8D5F2', stroke: '#2563EB' },        // Senior
+        5: { fill: '#DBEAFE', stroke: '#3B82F6' },        // Mid
+        6: { fill: '#F1F5F9', stroke: '#94A3B8' }         // Junior
+      };
+      const colors = rankColors[m.rankLevel] || rankColors[6];
+
+      // Order pill shows rank level
+      let orderText = '';
+      if (orgSorted) {
+        const peers = orgData.levels.flatMap(l => l.members).filter(x => x.parentId === m.parentId);
+        if (peers.length > 1) {
+          const sortedPeers = sortByRankAndHire(peers);
+          const idx = sortedPeers.findIndex(p => p.id === m.id) + 1;
+          orderText = `${idx}`;
+        }
+      }
+
+      drawNode(svg, pos.x, pos.y, nodeW, nodeH, {
+        label: m.name,
+        subLabel: m.rankName + (m.hireDate ? ` · ${m.hireDate.substring(2, 4)}년` : ''),
+        fill: colors.fill,
+        stroke: colors.stroke,
+        strokeWidth: m.rankLevel <= 2 ? 2.5 : 1.5,
+        bold: m.rankLevel <= 2,
+        orderText,
+        orderColor: '#2563EB'
+      });
+    });
+  });
+
+  if (orgSorted) {
+    drawHorizSiblingArrow(svg, 130, 350, 380, '#2563EB', '상위직/선임자 → 후임');
+  }
+}
+
+// Initial render
+renderFam();
+renderClan();
+renderOrg();
+</script>
+
+</body>
+</html>

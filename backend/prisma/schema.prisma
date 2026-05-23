@@ -1,0 +1,282 @@
+// PASS Backend — Prisma Schema
+// P0~P4 통합 (Auth · Users · Contacts · Relations · Posts · Chat)
+// Dev: SQLite, Prod: MariaDB (datasource만 교체)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// P0 — Auth & Users
+// ============================================================
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  phone         String    @unique
+  phoneVerified Boolean   @default(false) @map("phone_verified")
+  status        String    @default("active") // active | suspended | deleted
+  name          String?
+  avatar        String?
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  lastLoginAt   DateTime? @map("last_login_at")
+
+  // Relations
+  refreshTokens     RefreshToken[]
+  devicePins        DevicePin[]
+  contactsOwned     ContactLink[]    @relation("ContactOwner")
+  contactsTargeted  ContactLink[]    @relation("ContactTarget")
+  relationsFrom     Relation[]       @relation("RelationFrom")
+  relationsTo       Relation[]       @relation("RelationTo")
+  posts             Post[]
+  postLikes         PostLike[]
+  postComments      PostComment[]
+  conversationsAsA  Conversation[]   @relation("ConvUserA")
+  conversationsAsB  Conversation[]   @relation("ConvUserB")
+  messages          Message[]
+  messageReads      MessageRead[]
+  userGraphs        UserGraph[]
+
+  @@index([phone])
+  @@index([status])
+  @@map("users")
+}
+
+/// SMS / Email OTP 발급·검증
+model AuthCode {
+  id          String    @id @default(cuid())
+  channel     String    // sms | email
+  target      String    // 전화번호 또는 이메일
+  codeHash    String    @map("code_hash") // 6자리 코드의 sha256 (평문 미저장)
+  purpose     String    @default("login") // login | register | reset_pin | phone_change
+  attempts    Int       @default(0)
+  maxAttempts Int       @default(5) @map("max_attempts")
+  expiresAt   DateTime  @map("expires_at")
+  consumedAt  DateTime? @map("consumed_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  ipAddress   String?   @map("ip_address")
+
+  @@index([target, expiresAt])
+  @@index([createdAt])
+  @@map("auth_codes")
+}
+
+/// Refresh Token — 디바이스 결속
+model RefreshToken {
+  id          String    @id @default(cuid())
+  userId      String    @map("user_id")
+  tokenHash   String    @unique @map("token_hash") // sha256 of refresh token
+  deviceId    String?   @map("device_id")
+  expiresAt   DateTime  @map("expires_at")
+  revokedAt   DateTime? @map("revoked_at")
+  lastUsedAt  DateTime? @map("last_used_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, revokedAt])
+  @@map("refresh_tokens")
+}
+
+/// Device 2FA PIN — 디바이스 단위로 PIN 저장 (bcrypt 해시)
+/// 동일 user가 여러 device를 가질 수 있음. PIN은 device별 별도.
+model DevicePin {
+  id          String    @id @default(cuid())
+  userId      String    @map("user_id")
+  deviceId    String    @map("device_id")
+  pinHash     String    @map("pin_hash") // bcrypt(pin)
+  failedTries Int       @default(0) @map("failed_tries")
+  lockedUntil DateTime? @map("locked_until")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, deviceId])
+  @@index([deviceId])
+  @@map("device_pins")
+}
+
+// ============================================================
+// P1 — Contacts (해시 기반 동기화)
+// ============================================================
+
+model ContactLink {
+  id           String    @id @default(cuid())
+  ownerId      String    @map("owner_user_id")
+  targetId     String?   @map("target_user_id") // null이면 미가입자
+  hashedPhone  String    @map("hashed_phone")   // sha256(E.164)
+  displayName  String?   @map("display_name")   // 주소록상 이름
+  invitedAt    DateTime? @map("invited_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  owner        User      @relation("ContactOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  target       User?     @relation("ContactTarget", fields: [targetId], references: [id], onDelete: SetNull)
+
+  @@unique([ownerId, hashedPhone])
+  @@index([targetId])
+  @@map("contact_links")
+}
+
+// ============================================================
+// P2 — Relations (가족·모임·학급)
+// ============================================================
+
+/// 모든 관계의 기반 — fromUser → toUser
+/// kind에 따라 의미가 다름
+model Relation {
+  id          String    @id @default(cuid())
+  fromUserId  String    @map("from_user_id")
+  toUserId    String    @map("to_user_id")
+  kind        String    // family | friend | class
+  /// family인 경우: tier (grandparents, parents, siblings, children, ...)
+  /// friend인 경우: hop (1 또는 2)
+  /// class인 경우: role (teacher, student, parent)
+  subtype     String?
+  /// family: rel 예) '아버지' '큰형'  / class: 출석번호 / friend: viaUserId
+  meta        String?   // JSON 문자열 (sqlite는 jsonb 미지원)
+  status      String    @default("pending") // pending | confirmed | rejected | revoked
+  birthOrder  Int?      @map("birth_order")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  confirmedAt DateTime? @map("confirmed_at")
+
+  from        User      @relation("RelationFrom", fields: [fromUserId], references: [id], onDelete: Cascade)
+  to          User      @relation("RelationTo",   fields: [toUserId],   references: [id], onDelete: Cascade)
+
+  @@unique([fromUserId, toUserId, kind])
+  @@index([toUserId, kind, status])
+  @@index([kind, subtype])
+  @@map("relations")
+}
+
+// ============================================================
+// P3 — Posts / Feed
+// ============================================================
+
+model Post {
+  id          String    @id @default(cuid())
+  authorId    String    @map("author_id")
+  content     String
+  imageUrl    String?   @map("image_url")
+  audience    String    @default("friends") // friends | extended (2-hop) | public
+  likeCount   Int       @default(0) @map("like_count")
+  commentCount Int      @default(0) @map("comment_count")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  author      User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  likes       PostLike[]
+  comments    PostComment[]
+
+  @@index([authorId, createdAt])
+  @@index([createdAt])
+  @@map("posts")
+}
+
+model PostLike {
+  id        String   @id @default(cuid())
+  postId    String   @map("post_id")
+  userId    String   @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId])
+  @@index([userId])
+  @@map("post_likes")
+}
+
+model PostComment {
+  id        String    @id @default(cuid())
+  postId    String    @map("post_id")
+  userId    String    @map("user_id")
+  content   String
+  createdAt DateTime  @default(now()) @map("created_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([postId, createdAt])
+  @@map("post_comments")
+}
+
+// ============================================================
+// P4 — Chat
+// ============================================================
+
+/// 1:1 대화방 — userAId < userBId 정렬 보장 (어플리케이션 레이어)
+model Conversation {
+  id          String    @id @default(cuid())
+  userAId     String    @map("user_a_id")
+  userBId     String    @map("user_b_id")
+  lastMessage String?   @map("last_message")
+  lastAt      DateTime? @map("last_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  userA       User      @relation("ConvUserA", fields: [userAId], references: [id], onDelete: Cascade)
+  userB       User      @relation("ConvUserB", fields: [userBId], references: [id], onDelete: Cascade)
+  messages    Message[]
+
+  @@unique([userAId, userBId])
+  @@index([userAId])
+  @@index([userBId])
+  @@map("conversations")
+}
+
+model Message {
+  id              String    @id @default(cuid())
+  conversationId  String    @map("conversation_id")
+  senderId        String    @map("sender_id")
+  text            String
+  createdAt       DateTime  @default(now()) @map("created_at")
+  deletedAt       DateTime? @map("deleted_at")
+
+  conversation    Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender          User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  reads           MessageRead[]
+
+  @@index([conversationId, createdAt])
+  @@index([senderId])
+  @@map("messages")
+}
+
+model MessageRead {
+  id          String    @id @default(cuid())
+  messageId   String    @map("message_id")
+  userId      String    @map("user_id")
+  readAt      DateTime  @default(now()) @map("read_at")
+
+  message     Message   @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, userId])
+  @@index([userId])
+  @@map("message_reads")
+}
+
+// ============================================================
+// 관계망 그래프 — 가계도(family) / 모임(group) / 학급(class)
+// 사용자별로 그래프 전체를 JSON 문서로 저장. 비가입 멤버(placeholder) 허용.
+// ============================================================
+model UserGraph {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  kind      String   // family | group | class
+  data      String   // JSON 문자열 (sqlite는 jsonb 미지원)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, kind])
+  @@map("user_graphs")
+}

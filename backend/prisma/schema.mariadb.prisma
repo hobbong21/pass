@@ -1,0 +1,258 @@
+// MariaDB 전환용 Prisma 스키마
+// 사용법: 운영 시 이 파일을 schema.prisma 로 교체 후 migrate
+//
+//   cp prisma/schema.mariadb.prisma prisma/schema.prisma
+//   npx prisma migrate dev --name init_mariadb
+//
+// 차이점 (SQLite 대비):
+//   - provider: mysql (MariaDB 10.11+ 호환)
+//   - String → @db.VarChar(N) / @db.Text 명시
+//   - JSON 메타는 그대로 String 유지 (운영 시 Json 타입 사용 가능)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// P0 — Auth & Users
+// ============================================================
+
+model User {
+  id            String    @id @default(cuid()) @db.VarChar(40)
+  email         String    @unique @db.VarChar(255)
+  phone         String    @unique @db.VarChar(20)
+  phoneVerified Boolean   @default(false) @map("phone_verified")
+  status        String    @default("active") @db.VarChar(20)
+  name          String?   @db.VarChar(100)
+  avatar        String?   @db.VarChar(255)
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  lastLoginAt   DateTime? @map("last_login_at")
+
+  refreshTokens     RefreshToken[]
+  devicePins        DevicePin[]
+  contactsOwned     ContactLink[]    @relation("ContactOwner")
+  contactsTargeted  ContactLink[]    @relation("ContactTarget")
+  relationsFrom     Relation[]       @relation("RelationFrom")
+  relationsTo       Relation[]       @relation("RelationTo")
+  posts             Post[]
+  postLikes         PostLike[]
+  postComments      PostComment[]
+  conversationsAsA  Conversation[]   @relation("ConvUserA")
+  conversationsAsB  Conversation[]   @relation("ConvUserB")
+  messages          Message[]
+  messageReads      MessageRead[]
+
+  @@index([phone])
+  @@index([status])
+  @@map("users")
+}
+
+model AuthCode {
+  id          String    @id @default(cuid()) @db.VarChar(40)
+  channel     String    @db.VarChar(10)
+  target      String    @db.VarChar(255)
+  codeHash    String    @map("code_hash") @db.VarChar(64)
+  purpose     String    @default("login") @db.VarChar(20)
+  attempts    Int       @default(0)
+  maxAttempts Int       @default(5) @map("max_attempts")
+  expiresAt   DateTime  @map("expires_at")
+  consumedAt  DateTime? @map("consumed_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  ipAddress   String?   @map("ip_address") @db.VarChar(45)
+
+  @@index([target, expiresAt])
+  @@index([createdAt])
+  @@map("auth_codes")
+}
+
+model RefreshToken {
+  id          String    @id @default(cuid()) @db.VarChar(40)
+  userId      String    @map("user_id") @db.VarChar(40)
+  tokenHash   String    @unique @map("token_hash") @db.VarChar(64)
+  deviceId    String?   @map("device_id") @db.VarChar(128)
+  expiresAt   DateTime  @map("expires_at")
+  revokedAt   DateTime? @map("revoked_at")
+  lastUsedAt  DateTime? @map("last_used_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, revokedAt])
+  @@map("refresh_tokens")
+}
+
+model DevicePin {
+  id          String    @id @default(cuid()) @db.VarChar(40)
+  userId      String    @map("user_id") @db.VarChar(40)
+  deviceId    String    @map("device_id") @db.VarChar(128)
+  pinHash     String    @map("pin_hash") @db.VarChar(255)
+  failedTries Int       @default(0) @map("failed_tries")
+  lockedUntil DateTime? @map("locked_until")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, deviceId])
+  @@index([deviceId])
+  @@map("device_pins")
+}
+
+// ============================================================
+// P1 — Contacts
+// ============================================================
+
+model ContactLink {
+  id           String    @id @default(cuid()) @db.VarChar(40)
+  ownerId      String    @map("owner_user_id") @db.VarChar(40)
+  targetId     String?   @map("target_user_id") @db.VarChar(40)
+  hashedPhone  String    @map("hashed_phone") @db.VarChar(64)
+  displayName  String?   @map("display_name") @db.VarChar(100)
+  invitedAt    DateTime? @map("invited_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  owner        User      @relation("ContactOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  target       User?     @relation("ContactTarget", fields: [targetId], references: [id], onDelete: SetNull)
+
+  @@unique([ownerId, hashedPhone])
+  @@index([targetId])
+  @@map("contact_links")
+}
+
+// ============================================================
+// P2 — Relations
+// ============================================================
+
+model Relation {
+  id          String    @id @default(cuid()) @db.VarChar(40)
+  fromUserId  String    @map("from_user_id") @db.VarChar(40)
+  toUserId    String    @map("to_user_id") @db.VarChar(40)
+  kind        String    @db.VarChar(20)
+  subtype     String?   @db.VarChar(40)
+  meta        Json?
+  status      String    @default("pending") @db.VarChar(20)
+  birthOrder  Int?      @map("birth_order")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  confirmedAt DateTime? @map("confirmed_at")
+
+  from        User      @relation("RelationFrom", fields: [fromUserId], references: [id], onDelete: Cascade)
+  to          User      @relation("RelationTo",   fields: [toUserId],   references: [id], onDelete: Cascade)
+
+  @@unique([fromUserId, toUserId, kind])
+  @@index([toUserId, kind, status])
+  @@index([kind, subtype])
+  @@map("relations")
+}
+
+// ============================================================
+// P3 — Posts / Feed
+// ============================================================
+
+model Post {
+  id           String    @id @default(cuid()) @db.VarChar(40)
+  authorId     String    @map("author_id") @db.VarChar(40)
+  content      String    @db.Text
+  imageUrl     String?   @map("image_url") @db.VarChar(500)
+  audience     String    @default("friends") @db.VarChar(20)
+  likeCount    Int       @default(0) @map("like_count")
+  commentCount Int       @default(0) @map("comment_count")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  deletedAt    DateTime? @map("deleted_at")
+
+  author       User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  likes        PostLike[]
+  comments     PostComment[]
+
+  @@index([authorId, createdAt])
+  @@index([createdAt])
+  @@map("posts")
+}
+
+model PostLike {
+  id        String   @id @default(cuid()) @db.VarChar(40)
+  postId    String   @map("post_id") @db.VarChar(40)
+  userId    String   @map("user_id") @db.VarChar(40)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId])
+  @@index([userId])
+  @@map("post_likes")
+}
+
+model PostComment {
+  id        String    @id @default(cuid()) @db.VarChar(40)
+  postId    String    @map("post_id") @db.VarChar(40)
+  userId    String    @map("user_id") @db.VarChar(40)
+  content   String    @db.Text
+  createdAt DateTime  @default(now()) @map("created_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([postId, createdAt])
+  @@map("post_comments")
+}
+
+// ============================================================
+// P4 — Chat
+// ============================================================
+
+model Conversation {
+  id          String    @id @default(cuid()) @db.VarChar(40)
+  userAId     String    @map("user_a_id") @db.VarChar(40)
+  userBId     String    @map("user_b_id") @db.VarChar(40)
+  lastMessage String?   @map("last_message") @db.VarChar(200)
+  lastAt      DateTime? @map("last_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  userA       User      @relation("ConvUserA", fields: [userAId], references: [id], onDelete: Cascade)
+  userB       User      @relation("ConvUserB", fields: [userBId], references: [id], onDelete: Cascade)
+  messages    Message[]
+
+  @@unique([userAId, userBId])
+  @@index([userAId])
+  @@index([userBId])
+  @@map("conversations")
+}
+
+model Message {
+  id              String    @id @default(cuid()) @db.VarChar(40)
+  conversationId  String    @map("conversation_id") @db.VarChar(40)
+  senderId        String    @map("sender_id") @db.VarChar(40)
+  text            String    @db.Text
+  createdAt       DateTime  @default(now()) @map("created_at")
+  deletedAt       DateTime? @map("deleted_at")
+
+  conversation    Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender          User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  reads           MessageRead[]
+
+  @@index([conversationId, createdAt])
+  @@index([senderId])
+  @@map("messages")
+}
+
+model MessageRead {
+  id          String    @id @default(cuid()) @db.VarChar(40)
+  messageId   String    @map("message_id") @db.VarChar(40)
+  userId      String    @map("user_id") @db.VarChar(40)
+  readAt      DateTime  @default(now()) @map("read_at")
+
+  message     Message   @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, userId])
+  @@index([userId])
+  @@map("message_reads")
+}

@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#FFA000">
+<title>PASS — 메인</title>
+<script src="pass-api.js"></script>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/static/pretendard.min.css" rel="stylesheet">
+<style>
+  :root {
+    --chon-orange: #FFA000;
+    --chon-orange-dark: #E87F0A;
+    --chon-orange-light: #FFC78A;
+    --chon-yellow: #FFC300;
+    --chon-yellow-soft: #FFF3D6;
+    --bg-app: #F8F9FB;
+    --bg-card: #FFFFFF;
+    --text-primary: #1F1F1F;
+    --text-secondary: #6B7280;
+    --text-tertiary: #9CA3AF;
+    --border-light: #F1F5F9;
+    --success: #10B981;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+    --shadow-md: 0 4px 14px rgba(0,0,0,0.08);
+    --shadow-lg: 0 10px 30px rgba(0,0,0,0.14);
+    --radius-sm: 8px;
+    --radius-md: 14px;
+    --radius-lg: 20px;
+    --radius-pill: 999px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --nav-h: 76px;
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg-app);
+    color: var(--text-primary);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ============================================
+     App Shell
+     ============================================ */
+  .app {
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+    background: var(--bg-app);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    box-shadow: 0 0 40px rgba(0,0,0,0.06);
+  }
+
+  @media (min-width: 768px) {
+    body { padding: 32px 0; }
+    .app {
+      border-radius: 28px;
+      overflow: hidden;
+      min-height: calc(100vh - 64px);
+      min-height: calc(100dvh - 64px);
+    }
+  }
+
+  /* ============================================
+     Header
+     ============================================ */
+  .app-header {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    background: var(--bg-app);
+    padding: calc(14px + var(--safe-top)) 20px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .brand-mark {
+    width: 36px; height: 36px;
+    border-radius: 11px;
+    background: linear-gradient(135deg, var(--chon-orange), #5BBA6F);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 16px;
+    letter-spacing: -0.5px;
+    box-shadow: var(--shadow-sm);
+  }
+  .brand-name {
+    font-size: 20px;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    color: var(--text-primary);
+  }
+  .brand-sub {
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-weight: 700;
+    margin-top: -2px;
+  }
+  .brand-text { line-height: 1.1; }
+  .icon-btn {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: white;
+    border: 1px solid var(--border-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 18px;
+    position: relative;
+    transition: background 0.15s;
+  }
+  .icon-btn:active { background: var(--bg-app); }
+  .icon-btn-dot {
+    position: absolute;
+    top: 8px; right: 10px;
+    width: 8px; height: 8px;
+    background: #DC2626;
+    border-radius: 50%;
+    border: 2px solid white;
+  }
+
+  /* ============================================
+     Content
+     ============================================ */
+  .content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0 16px calc(var(--nav-h) + var(--safe-bottom) + 16px);
+    -webkit-overflow-scrolling: touch;
+  }
+  .page { display: none; }
+  .page.active { display: block; animation: fadeIn 0.2s ease; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ============================================
+     Safety banner (보호 배너)
+     ============================================ */
+  .safety-banner {
+    background: white;
+    border: 1px solid var(--chon-orange-light);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .safety-icon {
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--chon-orange), var(--chon-orange-dark));
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .safety-text {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .safety-text strong { color: var(--chon-orange-dark); }
+
+  /* ============================================
+     Hero — CHON DID 트로피
+     ============================================ */
+  .hero-card {
+    background: linear-gradient(135deg, #FFB960 0%, #FFA000 60%, #E87F0A 100%);
+    border-radius: var(--radius-lg);
+    padding: 22px 22px 24px;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 12px;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(247, 147, 30, 0.28);
+    color: white;
+  }
+  .hero-card::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -50px;
+    width: 180px; height: 180px;
+    background: radial-gradient(circle, rgba(255,255,255,0.18) 0%, transparent 70%);
+  }
+  .hero-eyebrow {
+    font-size: 12px;
+    font-weight: 700;
+    opacity: 0.92;
+    margin-bottom: 6px;
+  }
+  .hero-title {
+    font-size: 22px;
+    font-weight: 900;
+    line-height: 1.2;
+    letter-spacing: -0.5px;
+    margin-bottom: 12px;
+    max-width: 60%;
+  }
+  .hero-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: white;
+    color: var(--chon-orange-dark);
+    padding: 8px 16px;
+    border-radius: var(--radius-pill);
+    font-size: 12px;
+    font-weight: 800;
+    box-shadow: var(--shadow-sm);
+  }
+  .hero-illust {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    font-size: 64px;
+    line-height: 1;
+    filter: drop-shadow(0 8px 16px rgba(0,0,0,0.2));
+  }
+
+  /* ============================================
+     Mutual Auth Card
+     ============================================ */
+  .feature-card {
+    background: white;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    padding: 18px 20px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    cursor: pointer;
+    transition: all 0.18s;
+  }
+  .feature-card:active { transform: scale(0.99); }
+  .feature-card:hover {
+    border-color: var(--chon-orange);
+    box-shadow: var(--shadow-md);
+  }
+  .feature-info { flex: 1; }
+  .feature-title {
+    font-size: 16px;
+    font-weight: 900;
+    margin-bottom: 4px;
+    letter-spacing: -0.3px;
+  }
+  .feature-desc {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.55;
+    font-weight: 500;
+  }
+  .feature-illust {
+    width: 64px; height: 64px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--chon-yellow-soft), var(--chon-orange-light));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    flex-shrink: 0;
+  }
+
+  /* ============================================
+     Section title
+     ============================================ */
+  .section-title {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--text-secondary);
+    margin: 22px 4px 12px;
+  }
+
+  /* ============================================
+     Quick action grid (4 icons)
+     ============================================ */
+  .quick-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .quick-btn {
+    background: white;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    padding: 14px 8px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.18s;
+    text-align: center;
+  }
+  .quick-btn:active { transform: scale(0.96); }
+  .quick-btn:hover {
+    border-color: var(--chon-orange);
+    background: var(--chon-yellow-soft);
+  }
+  .quick-icon {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    background: var(--chon-yellow-soft);
+    color: var(--chon-orange-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+  .quick-icon.bell { background: #FEE2E2; color: #DC2626; }
+  .quick-icon.contact { background: #DBEAFE; color: #2563EB; }
+  .quick-icon.user { background: #D1FAE5; color: var(--success); }
+  .quick-icon.doc { background: #EDE9FE; color: #7C3AED; }
+  .quick-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  /* ============================================
+     Status pill
+     ============================================ */
+  .status-pill {
+    background: linear-gradient(135deg, var(--chon-yellow-soft), white);
+    border: 1px solid var(--chon-orange-light);
+    border-radius: var(--radius-pill);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .status-icon {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: var(--success);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 900;
+    flex-shrink: 0;
+  }
+  .status-text {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .status-text strong { color: var(--chon-orange-dark); }
+
+  /* ============================================
+     Stats row
+     ============================================ */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .stat-card {
+    background: white;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    padding: 14px 8px;
+    text-align: center;
+  }
+  .stat-value {
+    font-size: 20px;
+    font-weight: 900;
+    line-height: 1;
+    color: var(--text-primary);
+  }
+  .stat-value.orange { color: var(--chon-orange-dark); }
+  .stat-value.green { color: var(--success); }
+  .stat-value.blue { color: #2563EB; }
+  .stat-label {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    font-weight: 700;
+    margin-top: 4px;
+  }
+
+  /* ============================================
+     Mode cards (가계도 / 모임 / 학급증)
+     ============================================ */
+  .mode-intro {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin: 0 4px 16px;
+    line-height: 1.6;
+  }
+  .mode-card {
+    background: white;
+    border: 1px solid var(--border-light);
+    border-left: 4px solid var(--chon-orange);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    transition: all 0.18s;
+  }
+  .mode-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+  }
+  .mode-card:active { transform: scale(0.99); }
+  .mode-card.family { border-left-color: var(--chon-orange); }
+  .mode-card.friend { border-left-color: #5BBA6F; }
+  .mode-card.classid { border-left-color: #2563EB; }
+
+  .mode-icon-wrap {
+    width: 56px; height: 56px;
+    border-radius: 16px;
+    background: var(--chon-yellow-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    flex-shrink: 0;
+  }
+  .mode-card.friend .mode-icon-wrap { background: #ECFDF5; }
+  .mode-card.classid .mode-icon-wrap { background: #DBEAFE; }
+
+  .mode-info { flex: 1; min-width: 0; }
+  .mode-title {
+    font-size: 16px;
+    font-weight: 900;
+    letter-spacing: -0.3px;
+    margin-bottom: 2px;
+  }
+  .mode-desc {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 8px;
+  }
+  .mode-stats {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  .mode-stats strong { color: var(--text-primary); margin-right: 2px; font-size: 12px; }
+  .mode-card.family .mode-stats strong { color: var(--chon-orange-dark); }
+  .mode-card.friend .mode-stats strong { color: #16A34A; }
+  .mode-card.classid .mode-stats strong { color: #2563EB; }
+
+  .mode-arrow {
+    color: var(--text-tertiary);
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+
+  /* ============================================
+     Recent activity
+     ============================================ */
+  .activity-item {
+    background: white;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .activity-item:hover { background: #FAFBFC; }
+  .activity-icon {
+    width: 38px; height: 38px;
+    border-radius: 11px;
+    background: var(--chon-yellow-soft);
+    color: var(--chon-orange-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .activity-icon.green { background: #D1FAE5; color: var(--success); }
+  .activity-icon.blue { background: #DBEAFE; color: #2563EB; }
+  .activity-info { flex: 1; min-width: 0; }
+  .activity-title {
+    font-size: 13px;
+    font-weight: 800;
+    margin-bottom: 2px;
+  }
+  .activity-meta {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    font-weight: 600;
+  }
+  .activity-tag {
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--success);
+    background: #D1FAE5;
+    padding: 3px 8px;
+    border-radius: var(--radius-pill);
+  }
+  .activity-tag.pending { color: var(--chon-orange-dark); background: var(--chon-yellow-soft); }
+
+  /* ============================================
+     Empty placeholder (for other tabs)
+     ============================================ */
+  .empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--text-tertiary);
+  }
+  .empty-state-icon { font-size: 64px; margin-bottom: 16px; }
+  .empty-state-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+  }
+  .empty-state-desc {
+    font-size: 13px;
+    color: var(--text-tertiary);
+    line-height: 1.6;
+  }
+
+  /* ============================================
+     Bottom Nav (Figma 스타일 — 중앙 강조)
+     ============================================ */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
+    background: white;
+    border-top: 1px solid var(--border-light);
+    padding: 8px 8px calc(8px + var(--safe-bottom));
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    align-items: end;
+    z-index: 40;
+    box-shadow: 0 -6px 24px rgba(0,0,0,0.05);
+  }
+  .nav-btn {
+    background: none;
+    border: none;
+    padding: 8px 4px 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--text-tertiary);
+    border-radius: 12px;
+    transition: color 0.15s;
+  }
+  .nav-btn-icon { font-size: 22px; line-height: 1; }
+  .nav-btn-label { font-size: 10px; font-weight: 800; }
+  .nav-btn.active { color: var(--chon-orange-dark); }
+
+  /* Center button — large prominent circle */
+  .nav-btn.center {
+    position: relative;
+    padding-top: 0;
+  }
+  .nav-btn.center .nav-circle {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--chon-yellow), var(--chon-orange));
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    box-shadow: 0 6px 16px rgba(247,147,30,0.4), 0 0 0 4px white;
+    margin-top: -20px;
+    transition: transform 0.18s;
+  }
+  .nav-btn.center:active .nav-circle { transform: scale(0.94); }
+  .nav-btn.center .nav-btn-label {
+    color: var(--chon-orange-dark);
+    margin-top: 4px;
+  }
+
+  /* ============================================
+     Modal (인증 액션)
+     ============================================ */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 99;
+    display: none;
+    animation: backdropFade 0.2s ease;
+  }
+  .modal-backdrop.visible { display: block; }
+  @keyframes backdropFade { from { opacity: 0; } to { opacity: 1; } }
+
+  .modal-sheet {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%) translateY(100%);
+    width: 100%;
+    max-width: 480px;
+    background: white;
+    border-radius: 24px 24px 0 0;
+    z-index: 100;
+    padding: 20px 20px calc(28px + var(--safe-bottom));
+    transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 -16px 32px rgba(0,0,0,0.16);
+  }
+  .modal-sheet.visible { transform: translateX(-50%) translateY(0); }
+  .modal-grip {
+    width: 40px; height: 4px;
+    background: #D1D5DB;
+    border-radius: 2px;
+    margin: 0 auto 16px;
+  }
+  .modal-title {
+    font-size: 18px;
+    font-weight: 900;
+    text-align: center;
+    margin-bottom: 6px;
+  }
+  .modal-sub {
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 22px;
+  }
+  .modal-options { display: flex; flex-direction: column; gap: 8px; }
+  .modal-opt {
+    background: var(--bg-app);
+    border: 1px solid var(--border-light);
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: left;
+    font-family: inherit;
+    width: 100%;
+  }
+  .modal-opt:active { transform: scale(0.99); }
+  .modal-opt:hover { border-color: var(--chon-orange); background: var(--chon-yellow-soft); }
+  .modal-opt-icon {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--chon-yellow), var(--chon-orange));
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .modal-opt-info { flex: 1; }
+  .modal-opt-title { font-size: 14px; font-weight: 800; }
+  .modal-opt-desc { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+
+  /* ============================================
+     Toast
+     ============================================ */
+  .toast {
+    position: fixed;
+    bottom: calc(var(--nav-h) + var(--safe-bottom) + 20px);
+    left: 50%;
+    transform: translateX(-50%) translateY(40px);
+    background: #1F1F1F;
+    color: white;
+    padding: 12px 22px;
+    border-radius: var(--radius-pill);
+    font-size: 13px;
+    font-weight: 700;
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 200;
+    white-space: nowrap;
+    box-shadow: var(--shadow-lg);
+  }
+  .toast.visible {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header class="app-header">
+    <div class="brand">
+      <div class="brand-mark">P</div>
+      <div class="brand-text">
+        <div class="brand-name">PASS</div>
+        <div class="brand-sub">관계형 SNS</div>
+      </div>
+    </div>
+    <button class="icon-btn" onclick="showToast('🔔 알림이 없습니다')">
+      🔔
+      <span class="icon-btn-dot"></span>
+    </button>
+  </header>
+
+  <main class="content">
+    <!-- ============ HOME ============ -->
+    <section class="page active" id="pageHome">
+      <div class="safety-banner">
+        <div class="safety-icon">🛡️</div>
+        <div class="safety-text">
+          실시간으로 <strong>CHON DID</strong>를 보호합니다
+        </div>
+      </div>
+
+      <!-- Hero -->
+      <div class="hero-card" onclick="openAuthSheet()">
+        <div class="hero-eyebrow">나를 확인하는</div>
+        <div class="hero-title">CHON DID<br/>트로피</div>
+        <div class="hero-cta">발급받기 →</div>
+        <div class="hero-illust">📱</div>
+      </div>
+
+      <!-- 상호 인증 -->
+      <div class="feature-card" onclick="switchPage('auth'); showToast('🪪 상호 인증 화면')">
+        <div class="feature-info">
+          <div class="feature-title">상호 인증</div>
+          <div class="feature-desc">가족·지인의 신원을<br/>안전하게 확인하기</div>
+        </div>
+        <div class="feature-illust">🪪</div>
+      </div>
+
+      <div class="section-title">즉시 인증</div>
+      <div class="quick-grid">
+        <button class="quick-btn" onclick="showToast('📞 통화 인증')">
+          <div class="quick-icon bell">📞</div>
+          <div class="quick-label">통화</div>
+        </button>
+        <button class="quick-btn" onclick="showToast('👥 주소록 인증')">
+          <div class="quick-icon contact">👥</div>
+          <div class="quick-label">주소록</div>
+        </button>
+        <button class="quick-btn" onclick="showToast('👤 본인 확인')">
+          <div class="quick-icon user">👤</div>
+          <div class="quick-label">본인</div>
+        </button>
+        <button class="quick-btn" onclick="showToast('📄 증명서')">
+          <div class="quick-icon doc">📄</div>
+          <div class="quick-label">증명서</div>
+        </button>
+      </div>
+
+      <div class="status-pill">
+        <div class="status-icon">✓</div>
+        <div class="status-text">
+          <strong>패턴 인증</strong> 능력이 활성화되었습니다
+        </div>
+      </div>
+
+      <div class="section-title">오늘의 활동</div>
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-value orange">3</div>
+          <div class="stat-label">인증 요청</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value green">2</div>
+          <div class="stat-label">상호 인증</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value blue">5</div>
+          <div class="stat-label">통화 보호</div>
+        </div>
+      </div>
+
+      <div class="section-title">최근 활동</div>
+      <div class="activity-item" onclick="showToast('📞 김민수님 통화')">
+        <div class="activity-icon">📞</div>
+        <div class="activity-info">
+          <div class="activity-title">김민수님과 인증 통화</div>
+          <div class="activity-meta">방금 전 · 1-hop 가족</div>
+        </div>
+        <div class="activity-tag">완료</div>
+      </div>
+      <div class="activity-item" onclick="showToast('🪪 상호 인증')">
+        <div class="activity-icon green">🪪</div>
+        <div class="activity-info">
+          <div class="activity-title">박지영님 상호 인증 요청</div>
+          <div class="activity-meta">5분 전 · 응답 대기</div>
+        </div>
+        <div class="activity-tag pending">대기</div>
+      </div>
+      <div class="activity-item" onclick="showToast('📄 증명서 발급')">
+        <div class="activity-icon blue">📄</div>
+        <div class="activity-info">
+          <div class="activity-title">관계 증명서 발급</div>
+          <div class="activity-meta">2시간 전 · 자녀 증명</div>
+        </div>
+        <div class="activity-tag">완료</div>
+      </div>
+    </section>
+
+    <!-- ============ PASS AI ============ -->
+    <section class="page" id="pageAi">
+      <div class="empty-state">
+        <div class="empty-state-icon">🤖</div>
+        <div class="empty-state-title">PASS AI</div>
+        <div class="empty-state-desc">관계 기반 AI 어시스턴트가<br/>곧 출시됩니다</div>
+      </div>
+    </section>
+
+    <!-- ============ AUTH (center tab) ============ -->
+    <section class="page" id="pageAuth">
+      <div class="section-title" style="margin-top: 8px;">인증 센터</div>
+
+      <div class="feature-card" onclick="openAuthSheet()">
+        <div class="feature-info">
+          <div class="feature-title">새 인증 요청</div>
+          <div class="feature-desc">상호 인증·증명서 발급<br/>방법을 선택해 주세요</div>
+        </div>
+        <div class="feature-illust">🆔</div>
+      </div>
+
+      <div class="section-title">대기 중인 인증</div>
+      <div class="activity-item">
+        <div class="activity-icon">⏱</div>
+        <div class="activity-info">
+          <div class="activity-title">박지영님 → 나</div>
+          <div class="activity-meta">상호 인증 요청 · 5분 전</div>
+        </div>
+        <div class="activity-tag pending">응답 대기</div>
+      </div>
+      <div class="activity-item">
+        <div class="activity-icon">⏱</div>
+        <div class="activity-info">
+          <div class="activity-title">이상호님 → 나</div>
+          <div class="activity-meta">관계 증명 요청 · 1시간 전</div>
+        </div>
+        <div class="activity-tag pending">응답 대기</div>
+      </div>
+
+      <div class="section-title">완료된 인증</div>
+      <div class="activity-item">
+        <div class="activity-icon green">✓</div>
+        <div class="activity-info">
+          <div class="activity-title">김민수님 ↔ 나</div>
+          <div class="activity-meta">상호 인증 완료 · 어제</div>
+        </div>
+        <div class="activity-tag">완료</div>
+      </div>
+    </section>
+
+    <!-- ============ RELATIONS (3 모드) ============ -->
+    <section class="page" id="pageRel">
+      <div class="section-title" style="margin-top:8px;">관계 네트워크</div>
+      <p class="mode-intro">
+        용도에 맞는 모드를 선택하세요. 각 모드는 고유의 시각화와<br/>
+        인증 흐름을 제공합니다.
+      </p>
+
+      <!-- 🌳 가계도 -->
+      <div class="mode-card family" onclick="openMode('family')">
+        <div class="mode-icon-wrap">🌳</div>
+        <div class="mode-info">
+          <div class="mode-title">가계도</div>
+          <div class="mode-desc">부계 중심 + 세대별 박스 포함 디자인<br/>출생 순서 좌→우 정렬</div>
+          <div class="mode-stats">
+            <span><strong>12</strong>명 등록</span>
+            <span><strong>8</strong>명 인증</span>
+            <span>4 세대</span>
+          </div>
+        </div>
+        <div class="mode-arrow">›</div>
+      </div>
+
+      <!-- 🌐 모임 -->
+      <div class="mode-card friend" onclick="openMode('friend')">
+        <div class="mode-icon-wrap">🌐</div>
+        <div class="mode-info">
+          <div class="mode-title">모임</div>
+          <div class="mode-desc">1-hop 모임원 + 2-hop 추천<br/>신뢰 네트워크 그래프</div>
+          <div class="mode-stats">
+            <span><strong>5</strong>명 등록</span>
+            <span><strong>3</strong>명 인증</span>
+            <span><strong>2</strong>명 2-hop</span>
+          </div>
+        </div>
+        <div class="mode-arrow">›</div>
+      </div>
+
+      <!-- 🏫 학급증 -->
+      <div class="mode-card classid" onclick="openMode('classid')">
+        <div class="mode-icon-wrap">🏫</div>
+        <div class="mode-info">
+          <div class="mode-title">학급증</div>
+          <div class="mode-desc">선생님 · 학부모 · 학생 역할 기반<br/>출석번호로 학급 관리</div>
+          <div class="mode-stats">
+            <span><strong>1</strong>명 선생</span>
+            <span><strong>4</strong>명 학생</span>
+            <span><strong>2</strong>명 학부모</span>
+          </div>
+        </div>
+        <div class="mode-arrow">›</div>
+      </div>
+
+      <div class="section-title" style="margin-top:22px;">통합 보기</div>
+      <div class="activity-item" onclick="goRelTool()">
+        <div class="activity-icon blue">🗂</div>
+        <div class="activity-info">
+          <div class="activity-title">전체 통합 페이지 (PASS v2)</div>
+          <div class="activity-meta">피드·모임·채팅·Trust 한 화면</div>
+        </div>
+        <div style="color:var(--text-tertiary); font-size:18px;">›</div>
+      </div>
+    </section>
+
+    <!-- ============ MY ============ -->
+    <section class="page" id="pageMy">
+      <div style="background:white; border-radius:var(--radius-lg); padding:22px; text-align:center; margin-top:8px; border:1px solid var(--border-light);">
+        <div id="profileAvatar" style="width:80px; height:80px; border-radius:24px; background:var(--chon-orange); color:white; display:flex; align-items:center; justify-content:center; font-size:32px; font-weight:900; margin:0 auto 12px;">홍</div>
+        <div id="profileName" style="font-size:20px; font-weight:900; margin-bottom:4px;">홍길순</div>
+        <div id="profileEmail" style="font-size:13px; color:var(--text-secondary); font-weight:600;">demo@chon.ai</div>
+      </div>
+
+      <div class="section-title">CHON DID</div>
+      <div class="activity-item" onclick="showToast('🛡 하드웨어 인증')">
+        <div class="activity-icon green">🛡</div>
+        <div class="activity-info">
+          <div class="activity-title">하드웨어 인증</div>
+          <div class="activity-meta">TRUSTED · 마지막 하트비트 2시간 전</div>
+        </div>
+        <div class="activity-tag">활성</div>
+      </div>
+      <div class="activity-item" onclick="showToast('📱 단말 관리')">
+        <div class="activity-icon blue">📱</div>
+        <div class="activity-info">
+          <div class="activity-title">단말 관리</div>
+          <div class="activity-meta">현재 1대 등록</div>
+        </div>
+      </div>
+
+      <div class="section-title">계정</div>
+      <div class="activity-item" onclick="showToast('🔢 간편 번호 변경')">
+        <div class="activity-icon">🔢</div>
+        <div class="activity-info">
+          <div class="activity-title">간편 번호 (2FA)</div>
+          <div class="activity-meta">이 디바이스 등록됨</div>
+        </div>
+      </div>
+      <div class="activity-item" onclick="logoutPass()" style="border-color: #FCA5A5;">
+        <div class="activity-icon" style="background:#FEE2E2; color:#DC2626;">🚪</div>
+        <div class="activity-info">
+          <div class="activity-title" style="color:#DC2626;">로그아웃</div>
+          <div class="activity-meta">간편 번호 등록은 유지됩니다</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav">
+    <button class="nav-btn active" data-page="home" onclick="switchPage('home')">
+      <div class="nav-btn-icon">🏠</div>
+      <div class="nav-btn-label">홈</div>
+    </button>
+    <button class="nav-btn" data-page="ai" onclick="switchPage('ai')">
+      <div class="nav-btn-icon">🤖</div>
+      <div class="nav-btn-label">AI</div>
+    </button>
+    <button class="nav-btn center" data-page="auth" onclick="switchPage('auth')">
+      <div class="nav-circle">🆔</div>
+      <div class="nav-btn-label">인증</div>
+    </button>
+    <button class="nav-btn" data-page="rel" onclick="switchPage('rel')">
+      <div class="nav-btn-icon">🌳</div>
+      <div class="nav-btn-label">관계</div>
+    </button>
+    <button class="nav-btn" data-page="my" onclick="switchPage('my')">
+      <div class="nav-btn-icon">👤</div>
+      <div class="nav-btn-label">마이</div>
+    </button>
+  </nav>
+</div>
+
+<!-- Auth modal sheet -->
+<div class="modal-backdrop" id="modalBackdrop" onclick="closeAuthSheet()"></div>
+<div class="modal-sheet" id="authSheet">
+  <div class="modal-grip"></div>
+  <div class="modal-title">인증 방법 선택</div>
+  <div class="modal-sub">어떤 방식으로 인증하시겠습니까?</div>
+  <div class="modal-options">
+    <button class="modal-opt" onclick="chooseAuth('mutual')">
+      <div class="modal-opt-icon">🤝</div>
+      <div class="modal-opt-info">
+        <div class="modal-opt-title">상호 인증</div>
+        <div class="modal-opt-desc">상대방과 실시간 1:1 인증</div>
+      </div>
+      <div style="color:var(--text-tertiary); font-size:20px;">›</div>
+    </button>
+    <button class="modal-opt" onclick="chooseAuth('call')">
+      <div class="modal-opt-icon">📞</div>
+      <div class="modal-opt-info">
+        <div class="modal-opt-title">통화 인증</div>
+        <div class="modal-opt-desc">PRECALL 서명으로 통화 안전 확인</div>
+      </div>
+      <div style="color:var(--text-tertiary); font-size:20px;">›</div>
+    </button>
+    <button class="modal-opt" onclick="chooseAuth('cert')">
+      <div class="modal-opt-icon">📄</div>
+      <div class="modal-opt-info">
+        <div class="modal-opt-title">관계 증명서 발급</div>
+        <div class="modal-opt-desc">가족·지인 관계 증명</div>
+      </div>
+      <div style="color:var(--text-tertiary); font-size:20px;">›</div>
+    </button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// Session bootstrap (백엔드 연동)
+// ============================================================
+function loadSession() {
+  try { return JSON.parse(sessionStorage.getItem('passUser')) || null; } catch (e) { return null; }
+}
+
+async function applyUser() {
+  const session = loadSession();
+  const hasToken = window.PassAPI && PassAPI.isLoggedIn();
+
+  // 토큰도 세션도 없으면 → 로그인 페이지로 (데모는 통과)
+  if (!hasToken && !session) {
+    document.getElementById('profileAvatar').textContent = '데';
+    document.getElementById('profileName').textContent = '데모 사용자';
+    document.getElementById('profileEmail').textContent = '(로그인하지 않음 — 데모)';
+    return;
+  }
+
+  // 토큰이 있으면 서버에서 최신 사용자 정보 가져오기
+  let user = session;
+  if (hasToken) {
+    try {
+      const me = await PassAPI.users.me();
+      user = { email: me.email, name: me.name || me.email.split('@')[0], avatar: me.avatar };
+      // 세션도 갱신
+      try { sessionStorage.setItem('passUser', JSON.stringify({ ...session, ...user })); } catch (e) {}
+    } catch (e) {
+      if (e.status === 401) {
+        PassAPI.clearSession();
+        window.location.href = 'chon-pass-login.html';
+        return;
+      }
+    }
+  }
+
+  if (user && user.email) {
+    const nick = user.name || user.email.split('@')[0];
+    document.getElementById('profileAvatar').textContent = (user.avatar || nick.charAt(0)).toUpperCase();
+    document.getElementById('profileName').textContent = nick;
+    document.getElementById('profileEmail').textContent = user.email;
+    if (!sessionStorage.getItem('passWelcomed')) {
+      const isNew = session?.isNew;
+      setTimeout(() => showToast((isNew ? '🎉 환영합니다 ' : '👋 ') + user.email), 400);
+      try { sessionStorage.setItem('passWelcomed', '1'); } catch (e) {}
+    }
+  }
+}
+
+// ============================================================
+// Page navigation
+// ============================================================
+function switchPage(page) {
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.page === page));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const map = { home: 'pageHome', ai: 'pageAi', auth: 'pageAuth', rel: 'pageRel', my: 'pageMy' };
+  document.getElementById(map[page]).classList.add('active');
+  document.querySelector('.content').scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ============================================================
+// Auth modal sheet
+// ============================================================
+function openAuthSheet() {
+  document.getElementById('authSheet').classList.add('visible');
+  document.getElementById('modalBackdrop').classList.add('visible');
+}
+function closeAuthSheet() {
+  document.getElementById('authSheet').classList.remove('visible');
+  document.getElementById('modalBackdrop').classList.remove('visible');
+}
+function chooseAuth(type) {
+  const labels = {
+    mutual: '🤝 상호 인증',
+    call: '📞 통화 인증',
+    cert: '📄 관계 증명서 발급'
+  };
+  closeAuthSheet();
+  showToast(labels[type] + ' 시작');
+  setTimeout(() => switchPage('auth'), 400);
+}
+
+// ============================================================
+// Relation modes (3 modes — 가계도 / 모임 / 학급증)
+// ============================================================
+const MODE_FILES = {
+  family: 'chon-family-tree-v13.html',
+  friend: 'chon-friends-v1.html',
+  classid: 'chon-class-id-v4.html'
+};
+const MODE_LABELS = {
+  family: '🌳 가계도',
+  friend: '🌐 모임',
+  classid: '🏫 학급증'
+};
+
+function openMode(mode) {
+  const file = MODE_FILES[mode];
+  if (!file) return;
+  showToast('→ ' + MODE_LABELS[mode] + ' 모드 열기');
+  setTimeout(() => { window.location.href = file; }, 200);
+}
+
+function goRelTool() {
+  // 통합 보기 — PASS v2 (피드·모임·채팅·Trust)
+  window.location.href = 'chon-pass-v2.html';
+}
+
+// ============================================================
+// Logout (백엔드 연동)
+// ============================================================
+async function logoutPass() {
+  if (!confirm('로그아웃 하시겠습니까?\n\n간편 번호(2FA) 등록은 이 디바이스에 유지됩니다.\n다음 로그인 시 간편 번호 6자리로 빠르게 들어올 수 있습니다.')) return;
+  // 백엔드에 refresh 토큰 폐기 요청
+  if (window.PassAPI && PassAPI.isLoggedIn()) {
+    try { await PassAPI.auth.logout(false); } catch (e) { /* 무시 */ }
+  }
+  // 세션만 종료 — 디바이스 신뢰는 유지 (PIN 로그인 가능하도록)
+  if (window.PassAPI) PassAPI.clearSession();
+  else {
+    try { sessionStorage.removeItem('passUser'); sessionStorage.removeItem('passWelcomed'); } catch (e) {}
+  }
+  window.location.href = 'chon-pass-login.html';
+}
+
+// ============================================================
+// Toast
+// ============================================================
+function showToast(text) {
+  const t = document.getElementById('toast');
+  t.textContent = text;
+  t.classList.add('visible');
+  clearTimeout(window._toastT);
+  window._toastT = setTimeout(() => t.classList.remove('visible'), 2400);
+}
+
+// ============================================================
+// Keyboard shortcut
+// ============================================================
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeAuthSheet();
+});
+
+// Init
+applyUser();
+</script>
+</body>
+</html>
