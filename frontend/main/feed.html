@@ -172,19 +172,92 @@
     left: 50%;
     transform: translateX(-50%);
     width: 100%;
-    max-width: 560px;
+    max-width: 480px;
     background: white;
-    border-top: 1px solid #E2E8F0;
-    padding: 6px 4px calc(6px + var(--safe-bottom));
+    border-top: 1px solid var(--border-light, #F1F5F9);
+    padding: 8px 8px calc(8px + var(--safe-bottom));
     display: grid;
     grid-template-columns: repeat(5, 1fr);
+    align-items: end;
     z-index: 40;
-    box-shadow: 0 -4px 20px rgba(0,0,0,0.04);
+    box-shadow: 0 -6px 24px rgba(0,0,0,0.05);
   }
   .nav-btn {
     background: none;
     border: none;
-    padding: 8px 4px;
+    padding: 8px 4px 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--text-tertiary);
+    border-radius: 12px;
+    transition: color 0.15s;
+    position: relative;
+  }
+  .nav-btn-icon { font-size: 22px; line-height: 1; }
+  .nav-btn-label { font-size: 10px; font-weight: 800; }
+  .nav-btn.active { color: var(--chon-orange-dark); }
+  .nav-btn-badge {
+    position: absolute;
+    top: 4px; right: 14px;
+    min-width: 16px; height: 16px;
+    background: #DC2626;
+    color: white;
+    border-radius: 999px;
+    font-size: 9px;
+    font-weight: 900;
+    padding: 0 4px;
+    display: flex; align-items: center; justify-content: center;
+    border: 2px solid white;
+  }
+  /* Center button — large prominent circle (home.html과 동일 패턴) */
+  .nav-btn.center {
+    position: relative;
+    padding-top: 0;
+  }
+  .nav-btn.center .nav-circle {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--chon-yellow, #FFC300), var(--chon-orange));
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    box-shadow: 0 6px 16px rgba(247,147,30,0.4), 0 0 0 4px white;
+    margin-top: -20px;
+    transition: transform 0.18s;
+  }
+  .nav-btn.center:active .nav-circle { transform: scale(0.94); }
+  .nav-btn.center .nav-btn-label {
+    color: var(--chon-orange-dark);
+    margin-top: 4px;
+  }
+
+  /* ============================================
+     Section Tabs (feed 내부 5섹션 전환 — 상단 위치)
+     ============================================ */
+  .section-tabs {
+    display: flex;
+    gap: 4px;
+    padding: 6px 12px;
+    background: white;
+    border-bottom: 1px solid var(--border-light, #F1F5F9);
+    overflow-x: auto;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+  }
+  .section-tab {
+    flex: 1;
+    min-width: 60px;
+    background: transparent;
+    border: none;
+    padding: 8px 6px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -192,19 +265,18 @@
     cursor: pointer;
     font-family: inherit;
     color: var(--text-tertiary);
-    border-radius: var(--radius-md);
-    transition: all 0.15s;
+    border-radius: var(--radius-sm);
     position: relative;
+    transition: color 0.15s, background 0.15s;
   }
-  .nav-btn-icon { font-size: 22px; line-height: 1; }
-  .nav-btn-label { font-size: 10px; font-weight: 800; }
-  .nav-btn.active {
-    color: var(--chon-orange-dark);
-  }
-  .nav-btn.active .nav-btn-icon { transform: translateY(-2px); }
-  .nav-btn-badge {
+  .section-tab:active { background: var(--bg-app); }
+  .section-tab.active { color: var(--chon-orange-dark); }
+  .section-tab.active .section-tab-icon { transform: translateY(-1px); }
+  .section-tab-icon { font-size: 18px; line-height: 1; transition: transform 0.15s; }
+  .section-tab-label { font-size: 10px; font-weight: 800; }
+  .section-tab-badge {
     position: absolute;
-    top: 4px; right: 14px;
+    top: 2px; right: 8px;
     min-width: 16px; height: 16px;
     background: #DC2626;
     color: white;
@@ -1302,14 +1374,12 @@
   }
   @media (min-width: 1024px) {
     .app { max-width: 640px; }
-    .bottom-nav { max-width: 640px; }
     #graphSvg { height: 540px; }
     .friends-grid { grid-template-columns: repeat(4, 1fr); }
     .badges-grid { grid-template-columns: repeat(4, 1fr); }
   }
   @media (min-width: 1280px) {
     .app { max-width: 720px; }
-    .bottom-nav { max-width: 720px; }
   }
 
   /* ============================================
@@ -1358,6 +1428,31 @@
     </div>
     <button class="header-action" onclick="resetAll()">처음부터</button>
   </header>
+
+  <!-- 내부 섹션 탭 (피드/모임/채팅/Trust/프로필) -->
+  <div class="section-tabs">
+    <button class="section-tab active" data-section="feed" onclick="switchMain('feed')">
+      <span class="section-tab-icon">🏠</span>
+      <span class="section-tab-label">피드</span>
+    </button>
+    <button class="section-tab" data-section="network" onclick="switchMain('network')">
+      <span class="section-tab-icon">🌐</span>
+      <span class="section-tab-label">모임</span>
+    </button>
+    <button class="section-tab" data-section="chat" onclick="switchMain('chat')">
+      <span class="section-tab-icon">💬</span>
+      <span class="section-tab-label">채팅</span>
+      <span class="section-tab-badge is-hidden" id="navChatBadge">0</span>
+    </button>
+    <button class="section-tab" data-section="trust" onclick="switchMain('trust')">
+      <span class="section-tab-icon">🌱</span>
+      <span class="section-tab-label">Trust</span>
+    </button>
+    <button class="section-tab" data-section="profile" onclick="switchMain('profile')">
+      <span class="section-tab-icon">👤</span>
+      <span class="section-tab-label">프로필</span>
+    </button>
+  </div>
 
   <main class="content">
     <!-- ============ FEED ============ -->
@@ -1567,26 +1662,25 @@
   </main>
 
   <nav class="bottom-nav">
-    <button class="nav-btn active" data-section="feed" onclick="switchMain('feed')">
+    <button class="nav-btn" onclick="window.location.href='./home.html'">
       <div class="nav-btn-icon">🏠</div>
-      <div class="nav-btn-label">피드</div>
+      <div class="nav-btn-label">홈</div>
     </button>
-    <button class="nav-btn" data-section="network" onclick="switchMain('network')">
+    <button class="nav-btn active">
+      <div class="nav-btn-icon">📰</div>
+      <div class="nav-btn-label">Feed</div>
+    </button>
+    <button class="nav-btn center" onclick="window.location.href='./home.html?page=auth'">
+      <div class="nav-circle">🆔</div>
+      <div class="nav-btn-label">인증</div>
+    </button>
+    <button class="nav-btn" onclick="window.location.href='../views/friends.html'">
       <div class="nav-btn-icon">🌐</div>
       <div class="nav-btn-label">모임</div>
     </button>
-    <button class="nav-btn" data-section="chat" onclick="switchMain('chat')">
-      <div class="nav-btn-icon">💬</div>
-      <div class="nav-btn-label">채팅</div>
-      <span class="nav-btn-badge is-hidden" id="navChatBadge">0</span>
-    </button>
-    <button class="nav-btn" data-section="trust" onclick="switchMain('trust')">
-      <div class="nav-btn-icon">🌱</div>
-      <div class="nav-btn-label">Trust</div>
-    </button>
-    <button class="nav-btn" data-section="profile" onclick="switchMain('profile')">
-      <div class="nav-btn-icon">👤</div>
-      <div class="nav-btn-label">프로필</div>
+    <button class="nav-btn" onclick="window.location.href='./home.html?page=rel'">
+      <div class="nav-btn-icon">🌳</div>
+      <div class="nav-btn-label">관계</div>
     </button>
   </nav>
 </div>
@@ -1917,8 +2011,9 @@ async function loadChats() {
 // ============================================================
 function switchMain(section) {
   state.currentMain = section;
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.querySelector(`.nav-btn[data-section="${section}"]`).classList.add('active');
+  document.querySelectorAll('.section-tab').forEach(b => b.classList.remove('active'));
+  const tab = document.querySelector(`.section-tab[data-section="${section}"]`);
+  if (tab) tab.classList.add('active');
   document.querySelectorAll('.main-section').forEach(s => s.classList.remove('active'));
   const map = { feed: 'sectionFeed', network: 'sectionNetwork', chat: 'sectionChat', trust: 'sectionTrust', profile: 'sectionProfile' };
   document.getElementById(map[section]).classList.add('active');

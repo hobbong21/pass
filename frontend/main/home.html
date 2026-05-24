@@ -117,6 +117,11 @@
     margin-top: -2px;
   }
   .brand-text { line-height: 1.1; }
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
   .icon-btn {
     width: 40px; height: 40px;
     border-radius: 50%;
@@ -128,9 +133,13 @@
     cursor: pointer;
     font-size: 18px;
     position: relative;
-    transition: background 0.15s;
+    transition: background 0.15s, border-color 0.15s;
   }
   .icon-btn:active { background: var(--bg-app); }
+  .icon-btn.active {
+    background: var(--chon-yellow-soft);
+    border-color: var(--chon-orange);
+  }
   .icon-btn-dot {
     position: absolute;
     top: 8px; right: 10px;
@@ -651,6 +660,10 @@
     box-shadow: 0 -16px 32px rgba(0,0,0,0.16);
   }
   .modal-sheet.visible { transform: translateX(-50%) translateY(0); }
+  .modal-sheet.notif-sheet {
+    max-height: 80vh;
+    overflow-y: auto;
+  }
   .modal-grip {
     width: 40px; height: 4px;
     background: #D1D5DB;
@@ -783,10 +796,15 @@
         <div class="brand-sub">관계형 SNS</div>
       </div>
     </div>
-    <button class="icon-btn" onclick="showToast('🔔 알림이 없습니다')">
-      🔔
-      <span class="icon-btn-dot"></span>
-    </button>
+    <div class="header-actions">
+      <button class="icon-btn" data-page="my" onclick="switchPage('my')" aria-label="마이">
+        👤
+      </button>
+      <button class="icon-btn" onclick="openNotifSheet()" aria-label="알림">
+        🔔
+        <span class="icon-btn-dot"></span>
+      </button>
+    </div>
   </header>
 
   <main class="content">
@@ -843,56 +861,6 @@
         </div>
       </div>
 
-      <div class="section-title">오늘의 활동</div>
-      <div class="stats-row">
-        <div class="stat-card">
-          <div class="stat-value orange">3</div>
-          <div class="stat-label">인증 요청</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value green">2</div>
-          <div class="stat-label">상호 인증</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value blue">5</div>
-          <div class="stat-label">통화 보호</div>
-        </div>
-      </div>
-
-      <div class="section-title">최근 활동</div>
-      <div class="activity-item" onclick="showToast('📞 김민수님 통화')">
-        <div class="activity-icon">📞</div>
-        <div class="activity-info">
-          <div class="activity-title">김민수님과 인증 통화</div>
-          <div class="activity-meta">방금 전 · 1-hop 가족</div>
-        </div>
-        <div class="activity-tag">완료</div>
-      </div>
-      <div class="activity-item" onclick="showToast('🪪 상호 인증')">
-        <div class="activity-icon green">🪪</div>
-        <div class="activity-info">
-          <div class="activity-title">박지영님 상호 인증 요청</div>
-          <div class="activity-meta">5분 전 · 응답 대기</div>
-        </div>
-        <div class="activity-tag pending">대기</div>
-      </div>
-      <div class="activity-item" onclick="showToast('📄 증명서 발급')">
-        <div class="activity-icon blue">📄</div>
-        <div class="activity-info">
-          <div class="activity-title">관계 증명서 발급</div>
-          <div class="activity-meta">2시간 전 · 자녀 증명</div>
-        </div>
-        <div class="activity-tag">완료</div>
-      </div>
-    </section>
-
-    <!-- ============ PASS AI ============ -->
-    <section class="page" id="pageAi">
-      <div class="empty-state">
-        <div class="empty-state-icon">🤖</div>
-        <div class="empty-state-title">PASS AI</div>
-        <div class="empty-state-desc">관계 기반 AI 어시스턴트가<br/>곧 출시됩니다</div>
-      </div>
     </section>
 
     <!-- ============ AUTH (center tab) ============ -->
@@ -1048,27 +1016,74 @@
       <div class="nav-btn-icon">🏠</div>
       <div class="nav-btn-label">홈</div>
     </button>
-    <button class="nav-btn" data-page="ai" onclick="switchPage('ai')">
-      <div class="nav-btn-icon">🤖</div>
-      <div class="nav-btn-label">AI</div>
+    <button class="nav-btn" onclick="window.location.href='./feed.html'">
+      <div class="nav-btn-icon">📰</div>
+      <div class="nav-btn-label">Feed</div>
     </button>
     <button class="nav-btn center" data-page="auth" onclick="switchPage('auth')">
       <div class="nav-circle">🆔</div>
       <div class="nav-btn-label">인증</div>
     </button>
+    <button class="nav-btn" onclick="window.location.href='../views/friends.html'">
+      <div class="nav-btn-icon">🌐</div>
+      <div class="nav-btn-label">모임</div>
+    </button>
     <button class="nav-btn" data-page="rel" onclick="switchPage('rel')">
       <div class="nav-btn-icon">🌳</div>
       <div class="nav-btn-label">관계</div>
     </button>
-    <button class="nav-btn" data-page="my" onclick="switchPage('my')">
-      <div class="nav-btn-icon">👤</div>
-      <div class="nav-btn-label">마이</div>
-    </button>
   </nav>
 </div>
 
+<!-- Notification sheet -->
+<div class="modal-sheet notif-sheet" id="notifSheet">
+  <div class="modal-grip"></div>
+  <div class="modal-title">🔔 알림</div>
+  <div class="modal-sub">최근 인증 활동을 확인하세요</div>
+  <div class="section-title section-title--mt-8">오늘의 활동</div>
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-value orange">3</div>
+      <div class="stat-label">인증 요청</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value green">2</div>
+      <div class="stat-label">상호 인증</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value blue">5</div>
+      <div class="stat-label">통화 보호</div>
+    </div>
+  </div>
+  <div class="section-title">최근 활동</div>
+  <div class="activity-item" onclick="showToast('📞 김민수님 통화')">
+    <div class="activity-icon">📞</div>
+    <div class="activity-info">
+      <div class="activity-title">김민수님과 인증 통화</div>
+      <div class="activity-meta">방금 전 · 1-hop 가족</div>
+    </div>
+    <div class="activity-tag">완료</div>
+  </div>
+  <div class="activity-item" onclick="showToast('🪪 상호 인증')">
+    <div class="activity-icon green">🪪</div>
+    <div class="activity-info">
+      <div class="activity-title">박지영님 상호 인증 요청</div>
+      <div class="activity-meta">5분 전 · 응답 대기</div>
+    </div>
+    <div class="activity-tag pending">대기</div>
+  </div>
+  <div class="activity-item" onclick="showToast('📄 증명서 발급')">
+    <div class="activity-icon blue">📄</div>
+    <div class="activity-info">
+      <div class="activity-title">관계 증명서 발급</div>
+      <div class="activity-meta">2시간 전 · 자녀 증명</div>
+    </div>
+    <div class="activity-tag">완료</div>
+  </div>
+</div>
+
 <!-- Auth modal sheet -->
-<div class="modal-backdrop" id="modalBackdrop" onclick="closeAuthSheet()"></div>
+<div class="modal-backdrop" id="modalBackdrop" onclick="closeAllSheets()"></div>
 <div class="modal-sheet" id="authSheet">
   <div class="modal-grip"></div>
   <div class="modal-title">인증 방법 선택</div>
@@ -1157,9 +1172,9 @@ async function applyUser() {
 // Page navigation
 // ============================================================
 function switchPage(page) {
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.page === page));
+  document.querySelectorAll('.nav-btn, .icon-btn[data-page]').forEach(b => b.classList.toggle('active', b.dataset.page === page));
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  const map = { home: 'pageHome', ai: 'pageAi', auth: 'pageAuth', rel: 'pageRel', my: 'pageMy' };
+  const map = { home: 'pageHome', auth: 'pageAuth', rel: 'pageRel', my: 'pageMy' };
   document.getElementById(map[page]).classList.add('active');
   document.querySelector('.content').scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -1174,6 +1189,18 @@ function openAuthSheet() {
 function closeAuthSheet() {
   document.getElementById('authSheet').classList.remove('visible');
   document.getElementById('modalBackdrop').classList.remove('visible');
+}
+function openNotifSheet() {
+  document.getElementById('notifSheet').classList.add('visible');
+  document.getElementById('modalBackdrop').classList.add('visible');
+}
+function closeNotifSheet() {
+  document.getElementById('notifSheet').classList.remove('visible');
+  document.getElementById('modalBackdrop').classList.remove('visible');
+}
+function closeAllSheets() {
+  closeAuthSheet();
+  closeNotifSheet();
 }
 function chooseAuth(type) {
   const labels = {
@@ -1249,6 +1276,15 @@ document.addEventListener('keydown', e => {
 
 // Init
 applyUser();
+
+// 외부 페이지에서 ?page=auth|rel|my 로 진입 시 해당 탭 활성화
+(function applyInitialPage() {
+  try {
+    const params = new URLSearchParams(location.search);
+    const p = params.get('page');
+    if (p && ['home', 'auth', 'rel', 'my'].includes(p)) switchPage(p);
+  } catch (e) {}
+})();
 </script>
 </body>
 </html>
