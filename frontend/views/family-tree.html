@@ -1108,123 +1108,81 @@
     .phones-grid { flex-direction: column; align-items: center; }
     .desc-panel { width: 100%; max-width: 600px; }
   }
+
+  /* ============================================
+     Single-screen mode — 데모 베젤·래퍼 제거 후 phone-screen이 메인
+     ============================================ */
+  body { background: var(--bg-app); }
+  .phone-screen {
+    border-radius: 0;
+    min-height: 100vh;
+    height: auto;
+    max-width: 480px;
+    margin: 0 auto;
+    box-shadow: var(--shadow-md);
+  }
+
+  /* ============================================
+     Utility classes — inline style 대체
+     ============================================ */
+  .spacer-30 { height: 30px; }
+  .self-tag { font-size: 9px; }
+  .name-self { color: var(--chon-orange); }
+  .gl-line--confirmed { background: var(--status-confirmed); }
+  .gl-line--pending { background: var(--status-pending); }
+  .gl-line--drill { background: var(--drill-color); }
+  .gender-icon { font-size: 20px; }
+  .modal-input--mt8 { margin-top: 8px; }
+  .list-item-status.confirmed { color: var(--status-confirmed); }
+  .list-item-status.pending { color: var(--status-pending); }
 </style>
 </head>
 <body>
 
-<div class="demo-wrap">
+<div class="phone-screen" id="phone1">
 
-  <div class="demo-header">
-    <h1>📱 PASS 가계도 — 박스 포함 디자인</h1>
-    <p>
-      <span class="demo-badge">v11</span>
-      <span class="demo-badge">선 없음</span>
-      <span class="demo-badge">박스 포함 관계</span>
-      <span class="demo-badge">부모 박스 안의 자녀</span>
-    </p>
-    <p><strong>v11 핵심</strong>: 노드 간 연결선을 모두 제거하고, <strong>박스의 포함 관계</strong>로 가족 관계를 표현. 부모(부부)와 자녀들이 하나의 박스 안에 묶여 직관적으로 인식됩니다. 화면이 깔끔하고 모바일에 최적화.</p>
+  <div class="status-bar">
+    <span>9:30</span>
+    <div class="camera-dot"></div>
+    <div>▲ ◢ █</div>
   </div>
 
-  <div class="phones-grid">
+  <div class="app-header">
+    <button class="header-action home" onclick="window.location.href='../main/home.html'">‹ 홈</button>
+    <button class="header-back-btn hidden" id="backBtn" onclick="navigateBack()">‹ 뒤로</button>
+    <h1 id="appTitle">👨‍👩‍👧‍👦 가계도</h1>
+    <button class="header-action" onclick="resetAll()">처음부터</button>
+  </div>
 
-    <div class="phone-wrapper">
-      <div class="phone-caption">📱 가계도 v11 — 박스 포함</div>
-      <div class="phone">
-        <div class="phone-screen" id="phone1">
+  <div class="breadcrumb" id="breadcrumb"></div>
 
-          <div class="status-bar">
-            <span>9:30</span>
-            <div class="camera-dot"></div>
-            <div>▲ ◢ █</div>
-          </div>
+  <div class="content">
 
-          <div class="app-header">
-            <button class="header-back-btn hidden" id="backBtn" onclick="navigateBack()">‹ 뒤로</button>
-            <h1 id="appTitle">👨‍👩‍👧‍👦 가계도</h1>
-            <button class="header-action" onclick="resetAll()">처음부터</button>
-          </div>
+    <div class="summary-card" id="summaryCard">
+      <div class="summary-avatar" id="summaryAvatar">홍</div>
+      <div class="summary-info">
+        <div class="summary-name" id="summaryName">홍길순 님의 가계도</div>
+        <div class="summary-stats">
+          <span>👥 <strong id="statTotal">5</strong>명</span>
+          <span>✓ <strong id="statConfirmed">4</strong>명</span>
+        </div>
+      </div>
+    </div>
 
-          <div class="breadcrumb" id="breadcrumb"></div>
+    <div class="graph-canvas-wrap">
+      <svg id="graphSvg" viewBox="0 0 360 600" preserveAspectRatio="xMidYMid meet">
+        <g id="graphEdges"></g>
+        <g id="graphNodes"></g>
+      </svg>
+    </div>
+    <div class="graph-legend">
+      <div class="gl-item"><span class="gl-line gl-line--confirmed"></span> 인증됨</div>
+      <div class="gl-item"><span class="gl-line dashed gl-line--pending"></span> 대기</div>
+      <div class="gl-item"><span class="gl-line dashed gl-line--drill"></span> 외부 결혼자</div>
+    </div>
+    <div class="spacer-30"></div>
 
-          <div class="view-toggle">
-            <button class="view-toggle-btn active" id="toggleGraph" onclick="switchView('graph')">
-              <span>🌳</span><span>가계도</span>
-            </button>
-            <button class="view-toggle-btn" id="toggleTree" onclick="switchView('tree')">
-              <span>➕</span><span>추가하기</span>
-            </button>
-            <button class="view-toggle-btn" id="toggleList" onclick="switchView('list')">
-              <span>✓</span><span>인증현황</span>
-            </button>
-          </div>
-
-          <div class="content">
-
-            <div class="summary-card" id="summaryCard">
-              <div class="summary-avatar" id="summaryAvatar">홍</div>
-              <div class="summary-info">
-                <div class="summary-name" id="summaryName">홍길순 님의 가계도</div>
-                <div class="summary-stats">
-                  <span>👥 <strong id="statTotal">5</strong>명</span>
-                  <span>✓ <strong id="statConfirmed">4</strong>명</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="view-panel" id="viewTree">
-              <div class="family-legend">
-                <div class="family-legend-row">
-                  <div class="family-legend-chip">
-                    <span class="lc-swatch" style="background: rgba(254,243,199,0.5); border-color: rgba(217,119,6,0.4);"></span>
-                    <span>조부모 가족</span>
-                  </div>
-                  <div class="family-legend-chip">
-                    <span class="lc-swatch" style="background: rgba(254,215,170,0.5); border-color: rgba(247,147,30,0.4);"></span>
-                    <span>부모 가족</span>
-                  </div>
-                  <div class="family-legend-chip">
-                    <span class="lc-swatch" style="background: rgba(255,230,200,0.7); border-color: rgba(247,147,30,0.6);"></span>
-                    <span>나의 가족</span>
-                  </div>
-                  <div class="family-legend-chip">
-                    <span class="lc-swatch" style="background: rgba(229,231,235,0.6); border-color: rgba(156,163,175,0.5);"></span>
-                    <span>형제 가족</span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="tree-canvas" id="treeCanvas">
-                <!-- Tree will be rendered here -->
-              </div>
-              <div style="height: 30px;"></div>
-            </div>
-
-            <div class="view-panel active" id="viewGraph">
-              <div class="graph-canvas-wrap">
-                <svg id="graphSvg" viewBox="0 0 360 600" preserveAspectRatio="xMidYMid meet">
-                  <g id="graphEdges"></g>
-                  <g id="graphNodes"></g>
-                </svg>
-              </div>
-              <div class="graph-legend">
-                <div class="gl-item"><span class="gl-line" style="background: var(--status-confirmed);"></span> 인증됨</div>
-                <div class="gl-item"><span class="gl-line dashed" style="background: var(--status-pending);"></span> 대기</div>
-                <div class="gl-item"><span class="gl-line dashed" style="background: var(--drill-color);"></span> 외부 결혼자</div>
-              </div>
-              <div style="height: 30px;"></div>
-            </div>
-
-            <div class="view-panel" id="viewList">
-              <div class="verify-summary" id="verifySummary">
-                <!-- 동적 렌더링 -->
-              </div>
-              <div class="section-header">
-                <h2>✓ 인증 현황 (세대별)</h2>
-              </div>
-              <div class="list-section" id="resultList1"></div>
-            </div>
-
-          </div>
+  </div>
 
           <!-- Modal -->
           <div class="modal-fs" id="modalFs1">
@@ -1249,10 +1207,10 @@
                 <div class="modal-section-label">성별</div>
                 <div class="gender-toggle">
                   <div class="gender-option male selected" onclick="selectFsGender('male')">
-                    <span style="font-size: 20px;">♂</span> 남성
+                    <span class="gender-icon">♂</span> 남성
                   </div>
                   <div class="gender-option female" onclick="selectFsGender('female')">
-                    <span style="font-size: 20px;">♀</span> 여성
+                    <span class="gender-icon">♀</span> 여성
                   </div>
                 </div>
               </div>
@@ -1270,93 +1228,13 @@
               <div class="modal-section">
                 <div class="modal-section-label">관계</div>
                 <div class="relation-grid" id="relationGrid1"></div>
-                <input type="text" class="modal-input" id="modalFsRel1" placeholder="직접 입력" style="margin-top: 8px;" autocomplete="off"/>
+                <input type="text" class="modal-input modal-input--mt8" id="modalFsRel1" placeholder="직접 입력" autocomplete="off"/>
               </div>
             </div>
           </div>
 
-          <div class="toast" id="toast1"><span id="toastEmoji1">✓</span><span id="toastText1"></span></div>
+  <div class="toast" id="toast1"><span id="toastEmoji1">✓</span><span id="toastText1"></span></div>
 
-        </div>
-      </div>
-    </div>
-
-    <!-- Description -->
-    <div class="desc-panel">
-      <h3>🎯 v11 — 박스 포함 디자인</h3>
-
-      <div class="key-feature">
-        <span class="kf-icon">📦</span>
-        <div>
-          <strong>선 없음, 박스만</strong>
-          노드 간 연결선을 모두 제거하고 <strong>박스의 포함 관계</strong>로 가족 관계 표현. 시각적 노이즈 최소화.
-        </div>
-      </div>
-
-      <div class="desc-section">
-        <h4>디자인 원칙</h4>
-        <div class="design-diagram">┌─ 조부모 가족 ─────────────┐
-│  [할아버지] 💍 [할머니]     │
-│  ┌─ 부모 가족 ──────────┐  │
-│  │  [아버지] 💍 [어머니]  │  │
-│  │  ┌─ 나의 가족 ─────┐  │  │
-│  │  │ [형] [누나] [나] │  │  │
-│  │  │ [동생]          │  │  │
-│  │  └────────────────┘  │  │
-│  └────────────────────┘  │
-└──────────────────────────┘</div>
-      </div>
-
-      <div class="key-feature">
-        <span class="kf-icon">👫</span>
-        <div>
-          <strong>부부는 나란히, 자녀는 박스 안</strong>
-          부부의 박스가 자녀들의 박스를 감싸며 자연스러운 포함 관계를 표현.
-        </div>
-      </div>
-
-      <div class="key-feature">
-        <span class="kf-icon">🎨</span>
-        <div>
-          <strong>중첩 깊이 = 세대 깊이</strong>
-          박스가 안쪽으로 들어갈수록 더 어린 세대. 색상도 점점 진해지며 강조.
-        </div>
-      </div>
-
-      <div class="desc-section">
-        <h4>유지된 핵심 원칙</h4>
-        <ul>
-          <li><strong>출생 순서</strong> 좌→우 자동 정렬</li>
-          <li><strong>부계 중심</strong> + 외부 결혼자 시점 전환</li>
-          <li><strong>인증 뱃지</strong> (✓ / !)</li>
-          <li><strong>나(본인)</strong> 강조 (오렌지 글로우)</li>
-          <li><strong>관계도 / 추가하기 / 인증</strong> 3-way 전환</li>
-        </ul>
-      </div>
-
-      <div class="desc-section">
-        <h4>장점</h4>
-        <ul>
-          <li>모바일에서 <strong>선이 얽히지 않음</strong></li>
-          <li><strong>한 가족 = 한 박스</strong>로 즉시 인식</li>
-          <li>화면 폭 좁아도 <strong>세로 스크롤</strong>로 자연스럽게</li>
-          <li>박스 안쪽 = 더 가까운 가족</li>
-        </ul>
-      </div>
-
-      <div class="desc-section">
-        <h4>시도해보기</h4>
-        <ul>
-          <li>가계도에서 박스가 박스를 감싸는 구조 확인</li>
-          <li>한 가족 단위가 한 박스로 묶여있는지 확인</li>
-          <li><strong>형제 박스 안에서 좌→우</strong> 출생 순서 정렬 확인</li>
-          <li>"나" 노드 탭 → 액션 패널</li>
-          <li>형 노드 탭 → [💍 결혼] → 형수 등록 → <strong>형 가족 박스 자동 형성</strong></li>
-        </ul>
-      </div>
-
-    </div>
-  </div>
 </div>
 
 <script>
@@ -1436,19 +1314,11 @@ function getSiblingGroup(person) {
 }
 
 // ============================================================
-// View toggle
+// View toggle (단일 화면: 그래프 뷰만 존재)
 // ============================================================
-function switchView(view) {
-  currentView = view;
-  document.querySelectorAll('.view-toggle-btn').forEach(b => b.classList.remove('active'));
-  const btnMap = { tree: 'toggleTree', graph: 'toggleGraph', list: 'toggleList' };
-  const panelMap = { tree: 'viewTree', graph: 'viewGraph', list: 'viewList' };
-  document.getElementById(btnMap[view]).classList.add('active');
-  document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
-  document.getElementById(panelMap[view]).classList.add('active');
-  if (view === 'tree') renderTree();
-  else if (view === 'graph') renderGraph();
-  else renderList();
+function switchView(_view) {
+  renderGraph();
+  document.querySelectorAll('.action-panel').forEach(p => p.remove());
 }
 
 // ============================================================
@@ -1676,7 +1546,7 @@ function makePersonNode(person) {
   if (person.id === selectedNodeId) node.classList.add('selected');
 
   let nameHtml = person.name;
-  if (person.isSelf) nameHtml += ' <span style="font-size: 9px;">(나)</span>';
+  if (person.isSelf) nameHtml += ' <span class="self-tag">(나)</span>';
 
   node.innerHTML = `
     <div class="person-node-name">${nameHtml}</div>
@@ -2405,7 +2275,7 @@ function renderGraph() {
       e.stopPropagation();
       if (clickTimer) { clearTimeout(clickTimer); clickTimer = null; }
       selectedNodeId = id;
-      switchView('tree');
+      showGraphActionPanel(id, e);
     });
 
     nodesG.appendChild(grp);
@@ -2435,7 +2305,6 @@ function showGraphActionPanel(personId, evt) {
   if (!person.isSelf) {
     buttons.push({ label: person.confirmed ? '⏱ 대기로' : '✓ 인증', className: 'confirm', onClick: () => { toggleConfirm(person.id); closeGraphPanel(); } });
   }
-  buttons.push({ label: '➕ 추가하기 탭', className: 'order', onClick: () => { switchView('tree'); } });
   if (!person.isSelf) {
     buttons.push({ label: '🗑 삭제', className: 'delete', onClick: () => { deletePerson(person.id); closeGraphPanel(); } });
   }
@@ -2546,11 +2415,11 @@ function makeListItem(p, ordIdx, total) {
   item.innerHTML = `
     <div class="list-item-avatar">${p.name.charAt(0)}</div>
     <div class="list-item-info">
-      <div class="list-item-name">${p.name} ${p.isSelf ? '<span style="color: var(--chon-orange);">(나)</span>' : ''} ${ordText} ${drillText}</div>
+      <div class="list-item-name">${p.name} ${p.isSelf ? '<span class="name-self">(나)</span>' : ''} ${ordText} ${drillText}</div>
       <div class="list-item-rel">${p.rel || (p.isSelf ? '본인' : '')}${p.married ? ' · 💍' : ''}</div>
     </div>
     ${quickBtn}
-    <div class="list-item-status" style="color: ${p.confirmed || p.isSelf ? 'var(--status-confirmed)' : 'var(--status-pending)'};">
+    <div class="list-item-status ${p.confirmed || p.isSelf ? 'confirmed' : 'pending'}">
       ${p.confirmed || p.isSelf ? '✓' : '⏱'}
     </div>
   `;
@@ -2631,18 +2500,8 @@ function showToast(emoji, text) {
 function renderAll() {
   updateBreadcrumb();
   updateSummary();
-  if (currentView === 'tree') renderTree();
-  else if (currentView === 'graph') renderGraph();
-  else renderList();
+  renderGraph();
 }
-
-document.getElementById('treeCanvas').addEventListener('click', e => {
-  if (e.target === e.currentTarget || e.target.classList.contains('family-box') || e.target.classList.contains('children-box') || e.target.classList.contains('couple-row')) {
-    selectedNodeId = null;
-    document.querySelectorAll('.action-panel').forEach(p => p.remove());
-    renderTree();
-  }
-});
 
 // 그래프 SVG 빈 영역 클릭 시 액션 패널 닫기
 document.getElementById('graphSvg').addEventListener('click', e => {

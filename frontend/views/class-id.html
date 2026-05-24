@@ -12,7 +12,7 @@
     --chon-orange: #F7931E;
     --chon-orange-dark: #E87F0A;
     --chon-yellow-soft: #FFF3D6;
-    --bg-app: #F0F9FF;
+    --bg-app: #FFFBF0;
     --bg-empty: #F8FAFC;
     --text-primary: #1F1F1F;
     --text-secondary: #64748B;
@@ -950,110 +950,90 @@
     .phones-grid { flex-direction: column; align-items: center; }
     .desc-panel { width: 100%; max-width: 600px; }
   }
+
+  /* ============================================
+     Single-screen mode — 데모 베젤·래퍼 제거 후 phone-screen이 메인
+     ============================================ */
+  body { background: var(--bg-app); }
+  .phone-screen {
+    border-radius: 0;
+    min-height: 100vh;
+    height: auto;
+    max-width: 480px;
+    margin: 0 auto;
+    box-shadow: var(--shadow-md);
+  }
+  .add-actions {
+    display: flex;
+    gap: 8px;
+    padding: 12px 16px 0;
+  }
+  .add-btn {
+    flex: 1;
+    background: white;
+    border: 1.5px solid var(--student-border);
+    color: var(--student-color);
+    padding: 10px 12px;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .add-btn:active { transform: scale(0.97); }
+
+  /* ============================================
+     Utility classes — inline style 대체
+     ============================================ */
+  .spacer-30 { height: 30px; }
+  .self-tag { font-size: 9px; }
+  .name-self { color: var(--chon-orange); }
+  .gl-line--confirmed { background: var(--status-confirmed); }
+  .gl-line--pending { background: var(--status-pending); }
+  .list-item-status.confirmed { color: var(--status-confirmed); }
+  .list-item-status.pending { color: var(--status-pending); }
 </style>
 </head>
 <body>
 
-<div class="demo-wrap">
-
-  <div class="demo-header">
-    <h1>🎓 PASS 학급증 — 간소화 디자인</h1>
-    <p>
-      <span class="demo-badge">v2</span>
-      <span class="demo-badge">학급친구 학부모 제거</span>
-      <span class="demo-badge">우리집만 가족 단위</span>
-      <span class="demo-badge">3열 그리드</span>
-    </p>
-    <p><strong>v2 변경사항</strong>: 학급친구의 학부모를 모두 제거해 화면이 훨씬 깔끔해짐. <strong>학급친구는 학생 노드만</strong> 컴팩트한 3열 그리드로 표시. 우리집만 학부모와 함께 가족 단위로 강조 표시.</p>
+<div class="phone-screen">
+  <div class="status-bar">
+    <span>9:30</span>
+    <div class="camera-dot"></div>
+    <div>▲ ◢ █</div>
   </div>
+  <div class="app-header">
+    <button class="header-action home" onclick="window.location.href='../main/home.html'">‹ 홈</button>
+    <h1>🎓 학급증</h1>
+    <button class="header-action" onclick="resetAll()">처음부터</button>
+  </div>
+  <div class="content">
+    <div class="class-card">
+      <div class="class-avatar">🎓</div>
+      <div class="class-info">
+        <div class="class-name">행복초 3학년 2반</div>
+        <div class="class-stats">
+          <span>👥 <strong id="statTotal">7</strong>명</span>
+          <span>✓ <strong id="statConfirmed">6</strong>명</span>
+        </div>
+      </div>
+    </div>
 
-  <div class="phones-grid">
-
-    <div class="phone-wrapper">
-      <div class="phone-caption">📱 학급증 v2 — 간소화</div>
-      <div class="phone">
-        <div class="phone-screen">
-          <div class="status-bar">
-            <span>9:30</span>
-            <div class="camera-dot"></div>
-            <div>▲ ◢ █</div>
-          </div>
-          <div class="app-header">
-            <h1>🎓 학급증</h1>
-            <button class="header-action" onclick="resetAll()">처음부터</button>
-          </div>
-          <div class="view-toggle">
-            <button class="view-toggle-btn active" id="toggleGraph" onclick="switchView('graph')">
-              <span>🏫</span><span>학급증</span>
-            </button>
-            <button class="view-toggle-btn" id="toggleTree" onclick="switchView('tree')">
-              <span>➕</span><span>추가하기</span>
-            </button>
-            <button class="view-toggle-btn" id="toggleList" onclick="switchView('list')">
-              <span>✓</span><span>인증현황</span>
-            </button>
-          </div>
-          <div class="content">
-            <div class="class-card">
-              <div class="class-avatar">🎓</div>
-              <div class="class-info">
-                <div class="class-name">행복초 3학년 2반</div>
-                <div class="class-stats">
-                  <span>👥 <strong id="statTotal">7</strong>명</span>
-                  <span>✓ <strong id="statConfirmed">6</strong>명</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="view-panel" id="viewTree">
-              <div class="legend">
-                <div class="legend-row">
-                  <div class="legend-chip">
-                    <span class="lc-swatch" style="background: var(--teacher-bg); border-color: var(--teacher-border);"></span>
-                    <span>교사</span>
-                  </div>
-                  <div class="legend-chip">
-                    <span class="lc-swatch" style="background: var(--parent-bg); border-color: var(--parent-border);"></span>
-                    <span>학부모</span>
-                  </div>
-                  <div class="legend-chip">
-                    <span class="lc-swatch" style="background: var(--student-bg); border-color: var(--student-border);"></span>
-                    <span>학생</span>
-                  </div>
-                  <div class="legend-chip">
-                    <span class="lc-swatch" style="background: var(--container-myhome); border-color: var(--container-myhome-border);"></span>
-                    <span>우리집</span>
-                  </div>
-                </div>
-              </div>
-              <div class="class-canvas" id="classCanvas"></div>
-              <div style="height: 30px;"></div>
-            </div>
-
-            <div class="view-panel active" id="viewGraph">
-              <div class="graph-canvas-wrap">
-                <svg id="graphSvg" viewBox="0 0 360 600" preserveAspectRatio="xMidYMid meet">
-                  <g id="graphEdges"></g>
-                  <g id="graphNodes"></g>
-                </svg>
-              </div>
-              <div class="graph-legend">
-                <div class="gl-item"><span class="gl-line" style="background: var(--status-confirmed);"></span> 인증됨</div>
-                <div class="gl-item"><span class="gl-line dashed" style="background: var(--status-pending);"></span> 대기</div>
-              </div>
-              <div style="height: 30px;"></div>
-            </div>
-
-            <div class="view-panel" id="viewList">
-              <div class="verify-summary" id="verifySummary">
-                <!-- 동적 렌더링 -->
-              </div>
-              <div class="section-header">
-                <h2>✓ 인증 현황</h2>
-              </div>
-              <div class="list-section" id="resultList1"></div>
-            </div>
-          </div>
+    <div class="graph-canvas-wrap">
+      <svg id="graphSvg" viewBox="0 0 360 600" preserveAspectRatio="xMidYMid meet">
+        <g id="graphEdges"></g>
+        <g id="graphNodes"></g>
+      </svg>
+    </div>
+    <div class="graph-legend">
+      <div class="gl-item"><span class="gl-line gl-line--confirmed"></span> 인증됨</div>
+      <div class="gl-item"><span class="gl-line dashed gl-line--pending"></span> 대기</div>
+    </div>
+    <div class="add-actions">
+      <button class="add-btn" onclick="openModalForSlot('student')">＋ 학급친구</button>
+    </div>
+    <div class="spacer-30"></div>
+  </div>
 
           <div class="modal-fs" id="modalFs1">
             <div class="modal-fs-header">
@@ -1087,91 +1067,8 @@
             </div>
           </div>
 
-          <div class="toast" id="toast1"><span id="toastEmoji1">✓</span><span id="toastText1"></span></div>
+  <div class="toast" id="toast1"><span id="toastEmoji1">✓</span><span id="toastText1"></span></div>
 
-        </div>
-      </div>
-    </div>
-
-    <div class="desc-panel">
-      <h3>🎓 학급증 v2 — 간소화</h3>
-
-      <div class="key-feature">
-        <span class="kf-icon">✨</span>
-        <div>
-          <strong>훨씬 깔끔해진 화면</strong>
-          학급친구 학부모를 모두 제거. 학급친구는 학생 노드만 컴팩트하게 표시되어 한눈에 들어옵니다.
-        </div>
-      </div>
-
-      <div class="desc-section">
-        <h4>새 구조</h4>
-        <div class="design-diagram">┌─ 🏫 학급 (담임) ────────┐
-│  [김선생님]               │
-│                          │
-│  ┌─ 학생 영역 ─────────┐ │
-│  │ ┌─ 🏠 우리집 ─────┐ │ │
-│  │ │ [엄마][아빠]    │ │ │
-│  │ │   [나(5번)]     │ │ │
-│  │ └────────────────┘ │ │
-│  │                     │ │
-│  │ [영희][철수][민지] │ │
-│  │  1번   3번   12번   │ │
-│  │ [수민][+추가]       │ │
-│  │  22번               │ │
-│  └─────────────────────┘ │
-└────────────────────────┘</div>
-      </div>
-
-      <div class="removed-list">
-        <strong>❌ v2에서 제거된 것</strong>
-        <ul>
-          <li>학급친구의 학부모 노드</li>
-          <li>친구네 학부모 추가 액션</li>
-          <li>친구 학부모 시점 전환 (🔀)</li>
-          <li>학부모 추가 슬롯 (학급친구 옆)</li>
-        </ul>
-      </div>
-
-      <div class="key-feature">
-        <span class="kf-icon">📐</span>
-        <div>
-          <strong>3열 그리드</strong>
-          학급친구들을 3열로 컴팩트하게 배치. 한 번에 더 많은 친구 확인 가능.
-        </div>
-      </div>
-
-      <div class="key-feature">
-        <span class="kf-icon">🏠</span>
-        <div>
-          <strong>우리집만 가족 단위</strong>
-          우리집은 가로 전체 너비로 학부모+학생 가족 단위 강조.
-        </div>
-      </div>
-
-      <div class="desc-section">
-        <h4>유지된 핵심 기능</h4>
-        <ul>
-          <li>박스 포함 디자인 (선 없음)</li>
-          <li>교사-학생 위계 구조</li>
-          <li>출석번호순 자동 정렬</li>
-          <li>우리집 가족 단위 강조</li>
-          <li>인증 뱃지 (✓ / !)</li>
-          <li>구성원 목록 토글</li>
-        </ul>
-      </div>
-
-      <div class="desc-section">
-        <h4>시도해보기</h4>
-        <ul>
-          <li>학생 노드 탭 → 출석번호 변경/인증/삭제</li>
-          <li>"+학급친구" 슬롯 → 새 친구 등록</li>
-          <li>구성원 목록 토글로 전체 보기</li>
-          <li>3열 그리드로 정렬된 학급친구 확인</li>
-        </ul>
-      </div>
-    </div>
-  </div>
 </div>
 
 <script>
@@ -1209,17 +1106,9 @@ function sortByAttendance(arr) {
   return [...arr].sort((a, b) => (a.attendanceNo || 999) - (b.attendanceNo || 999));
 }
 
-function switchView(view) {
-  currentView = view;
-  document.querySelectorAll('.view-toggle-btn').forEach(b => b.classList.remove('active'));
-  const btnMap = { tree: 'toggleTree', graph: 'toggleGraph', list: 'toggleList' };
-  const panelMap = { tree: 'viewTree', graph: 'viewGraph', list: 'viewList' };
-  document.getElementById(btnMap[view]).classList.add('active');
-  document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
-  document.getElementById(panelMap[view]).classList.add('active');
-  if (view === 'tree') renderTree();
-  else if (view === 'graph') renderGraph();
-  else renderList();
+function switchView(_view) {
+  renderGraph();
+  document.querySelectorAll('.action-panel').forEach(p => p.remove());
 }
 
 function renderTree() {
@@ -1295,7 +1184,7 @@ function makePersonNode(person) {
 
   const roleNames = { teacher: '담임', parent: '학부모', student: '학생' };
   let nameHtml = person.name;
-  if (person.isSelf) nameHtml += ' <span style="font-size: 9px;">(나)</span>';
+  if (person.isSelf) nameHtml += ' <span class="self-tag">(나)</span>';
 
   let extra = '';
   if (person.role === 'student' && person.attendanceNo) {
@@ -1723,7 +1612,7 @@ function renderGraph() {
       e.stopPropagation();
       if (clickTimer) { clearTimeout(clickTimer); clickTimer = null; }
       selectedNodeId = id;
-      switchView('tree');
+      showGraphActionPanel(id, e);
     });
 
     nodesG.appendChild(grp);
@@ -1748,7 +1637,9 @@ function showGraphActionPanel(personId, evt) {
   if (!person.isSelf) {
     buttons.push({ label: person.confirmed ? '⏱ 대기로' : '✓ 인증', className: 'confirm', onClick: () => { toggleConfirm(person.id); closeGraphPanel(); } });
   }
-  buttons.push({ label: '➕ 추가하기 탭', className: 'order', onClick: () => { switchView('tree'); } });
+  if (person.role === 'student' && !person.isSelf) {
+    buttons.push({ label: '➕ 학급친구 추가', className: 'order', onClick: () => { openModalForSlot('student'); closeGraphPanel(); } });
+  }
   if (!person.isSelf) {
     buttons.push({ label: '🗑 삭제', className: 'delete', onClick: () => { deletePerson(person.id); closeGraphPanel(); } });
   }
@@ -1855,11 +1746,11 @@ function makeListItem(p) {
   item.innerHTML = `
     <div class="list-item-avatar">${p.name.charAt(0)}</div>
     <div class="list-item-info">
-      <div class="list-item-name">${p.name} ${p.isSelf ? '<span style="color: var(--chon-orange);">(나)</span>' : ''} ${attendText}</div>
+      <div class="list-item-name">${p.name} ${p.isSelf ? '<span class="name-self">(나)</span>' : ''} ${attendText}</div>
       <div class="list-item-rel">${extra}</div>
     </div>
     ${quickBtn}
-    <div class="list-item-status" style="color: ${p.confirmed || p.isSelf ? 'var(--status-confirmed)' : 'var(--status-pending)'};">
+    <div class="list-item-status ${p.confirmed || p.isSelf ? 'confirmed' : 'pending'}">
       ${p.confirmed || p.isSelf ? '✓' : '⏱'}
     </div>
   `;
@@ -1893,25 +1784,8 @@ function showToast(emoji, text) {
 
 function renderAll() {
   updateSummary();
-  if (currentView === 'tree') renderTree();
-  else if (currentView === 'graph') renderGraph();
-  else renderList();
+  renderGraph();
 }
-
-document.getElementById('classCanvas').addEventListener('click', e => {
-  if (e.target === e.currentTarget ||
-      e.target.classList.contains('class-box') ||
-      e.target.classList.contains('students-container') ||
-      e.target.classList.contains('students-grid') ||
-      e.target.classList.contains('my-home-block') ||
-      e.target.classList.contains('my-home-parents') ||
-      e.target.classList.contains('my-home-student') ||
-      e.target.classList.contains('teacher-row')) {
-    selectedNodeId = null;
-    document.querySelectorAll('.action-panel').forEach(p => p.remove());
-    renderTree();
-  }
-});
 
 document.getElementById('graphSvg').addEventListener('click', e => {
   if (e.target.tagName === 'svg' || e.target.id === 'graphEdges' || e.target.id === 'graphNodes') {

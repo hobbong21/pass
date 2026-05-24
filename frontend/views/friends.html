@@ -855,164 +855,127 @@
     .device-row { flex-direction: column; align-items: center; }
     .desc-panel { width: 100%; max-width: 600px; }
   }
+
+  /* ============================================
+     Single-screen mode — 데모 베젤·래퍼 제거 후 phone-screen이 메인
+     ============================================ */
+  body { background: var(--bg-app); }
+  .phone-screen {
+    border-radius: 0;
+    min-height: 100vh;
+    height: auto;
+    max-width: 480px;
+    margin: 0 auto;
+    box-shadow: var(--shadow-md);
+  }
+  .add-actions {
+    display: flex;
+    gap: 8px;
+    padding: 12px 16px 0;
+  }
+  .add-btn {
+    flex: 1;
+    background: white;
+    border: 1.5px solid var(--node-friend-border);
+    color: var(--friend-green-dark);
+    padding: 10px 12px;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .add-btn.ff {
+    border-style: dashed;
+    color: var(--text-secondary);
+  }
+  .add-btn:active { transform: scale(0.97); }
+
+  /* ============================================
+     Utility classes — inline style 대체
+     ============================================ */
+  .spacer-30 { height: 30px; }
+  .self-tag { font-size: 9px; }
+  .name-self { color: var(--chon-orange); }
+  .gl-dot--friend { background: var(--node-friend-bg); border-color: var(--node-friend-border); }
+  .gl-dot--ff { background: var(--node-ff-bg); border-color: var(--node-ff-border); border-style: dashed; }
+  .list-item-status.confirmed { color: var(--status-confirmed); }
+  .list-item-status.pending { color: var(--status-pending); }
+  .tier-badge--me {
+    background: rgba(247,147,30,0.15);
+    border-color: var(--chon-orange);
+    color: var(--chon-orange-dark);
+  }
 </style>
 </head>
 <body>
 
-<div class="page-header">
-  <h1>🌐 PASS 모임</h1>
-  <div class="subtitle">모임 + 모임원 추천 — 2-hop 신뢰 네트워크</div>
-  <div class="demo-badges">
-    <span class="demo-badge">3-way 토글</span>
-    <span class="demo-badge">모임원 추천 자동 승격</span>
-    <span class="demo-badge">인증현황 카운트</span>
+<div class="phone-screen">
+  <div class="status-bar">
+    <span>9:30</span>
+    <div class="camera-dot"></div>
+    <div>▲ ◢ █</div>
   </div>
-</div>
 
-<div class="device-row">
-  <div class="device-col">
-    <div class="phone-caption">📱 모임 v1 — 2-hop 네트워크</div>
-    <div class="phone">
-      <div class="phone-screen">
-        <div class="status-bar">
-          <span>9:30</span>
-          <div class="camera-dot"></div>
-          <div>▲ ◢ █</div>
+  <div class="app-header">
+    <button class="header-action home" onclick="window.location.href='../main/home.html'">‹ 홈</button>
+    <h1>🌐 모임</h1>
+    <button class="header-action" onclick="resetAll()">처음부터</button>
+  </div>
+
+  <div class="content">
+    <div class="summary-card">
+      <div class="summary-avatar">🌐</div>
+      <div class="summary-info">
+        <div class="summary-name" id="summaryName">내 모임 네트워크</div>
+        <div class="summary-stats">
+          <span>👥 <strong id="statTotal">5</strong>명</span>
+          <span>✓ <strong id="statConfirmed">3</strong>명</span>
+          <span>🔗 <strong id="statFf">2</strong>명(2-hop)</span>
         </div>
+      </div>
+    </div>
 
-        <div class="app-header">
-          <h1>🌐 모임</h1>
-          <button class="header-action" onclick="resetAll()">처음부터</button>
+    <div class="graph-canvas-wrap">
+      <svg id="graphSvg" viewBox="0 0 360 500" preserveAspectRatio="xMidYMid meet">
+        <g id="graphEdges"></g>
+        <g id="graphNodes"></g>
+      </svg>
+    </div>
+    <div class="graph-legend">
+      <div class="gl-item"><span class="gl-dot gl-dot--friend"></span> 모임원 (1-hop)</div>
+      <div class="gl-item"><span class="gl-dot gl-dot--ff"></span> 모임원 추천 (2-hop)</div>
+    </div>
+    <div class="add-actions">
+      <button class="add-btn" onclick="openAddRoot('friend')">＋ 모임원</button>
+      <button class="add-btn ff" onclick="openAddRoot('ff')">＋ 추천받은 사람</button>
+    </div>
+    <div class="spacer-30"></div>
+  </div>
+
+  <div class="modal-fs" id="modalFs">
+    <div class="modal-fs-header">
+      <button class="modal-fs-close" onclick="closeFsModal()">✕</button>
+      <div class="modal-fs-title" id="modalFsTitle">새 모임원 추가</div>
+      <button class="modal-fs-save" onclick="confirmFsAdd()">완료</button>
+    </div>
+    <div class="modal-fs-body">
+      <div class="modal-section">
+        <div class="modal-section-label">이름</div>
+        <input type="text" class="modal-input" id="modalFsName" placeholder="홍길동" autocomplete="off"/>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-label">성별</div>
+        <div class="gender-toggle">
+          <div class="gender-option male selected" onclick="selectGender('male')">남성</div>
+          <div class="gender-option female" onclick="selectGender('female')">여성</div>
         </div>
-
-        <div class="view-toggle">
-          <button class="view-toggle-btn active" id="toggleGraph" onclick="switchView('graph')">
-            <span>🌐</span><span>모임</span>
-          </button>
-          <button class="view-toggle-btn" id="toggleTree" onclick="switchView('tree')">
-            <span>➕</span><span>추가하기</span>
-          </button>
-          <button class="view-toggle-btn" id="toggleList" onclick="switchView('list')">
-            <span>✓</span><span>인증현황</span>
-          </button>
-        </div>
-
-        <div class="content">
-          <div class="summary-card">
-            <div class="summary-avatar">🌐</div>
-            <div class="summary-info">
-              <div class="summary-name" id="summaryName">내 모임 네트워크</div>
-              <div class="summary-stats">
-                <span>👥 <strong id="statTotal">5</strong>명</span>
-                <span>✓ <strong id="statConfirmed">3</strong>명</span>
-                <span>🔗 <strong id="statFf">2</strong>명(2-hop)</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Graph View (디폴트 active) -->
-          <div class="view-panel active" id="viewGraph">
-            <div class="graph-canvas-wrap">
-              <svg id="graphSvg" viewBox="0 0 360 500" preserveAspectRatio="xMidYMid meet">
-                <g id="graphEdges"></g>
-                <g id="graphNodes"></g>
-              </svg>
-            </div>
-            <div class="graph-legend">
-              <div class="gl-item"><span class="gl-dot" style="background: var(--node-friend-bg); border-color: var(--node-friend-border);"></span> 모임원 (1-hop)</div>
-              <div class="gl-item"><span class="gl-dot" style="background: var(--node-ff-bg); border-color: var(--node-ff-border); border-style: dashed;"></span> 모임원 추천 (2-hop)</div>
-            </div>
-            <div style="height: 30px;"></div>
-          </div>
-
-          <!-- Tree View (추가하기) -->
-          <div class="view-panel" id="viewTree">
-            <div class="tree-canvas" id="treeCanvas">
-              <!-- rendered by JS -->
-            </div>
-          </div>
-
-          <!-- List View (인증현황) -->
-          <div class="view-panel" id="viewList">
-            <div class="verify-summary" id="verifySummary"></div>
-            <div class="section-header">
-              <h2>✓ 인증 현황</h2>
-            </div>
-            <div class="list-section" id="resultList"></div>
-          </div>
-        </div>
-
-        <!-- Modal -->
-        <div class="modal-fs" id="modalFs">
-          <div class="modal-fs-header">
-            <button class="modal-fs-close" onclick="closeFsModal()">✕</button>
-            <div class="modal-fs-title" id="modalFsTitle">새 모임원 추가</div>
-            <button class="modal-fs-save" onclick="confirmFsAdd()">완료</button>
-          </div>
-          <div class="modal-fs-body">
-            <div class="modal-section">
-              <div class="modal-section-label">이름</div>
-              <input type="text" class="modal-input" id="modalFsName" placeholder="홍길동" autocomplete="off"/>
-            </div>
-            <div class="modal-section">
-              <div class="modal-section-label">성별</div>
-              <div class="gender-toggle">
-                <div class="gender-option male selected" onclick="selectGender('male')">남성</div>
-                <div class="gender-option female" onclick="selectGender('female')">여성</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Toast -->
-        <div class="toast" id="toast">
-          <span id="toastEmoji">✓</span><span id="toastText"></span>
-        </div>
-
       </div>
     </div>
   </div>
 
-  <!-- 설명 패널 -->
-  <div class="desc-panel">
-    <h3>🌐 모임 v1 — 2-hop 신뢰 네트워크</h3>
-
-    <div class="desc-section">
-      <h4>3-way 토글</h4>
-      <ul>
-        <li><strong>🌐 모임</strong>: SVG 그래프 (디폴트)</li>
-        <li><strong>➕ 추가하기</strong>: 박스 포함 디자인</li>
-        <li><strong>✓ 인증현황</strong>: 카운트 카드 + 빠른 인증</li>
-      </ul>
-    </div>
-
-    <div class="desc-section">
-      <h4>모임 vs 모임원 추천</h4>
-      <ul>
-        <li><strong>모임원 (1-hop)</strong>: 내가 직접 인증한 사람</li>
-        <li><strong>모임원 추천 (2-hop)</strong>: 모임원을 통해 알게 된 사람 (대기 상태)</li>
-        <li><strong>자동 승격</strong>: 모임원 추천을 인증하면 모임원(1-hop)으로 자동 승격</li>
-      </ul>
-    </div>
-
-    <div class="desc-section">
-      <h4>그래프 인터랙션</h4>
-      <ul>
-        <li><strong>단일 클릭</strong>: 액션 패널 (인증/삭제)</li>
-        <li><strong>더블클릭</strong>: 추가하기 탭으로 점프</li>
-        <li><strong>빈 영역 클릭</strong>: 패널 닫기</li>
-      </ul>
-    </div>
-
-    <div class="desc-section">
-      <h4>색상 의미</h4>
-      <ul>
-        <li>🟠 오렌지: 나(본인)</li>
-        <li>🟢 진한 초록: 모임원(1-hop), 실선</li>
-        <li>🟢 중간 초록 점선: 모임원끼리 서로 아는 사이</li>
-        <li>🟢 옅은 초록: 모임원 추천(2-hop), 점선</li>
-      </ul>
-    </div>
+  <div class="toast" id="toast">
+    <span id="toastEmoji">✓</span><span id="toastText"></span>
   </div>
 </div>
 
@@ -1054,19 +1017,10 @@ function getViaList(p) {
 }
 
 // ============================================================
-// View switch
+// View switch (단일 화면: 그래프 뷰만 존재)
 // ============================================================
-function switchView(view) {
-  currentView = view;
-  document.querySelectorAll('.view-toggle-btn').forEach(b => b.classList.remove('active'));
-  const btnMap = { tree: 'toggleTree', graph: 'toggleGraph', list: 'toggleList' };
-  const panelMap = { tree: 'viewTree', graph: 'viewGraph', list: 'viewList' };
-  document.getElementById(btnMap[view]).classList.add('active');
-  document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
-  document.getElementById(panelMap[view]).classList.add('active');
-  if (view === 'tree') renderTree();
-  else if (view === 'graph') renderGraph();
-  else renderList();
+function switchView(_view) {
+  renderGraph();
   document.querySelectorAll('.action-panel').forEach(p => p.remove());
 }
 
@@ -1141,7 +1095,7 @@ function makePersonNode(person) {
   }
 
   node.innerHTML = `
-    <div class="person-node-name">${person.name}${person.isSelf ? ' <span style="font-size:9px;">(나)</span>' : ''}</div>
+    <div class="person-node-name">${person.name}${person.isSelf ? ' <span class="self-tag">(나)</span>' : ''}</div>
     ${meta ? `<div class="person-node-meta">${meta}</div>` : ''}
     ${!person.isSelf ? `<div class="person-confirm-badge ${person.confirmed ? '' : 'pending'}">${person.confirmed ? '✓' : '!'}</div>` : ''}
   `;
@@ -1482,7 +1436,8 @@ function renderGraph() {
       e.stopPropagation();
       if (clickTimer) { clearTimeout(clickTimer); clickTimer = null; }
       selectedNodeId = id;
-      switchView('tree');
+      const person = getPerson(id);
+      if (person && !person.isSelf) openAddRoot(person.hopLevel === 2 ? 'ff' : 'friend');
     });
 
     nodesG.appendChild(grp);
@@ -1506,7 +1461,9 @@ function showGraphActionPanel(personId, evt) {
       buttons.push({ label: person.confirmed ? '⏱ 대기로' : '✓ 인증', className: 'confirm', onClick: () => { toggleConfirm(person.id); closeGraphPanel(); } });
     }
   }
-  buttons.push({ label: '➕ 추가하기 탭', className: 'promote', onClick: () => { switchView('tree'); } });
+  if (!person.isSelf) {
+    buttons.push({ label: '➕ 옆에 추가', className: 'promote', onClick: () => { openAddRoot(person.hopLevel === 2 ? 'ff' : 'friend'); closeGraphPanel(); } });
+  }
   if (!person.isSelf) {
     buttons.push({ label: '🗑 삭제', className: 'delete', onClick: () => { deletePerson(person.id); closeGraphPanel(); } });
   }
@@ -1569,7 +1526,7 @@ function renderList() {
   // 나
   const meDiv = document.createElement('div');
   meDiv.className = 'list-tier';
-  meDiv.innerHTML = `<div class="list-tier-header"><span class="tier-badge" style="background:rgba(247,147,30,0.15); border-color:var(--chon-orange); color:var(--chon-orange-dark);">🏠 나</span><span class="tier-count">1명</span></div>`;
+  meDiv.innerHTML = `<div class="list-tier-header"><span class="tier-badge tier-badge--me">🏠 나</span><span class="tier-count">1명</span></div>`;
   meDiv.appendChild(makeListItem(state.me));
   container.appendChild(meDiv);
 
@@ -1626,11 +1583,11 @@ function makeListItem(p) {
   item.innerHTML = `
     <div class="list-item-avatar">${p.name.charAt(0)}</div>
     <div class="list-item-info">
-      <div class="list-item-name">${p.name}${p.isSelf ? ' <span style="color: var(--chon-orange);">(나)</span>' : ''}</div>
+      <div class="list-item-name">${p.name}${p.isSelf ? ' <span class="name-self">(나)</span>' : ''}</div>
       <div class="list-item-meta">${meta}</div>
     </div>
     ${quickBtn}
-    <div class="list-item-status" style="color: ${p.confirmed || p.isSelf ? 'var(--status-confirmed)' : 'var(--status-pending)'};">
+    <div class="list-item-status ${p.confirmed || p.isSelf ? 'confirmed' : 'pending'}">
       ${p.confirmed || p.isSelf ? '✓' : '⏱'}
     </div>
   `;
@@ -1758,9 +1715,7 @@ function updateSummary() {
 
 function renderAll() {
   updateSummary();
-  if (currentView === 'tree') renderTree();
-  else if (currentView === 'graph') renderGraph();
-  else renderList();
+  renderGraph();
 }
 
 // ============================================================
@@ -1778,18 +1733,6 @@ function showToast(emoji, text) {
 // ============================================================
 // Event listeners
 // ============================================================
-document.getElementById('treeCanvas').addEventListener('click', e => {
-  if (e.target === e.currentTarget ||
-      e.target.classList.contains('me-block') ||
-      e.target.classList.contains('friends-box') ||
-      e.target.classList.contains('ff-box') ||
-      e.target.classList.contains('friends-grid')) {
-    selectedNodeId = null;
-    document.querySelectorAll('.action-panel').forEach(p => p.remove());
-    renderTree();
-  }
-});
-
 document.getElementById('graphSvg').addEventListener('click', e => {
   if (e.target.tagName === 'svg' || e.target.id === 'graphEdges' || e.target.id === 'graphNodes') {
     closeGraphPanel();
