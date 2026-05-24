@@ -63,12 +63,13 @@
   }
 
   @media (min-width: 768px) {
-    body { padding: 32px 0; }
+    body { padding: 32px 0; background: #F5F7FB; }
     .app {
       border-radius: 28px;
       overflow: hidden;
       min-height: calc(100vh - 64px);
       min-height: calc(100dvh - 64px);
+      box-shadow: var(--shadow-lg);
     }
   }
 
@@ -724,6 +725,51 @@
     transform: translateX(-50%) translateY(0);
     opacity: 1;
   }
+
+  /* ============================================
+     Utility classes — inline style 대체
+     ============================================ */
+  .section-title--mt-8 { margin-top: 8px; }
+  .section-title--mt-22 { margin-top: 22px; }
+  .chev {
+    color: var(--text-tertiary);
+    font-size: 20px;
+  }
+  .chev--sm { font-size: 18px; }
+  .profile-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: 22px;
+    text-align: center;
+    margin-top: 8px;
+    border: 1px solid var(--border-light);
+  }
+  .profile-card-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 24px;
+    background: var(--chon-orange);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    font-weight: 900;
+    margin: 0 auto 12px;
+  }
+  .profile-card-name {
+    font-size: 20px;
+    font-weight: 900;
+    margin-bottom: 4px;
+  }
+  .profile-card-email {
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-weight: 600;
+  }
+  .activity-item--danger { border-color: #FCA5A5; }
+  .activity-icon--danger { background: #FEE2E2; color: #DC2626; }
+  .activity-title--danger { color: #DC2626; }
 </style>
 </head>
 <body>
@@ -851,7 +897,7 @@
 
     <!-- ============ AUTH (center tab) ============ -->
     <section class="page" id="pageAuth">
-      <div class="section-title" style="margin-top: 8px;">인증 센터</div>
+      <div class="section-title section-title--mt-8">인증 센터</div>
 
       <div class="feature-card" onclick="openAuthSheet()">
         <div class="feature-info">
@@ -892,7 +938,7 @@
 
     <!-- ============ RELATIONS (3 모드) ============ -->
     <section class="page" id="pageRel">
-      <div class="section-title" style="margin-top:8px;">관계 네트워크</div>
+      <div class="section-title section-title--mt-8">관계 네트워크</div>
       <p class="mode-intro">
         용도에 맞는 모드를 선택하세요. 각 모드는 고유의 시각화와<br/>
         인증 흐름을 제공합니다.
@@ -943,23 +989,23 @@
         <div class="mode-arrow">›</div>
       </div>
 
-      <div class="section-title" style="margin-top:22px;">통합 보기</div>
+      <div class="section-title section-title--mt-22">통합 보기</div>
       <div class="activity-item" onclick="goRelTool()">
         <div class="activity-icon blue">🗂</div>
         <div class="activity-info">
           <div class="activity-title">전체 통합 페이지 (PASS v2)</div>
           <div class="activity-meta">피드·모임·채팅·Trust 한 화면</div>
         </div>
-        <div style="color:var(--text-tertiary); font-size:18px;">›</div>
+        <div class="chev chev--sm">›</div>
       </div>
     </section>
 
     <!-- ============ MY ============ -->
     <section class="page" id="pageMy">
-      <div style="background:white; border-radius:var(--radius-lg); padding:22px; text-align:center; margin-top:8px; border:1px solid var(--border-light);">
-        <div id="profileAvatar" style="width:80px; height:80px; border-radius:24px; background:var(--chon-orange); color:white; display:flex; align-items:center; justify-content:center; font-size:32px; font-weight:900; margin:0 auto 12px;">홍</div>
-        <div id="profileName" style="font-size:20px; font-weight:900; margin-bottom:4px;">홍길순</div>
-        <div id="profileEmail" style="font-size:13px; color:var(--text-secondary); font-weight:600;">demo@chon.ai</div>
+      <div class="profile-card">
+        <div class="profile-card-avatar" id="profileAvatar">홍</div>
+        <div class="profile-card-name" id="profileName">홍길순</div>
+        <div class="profile-card-email" id="profileEmail">demo@chon.ai</div>
       </div>
 
       <div class="section-title">CHON DID</div>
@@ -987,10 +1033,10 @@
           <div class="activity-meta">이 디바이스 등록됨</div>
         </div>
       </div>
-      <div class="activity-item" onclick="logoutPass()" style="border-color: #FCA5A5;">
-        <div class="activity-icon" style="background:#FEE2E2; color:#DC2626;">🚪</div>
+      <div class="activity-item activity-item--danger" onclick="logoutPass()">
+        <div class="activity-icon activity-icon--danger">🚪</div>
         <div class="activity-info">
-          <div class="activity-title" style="color:#DC2626;">로그아웃</div>
+          <div class="activity-title activity-title--danger">로그아웃</div>
           <div class="activity-meta">간편 번호 등록은 유지됩니다</div>
         </div>
       </div>
@@ -1034,7 +1080,7 @@
         <div class="modal-opt-title">상호 인증</div>
         <div class="modal-opt-desc">상대방과 실시간 1:1 인증</div>
       </div>
-      <div style="color:var(--text-tertiary); font-size:20px;">›</div>
+      <div class="chev">›</div>
     </button>
     <button class="modal-opt" onclick="chooseAuth('call')">
       <div class="modal-opt-icon">📞</div>
@@ -1042,7 +1088,7 @@
         <div class="modal-opt-title">통화 인증</div>
         <div class="modal-opt-desc">PRECALL 서명으로 통화 안전 확인</div>
       </div>
-      <div style="color:var(--text-tertiary); font-size:20px;">›</div>
+      <div class="chev">›</div>
     </button>
     <button class="modal-opt" onclick="chooseAuth('cert')">
       <div class="modal-opt-icon">📄</div>
@@ -1050,7 +1096,7 @@
         <div class="modal-opt-title">관계 증명서 발급</div>
         <div class="modal-opt-desc">가족·지인 관계 증명</div>
       </div>
-      <div style="color:var(--text-tertiary); font-size:20px;">›</div>
+      <div class="chev">›</div>
     </button>
   </div>
 </div>

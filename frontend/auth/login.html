@@ -38,7 +38,7 @@
     margin: 0;
     padding: 0;
     font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
-    background: #F8F9FB;
+    background: #F5F7FB;
     color: var(--text-primary);
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
@@ -519,7 +519,7 @@
     align-items: center;
     justify-content: center;
     color: white;
-    font-size: 50px;
+    font-size: 48px;
     box-shadow: 0 16px 40px rgba(16,185,129,0.3);
     animation: successPop 0.5s ease-out;
   }
@@ -957,6 +957,53 @@
     transform: translateX(-50%) translateY(0);
     opacity: 1;
   }
+
+  /* ============================================
+     Utility classes — inline style 대체
+     ============================================ */
+  .is-hidden { display: none !important; }
+  .text-orange { color: var(--chon-orange-dark); }
+  .required-mark { color: var(--chon-orange-dark); }
+  .helper-text-sub {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin: -8px 0 8px;
+    line-height: 1.5;
+  }
+  .center-hint-md {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 13px;
+    margin: 0 0 6px;
+  }
+  .center-hint-sm {
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 14px;
+  }
+  .tip-text {
+    text-align: center;
+    color: var(--text-tertiary);
+    font-size: 11px;
+    margin-top: 10px;
+  }
+  .demo-hint {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    margin-top: 6px;
+  }
+  .info-text {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    margin-top: 16px;
+    line-height: 1.6;
+  }
+  .check-text--bold { font-weight: 800; }
+  .otp-timer--m4 { margin: 0 4px 8px; }
+  .flex-spacer { flex: 1; }
+  .flex-spacer.min-h-8 { min-height: 8px; }
+  .flex-spacer.min-h-20 { min-height: 20px; }
 </style>
 </head>
 <body>
@@ -990,7 +1037,7 @@
                  placeholder="가입한 이메일을 입력해 주세요" autocomplete="email"/>
           <div class="form-error" id="loginError">등록되지 않은 이메일입니다</div>
         </div>
-        <p style="font-size:12px; color:var(--text-secondary); margin: -8px 0 8px; line-height:1.5;">
+        <p class="helper-text-sub">
           비밀번호 없이 이메일로 인증 코드를 받아 로그인합니다.
         </p>
         <div class="form-help">
@@ -1001,7 +1048,7 @@
       <!-- 간편 번호 로그인 (2FA) -->
       <div class="login-mode" id="modePin">
         <!-- 신뢰 디바이스: PIN 입력 UI -->
-        <div id="pinTrustedView" style="display:none;">
+        <div id="pinTrustedView" class="is-hidden">
           <div class="device-trust-banner">
             <div class="device-trust-icon">✓</div>
             <div class="device-trust-text">
@@ -1010,7 +1057,7 @@
             </div>
             <button class="device-trust-action" onclick="confirmClearDevice()">등록 해제</button>
           </div>
-          <p style="text-align:center; color:var(--text-secondary); font-size:13px; margin: 0 0 6px;">
+          <p class="center-hint-md">
             6자리 간편 번호로 로그인
           </p>
           <div class="pin-dots" id="loginPinDots">
@@ -1019,7 +1066,7 @@
           </div>
           <div class="pin-hint" id="loginPinHint">2FA · 이 디바이스에서만 유효</div>
           <div class="keypad" id="loginKeypad"></div>
-          <p style="text-align:center; font-size:12px; color:var(--text-secondary); margin-top: 14px;">
+          <p class="center-hint-sm">
             <a class="text-link" onclick="goScreen('screenForgot')">간편 번호를 잊으셨나요?</a>
             &nbsp;·&nbsp;
             <a class="text-link" onclick="switchLoginMode('email')">다른 계정</a>
@@ -1041,7 +1088,7 @@
         </div>
       </div>
 
-      <div style="flex:1; min-height: 20px;"></div>
+      <div class="flex-spacer min-h-20"></div>
     </div>
     <div class="screen-footer">
       <button class="primary-btn" id="loginBtn" onclick="doLogin()">인증 코드 받기</button>
@@ -1120,8 +1167,8 @@
     </div>
     <div class="screen-footer">
       <button class="primary-btn" id="verifyBtn" disabled onclick="verifyCode()">확인</button>
-      <p style="text-align:center; color:var(--text-tertiary); font-size:11px; margin-top:10px;">
-        Tip: 데모 코드는 <strong style="color:var(--chon-orange-dark);">123456</strong>
+      <p class="tip-text">
+        Tip: 데모 코드는 <strong class="text-orange">123456</strong>
       </p>
     </div>
   </section>
@@ -1170,7 +1217,7 @@
       <input type="checkbox" id="chkAll" class="check-input" onchange="toggleAllTerms(this.checked)"/>
       <label for="chkAll" class="check-row all">
         <div class="check-box"></div>
-        <div class="check-text" style="font-weight:800;">전체 동의</div>
+        <div class="check-text check-text--bold">전체 동의</div>
       </label>
 
       <input type="checkbox" id="chk1" class="check-input term-req" onchange="updateTermsState()"/>
@@ -1216,14 +1263,14 @@
       <p class="screen-sub">이메일과 휴대폰 번호만으로 가입할 수 있습니다.<br/>다른 정보는 가입 후 필요할 때 추가됩니다.</p>
 
       <div class="form-group">
-        <label class="form-label">이메일 <span style="color:var(--chon-orange-dark);">*</span></label>
+        <label class="form-label">이메일 <span class="required-mark">*</span></label>
         <input type="email" class="line-input" id="signupEmail"
                placeholder="이메일을 입력해 주세요" oninput="checkSignupForm()"/>
         <div class="form-error" id="signupEmailError">올바른 이메일 형식이 아닙니다</div>
       </div>
 
       <div class="form-group">
-        <label class="form-label">휴대폰 번호 <span style="color:var(--chon-orange-dark);">*</span></label>
+        <label class="form-label">휴대폰 번호 <span class="required-mark">*</span></label>
         <div class="input-row">
           <input type="tel" class="line-input" id="signupPhone"
                  placeholder="010-1234-5678" oninput="checkSignupForm()"/>
@@ -1232,16 +1279,16 @@
         <div class="form-error" id="signupPhoneError">이미 가입된 휴대폰 번호입니다</div>
       </div>
 
-      <div class="form-group" id="signupOtpGroup" style="display:none;">
-        <label class="form-label">인증 번호 <span style="color:var(--chon-orange-dark);">*</span></label>
+      <div class="form-group is-hidden" id="signupOtpGroup">
+        <label class="form-label">인증 번호 <span class="required-mark">*</span></label>
         <div class="input-row">
           <input type="tel" class="line-input" id="signupOtp" maxlength="6"
                  placeholder="6자리 인증 번호" oninput="checkSignupForm()"/>
-          <span class="otp-timer" id="signupOtpTimer" style="margin: 0 4px 8px;">03:00</span>
+          <span class="otp-timer otp-timer--m4" id="signupOtpTimer">03:00</span>
         </div>
         <div class="form-error" id="signupOtpError">인증 번호가 일치하지 않습니다</div>
-        <p style="font-size:11px; color:var(--text-tertiary); margin-top:6px;">
-          데모 인증 코드: <strong style="color:var(--chon-orange-dark);">123456</strong>
+        <p class="demo-hint">
+          데모 인증 코드: <strong class="text-orange">123456</strong>
         </p>
       </div>
     </div>
@@ -1268,12 +1315,12 @@
         </div>
       </div>
 
-      <p style="font-size:12px; color:var(--text-tertiary); margin-top:16px; line-height:1.6;">
+      <p class="info-text">
         💡 다른 디바이스에서는 항상 이메일 인증으로 로그인합니다.<br/>
         간편 번호는 이 디바이스에서만 유효합니다.
       </p>
 
-      <div style="flex:1"></div>
+      <div class="flex-spacer"></div>
     </div>
     <div class="screen-footer">
       <button class="secondary-btn" onclick="skipAuthSetup()">건너뛰기 (다음에 설정)</button>
@@ -1295,7 +1342,7 @@
       </div>
       <div class="pin-hint" id="setupPinHint">생일·전화번호 등 추측 가능한 번호는 피하세요</div>
 
-      <div style="flex:1; min-height: 8px;"></div>
+      <div class="flex-spacer min-h-8"></div>
       <div class="keypad" id="setupKeypad"></div>
     </div>
   </section>
@@ -1315,7 +1362,7 @@
       </div>
       <div class="pin-hint" id="confirmPinHint">방금 입력한 6자리 번호를 입력하세요</div>
 
-      <div style="flex:1; min-height: 8px;"></div>
+      <div class="flex-spacer min-h-8"></div>
       <div class="keypad" id="confirmKeypad"></div>
     </div>
   </section>
@@ -1397,11 +1444,11 @@ function refreshPinTabUI() {
   if (!trustedView || !untrustedView) return;
   if (hasPin) {
     document.getElementById('trustedEmailDisplay').textContent = t.email;
-    trustedView.style.display = 'block';
-    untrustedView.style.display = 'none';
+    trustedView.classList.remove('is-hidden');
+    untrustedView.classList.add('is-hidden');
   } else {
-    trustedView.style.display = 'none';
-    untrustedView.style.display = 'block';
+    trustedView.classList.add('is-hidden');
+    untrustedView.classList.remove('is-hidden');
   }
 }
 
@@ -1755,7 +1802,7 @@ async function requestSignupPhoneOtp() {
     state.signupOtpSent = true;
     state.currentSignupEmail = email;
     state.currentSignupPhone = phone;
-    document.getElementById('signupOtpGroup').style.display = 'block';
+    document.getElementById('signupOtpGroup').classList.remove('is-hidden');
     document.getElementById('signupOtp').focus();
     startSignupOtpTimer();
     showToast(res.demoCode

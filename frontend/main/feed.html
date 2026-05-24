@@ -121,7 +121,7 @@
     box-shadow: var(--shadow-sm);
   }
   .app-brand-text { line-height: 1.1; }
-  .app-brand-title { font-size: 19px; font-weight: 900; letter-spacing: -0.3px; }
+  .app-brand-title { font-size: 18px; font-weight: 900; letter-spacing: -0.3px; }
   .app-brand-sub { font-size: 11px; color: var(--text-secondary); font-weight: 700; margin-top: 2px; }
   .header-action {
     background: white;
@@ -1272,12 +1272,13 @@
      Responsive
      ============================================ */
   @media (min-width: 768px) {
-    body { padding: 32px 0; }
+    body { padding: 32px 0; background: #F5F7FB; }
     .app {
       border-radius: var(--radius-lg);
       overflow: hidden;
       min-height: calc(100vh - 64px);
       min-height: calc(100dvh - 64px);
+      box-shadow: var(--shadow-lg);
     }
     .bottom-nav {
       bottom: 32px;
@@ -1310,6 +1311,37 @@
     .app { max-width: 720px; }
     .bottom-nav { max-width: 720px; }
   }
+
+  /* ============================================
+     Utility classes — inline style 대체
+     ============================================ */
+  .gl-dot--friend { background: var(--node-friend-bg); border-color: var(--node-friend-border); }
+  .gl-dot--ff { background: var(--node-ff-bg); border-color: var(--node-ff-border); border-style: dashed; }
+  .trust-progress-bar { width: 0%; }
+  .profile-stat-value--green { color: var(--friend-green-dark); }
+  .profile-stat-value--orange { color: var(--chon-orange-dark); }
+  .profile-stat-value--amber { color: #92400E; }
+  .settings-value--trusted { color: var(--status-confirmed); }
+  .settings-label--danger { color: #DC2626; }
+  .is-hidden { display: none !important; }
+  .empty-state {
+    text-align: center;
+    padding: 50px 20px;
+    color: var(--text-tertiary);
+  }
+  .empty-state-icon { font-size: 48px; margin-bottom: 12px; }
+  .empty-state-title { font-weight: 700; font-size: 14px; }
+  .empty-state-sub { font-size: 12px; margin-top: 6px; }
+  .self-tag { font-size: 9px; }
+  .name-self { color: var(--chon-orange); }
+  .tier-badge--me {
+    background: rgba(247,147,30,0.15);
+    border-color: var(--chon-orange);
+    color: var(--chon-orange-dark);
+  }
+  .list-item-status.confirmed { color: var(--status-confirmed); }
+  .list-item-status.pending { color: var(--status-pending); }
+  .level-pill-name { font-size: 9px; }
 </style>
 </head>
 <body>
@@ -1385,8 +1417,8 @@
           </svg>
         </div>
         <div class="graph-legend">
-          <div class="gl-item"><span class="gl-dot" style="background: var(--node-friend-bg); border-color: var(--node-friend-border);"></span> 모임원 (1-hop)</div>
-          <div class="gl-item"><span class="gl-dot" style="background: var(--node-ff-bg); border-color: var(--node-ff-border); border-style: dashed;"></span> 모임원 추천 (2-hop)</div>
+          <div class="gl-item"><span class="gl-dot gl-dot--friend"></span> 모임원 (1-hop)</div>
+          <div class="gl-item"><span class="gl-dot gl-dot--ff"></span> 모임원 추천 (2-hop)</div>
         </div>
       </div>
 
@@ -1416,7 +1448,7 @@
         <div class="trust-stage-name" id="trustStageName">새싹</div>
         <div class="trust-stage-num" id="trustStageNum">Stage 2 / 7</div>
         <div class="trust-progress-wrap">
-          <div class="trust-progress-bar" id="trustProgressBar" style="width: 0%"></div>
+          <div class="trust-progress-bar" id="trustProgressBar"></div>
         </div>
         <div class="trust-progress-text" id="trustProgressText">
           <strong>0</strong> / 0 pts
@@ -1463,15 +1495,15 @@
 
       <div class="profile-stats-row">
         <div class="profile-stat">
-          <div class="profile-stat-value" style="color: var(--friend-green-dark);" id="pStatFriends">3</div>
+          <div class="profile-stat-value profile-stat-value--green" id="pStatFriends">3</div>
           <div class="profile-stat-label">모임원</div>
         </div>
         <div class="profile-stat">
-          <div class="profile-stat-value" style="color: var(--chon-orange-dark);" id="pStatPosts">0</div>
+          <div class="profile-stat-value profile-stat-value--orange" id="pStatPosts">0</div>
           <div class="profile-stat-label">포스트</div>
         </div>
         <div class="profile-stat">
-          <div class="profile-stat-value" style="color: #92400E;" id="pStatPoints">0</div>
+          <div class="profile-stat-value profile-stat-value--amber" id="pStatPoints">0</div>
           <div class="profile-stat-label">Trust Pts</div>
         </div>
       </div>
@@ -1502,7 +1534,7 @@
           <div class="settings-row" onclick="showToast('🛡️','하드웨어 인증')">
             <div class="settings-icon security">🛡️</div>
             <div class="settings-label">하드웨어 인증</div>
-            <div class="settings-value" style="color: var(--status-confirmed);">TRUSTED</div>
+            <div class="settings-value settings-value--trusted">TRUSTED</div>
             <div class="settings-arrow">›</div>
           </div>
           <div class="settings-row" onclick="showToast('📱','단말 관리')">
@@ -1526,7 +1558,7 @@
           </div>
           <div class="settings-row" onclick="logoutPass()">
             <div class="settings-icon danger">🚪</div>
-            <div class="settings-label" style="color: #DC2626;">로그아웃</div>
+            <div class="settings-label settings-label--danger">로그아웃</div>
             <div class="settings-arrow">›</div>
           </div>
         </div>
@@ -1546,7 +1578,7 @@
     <button class="nav-btn" data-section="chat" onclick="switchMain('chat')">
       <div class="nav-btn-icon">💬</div>
       <div class="nav-btn-label">채팅</div>
-      <span class="nav-btn-badge" id="navChatBadge" style="display:none;">0</span>
+      <span class="nav-btn-badge is-hidden" id="navChatBadge">0</span>
     </button>
     <button class="nav-btn" data-section="trust" onclick="switchMain('trust')">
       <div class="nav-btn-icon">🌱</div>
@@ -1968,10 +2000,10 @@ function renderFeed() {
   }
 
   if (posts.length === 0) {
-    list.innerHTML = `<div style="text-align:center; padding: 50px 20px; color: var(--text-tertiary);">
-      <div style="font-size:48px; margin-bottom:12px;">📭</div>
-      <div style="font-weight:700; font-size:14px;">아직 포스트가 없어요</div>
-      <div style="font-size:12px; margin-top:6px;">첫 번째 글을 작성해보세요</div>
+    list.innerHTML = `<div class="empty-state">
+      <div class="empty-state-icon">📭</div>
+      <div class="empty-state-title">아직 포스트가 없어요</div>
+      <div class="empty-state-sub">첫 번째 글을 작성해보세요</div>
     </div>`;
     return;
   }
@@ -2156,7 +2188,7 @@ function makePersonNode(person) {
   }
 
   node.innerHTML = `
-    <div class="person-node-name">${escHtml(person.name)}${person.isSelf ? ' <span style="font-size:9px;">(나)</span>' : ''}</div>
+    <div class="person-node-name">${escHtml(person.name)}${person.isSelf ? ' <span class="self-tag">(나)</span>' : ''}</div>
     ${meta ? `<div class="person-node-meta">${meta}</div>` : ''}
     ${!person.isSelf ? `<div class="person-confirm-badge ${person.confirmed ? '' : 'pending'}">${person.confirmed ? '✓' : '!'}</div>` : ''}
   `;
@@ -2472,7 +2504,7 @@ function renderList() {
 
   const meDiv = document.createElement('div');
   meDiv.className = 'list-tier';
-  meDiv.innerHTML = `<div class="list-tier-header"><span class="tier-badge" style="background:rgba(247,147,30,0.15); border-color:var(--chon-orange); color:var(--chon-orange-dark);">🏠 나</span><span class="tier-count">1명</span></div>`;
+  meDiv.innerHTML = `<div class="list-tier-header"><span class="tier-badge tier-badge--me">🏠 나</span><span class="tier-count">1명</span></div>`;
   meDiv.appendChild(makeListItem(state.me));
   container.appendChild(meDiv);
 
@@ -2525,11 +2557,11 @@ function makeListItem(p) {
   item.innerHTML = `
     <div class="list-item-avatar">${escHtml(p.name.charAt(0))}</div>
     <div class="list-item-info">
-      <div class="list-item-name">${escHtml(p.name)}${p.isSelf ? ' <span style="color: var(--chon-orange);">(나)</span>' : ''}</div>
+      <div class="list-item-name">${escHtml(p.name)}${p.isSelf ? ' <span class="name-self">(나)</span>' : ''}</div>
       <div class="list-item-meta">${meta}</div>
     </div>
     ${quickBtn}
-    <div class="list-item-status" style="color: ${p.confirmed || p.isSelf ? 'var(--status-confirmed)' : 'var(--status-pending)'};">
+    <div class="list-item-status ${p.confirmed || p.isSelf ? 'confirmed' : 'pending'}">
       ${p.confirmed || p.isSelf ? '✓' : '⏱'}
     </div>
   `;
@@ -2566,10 +2598,10 @@ function renderChatList() {
   }
 
   if (chats.length === 0) {
-    list.innerHTML = `<div style="text-align:center; padding: 50px 20px; color: var(--text-tertiary);">
-      <div style="font-size:48px; margin-bottom:12px;">💬</div>
-      <div style="font-weight:700; font-size:14px;">대화 없음</div>
-      <div style="font-size:12px; margin-top:6px;">모임원과 대화를 시작해보세요</div>
+    list.innerHTML = `<div class="empty-state">
+      <div class="empty-state-icon">💬</div>
+      <div class="empty-state-title">대화 없음</div>
+      <div class="empty-state-sub">모임원과 대화를 시작해보세요</div>
     </div>`;
     return;
   }
@@ -2711,9 +2743,9 @@ function updateChatBadge() {
   const badge = document.getElementById('navChatBadge');
   if (total > 0) {
     badge.textContent = total > 9 ? '9+' : total;
-    badge.style.display = 'flex';
+    badge.classList.remove('is-hidden');
   } else {
-    badge.style.display = 'none';
+    badge.classList.add('is-hidden');
   }
 }
 
@@ -2740,7 +2772,7 @@ function renderTrust() {
   document.getElementById('levelRow').innerHTML = TRUST_LEVELS.map(l => `
     <div class="level-pill ${l.lv === level.lv ? 'current' : ''}">
       <div class="level-pill-num">Lv${l.lv}</div>
-      <div style="font-size:9px;">${l.name}</div>
+      <div class="level-pill-name">${l.name}</div>
     </div>
   `).join('');
   document.getElementById('levelDesc').textContent = `Lv${level.lv} · ${level.desc}`;
