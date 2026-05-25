@@ -85,13 +85,7 @@
     color: var(--text-secondary);
     font-size: 13px;
   }
-  .demo-badges {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    margin-top: 10px;
-    flex-wrap: wrap;
-  }
+  
   .demo-badge {
     background: var(--friend-green-light);
     color: var(--friend-green-dark);
@@ -214,7 +208,6 @@
     flex: 1;
     background: white;
     overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
   }
   .view-panel { display: none; }
   .view-panel.active { display: block; }
@@ -912,6 +905,19 @@
     flex-shrink: 0;
   }
   .uh-brand { display: flex; align-items: center; gap: 10px; }
+  .uh-brand-button {
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-family: inherit;
+    color: inherit;
+    text-align: left;
+    transition: opacity 0.15s;
+  }
+  .uh-brand-button:hover { opacity: 0.85; }
+  .uh-brand-button:active { transform: scale(0.97); }
+
   .uh-brand-mark {
     width: 36px; height: 36px;
     border-radius: 11px;
@@ -1028,13 +1034,13 @@
 
 <div class="phone-screen">
   <header class="unified-header">
-    <div class="uh-brand">
+    <button class="uh-brand uh-brand-button" onclick="window.location.href='../main/home.html'" aria-label="홈으로 이동">
       <div class="uh-brand-mark">P</div>
       <div class="uh-brand-text">
         <div class="uh-brand-name">PASS</div>
         <div class="uh-brand-sub">관계형 SNS</div>
       </div>
-    </div>
+    </button>
     <div class="uh-actions">
       <button class="uh-icon-btn" onclick="window.location.href='../main/home.html?page=my'" aria-label="마이">👤</button>
       <button class="uh-icon-btn" onclick="window.location.href='../main/home.html?notif=1'" aria-label="알림">🔔<span class="uh-icon-dot"></span></button>

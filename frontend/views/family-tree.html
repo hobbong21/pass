@@ -62,53 +62,14 @@
     color: var(--text-primary);
     min-height: 100vh;
   }
-  .demo-wrap { max-width: 1200px; margin: 0 auto; padding: 24px; }
-  .demo-header {
-    background: white;
-    border-radius: var(--radius-lg);
-    padding: 20px 24px;
-    margin-bottom: 24px;
-    box-shadow: var(--shadow-md);
-  }
-  .demo-header h1 {
-    margin: 0 0 8px;
-    font-size: 24px;
-    color: var(--chon-orange);
-    font-weight: 900;
-  }
-  .demo-header p {
-    margin: 4px 0;
-    color: var(--text-secondary);
-    font-size: 14px;
-    line-height: 1.6;
-  }
-  .demo-badge {
-    display: inline-block;
-    background: var(--chon-yellow-soft);
-    color: var(--chon-orange-dark);
-    padding: 3px 10px;
-    border-radius: var(--radius-pill);
-    font-size: 11px;
-    font-weight: 700;
-    margin-right: 6px;
-  }
-  .phones-grid {
-    display: flex;
-    gap: 32px;
-    justify-content: center;
-    flex-wrap: wrap;
-    align-items: flex-start;
-  }
-  .phone-wrapper { display: flex; flex-direction: column; align-items: center; }
-  .phone-caption {
-    background: var(--chon-orange);
-    color: white;
-    padding: 8px 20px;
-    border-radius: var(--radius-pill);
-    font-size: 13px;
-    font-weight: 800;
-    margin-bottom: 14px;
-  }
+  
+  
+  
+  
+  
+  
+  
+  
   .phone {
     width: 380px;
     max-width: 100%;
@@ -240,7 +201,6 @@
     flex: 1;
     background: white;
     overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
   }
   .view-panel { display: none; }
   .view-panel.active { display: block; }
@@ -352,11 +312,13 @@
   .graph-node-name-below {
     font-family: 'Noto Sans KR', sans-serif;
     pointer-events: none;
+    -webkit-user-select: none;
     user-select: none;
   }
   .graph-node-rel-below {
     font-family: 'Noto Sans KR', sans-serif;
     pointer-events: none;
+    -webkit-user-select: none;
     user-select: none;
   }
   .graph-node-avatar { pointer-events: none; }
@@ -497,7 +459,6 @@
     margin: 0 16px;
     border-radius: var(--radius-md);
     overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
   }
 
   /* Container = a family unit (couple + their children) */
@@ -672,6 +633,7 @@
     color: #DC2626;
     font-size: 16px;
     margin: 0 2px;
+    -webkit-user-select: none;
     user-select: none;
   }
 
@@ -1028,66 +990,18 @@
     transform: translateX(-50%) translateY(0);
     opacity: 1;
   }
-  .desc-panel {
-    background: white;
-    border-radius: var(--radius-lg);
-    padding: 24px;
-    width: 340px;
-    box-shadow: var(--shadow-md);
-  }
-  .desc-panel h3 {
-    margin: 0 0 12px;
-    font-size: 16px;
-    color: var(--chon-orange);
-    font-weight: 900;
-  }
-  .desc-section {
-    margin-bottom: 18px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid #F1F5F9;
-  }
-  .desc-section:last-child { border-bottom: none; }
-  .desc-section h4 {
-    margin: 0 0 8px;
-    font-size: 13px;
-    font-weight: 800;
-  }
-  .desc-section p, .desc-section ul {
-    font-size: 12px;
-    line-height: 1.6;
-    color: var(--text-secondary);
-    margin: 4px 0;
-  }
-  .desc-section ul { padding-left: 18px; }
-  .desc-section strong { color: var(--text-primary); }
-  .key-feature {
-    display: flex;
-    gap: 10px;
-    padding: 10px;
-    background: var(--chon-yellow-soft);
-    border-radius: var(--radius-md);
-    margin-bottom: 8px;
-    font-size: 11px;
-    line-height: 1.5;
-  }
-  .key-feature .kf-icon { font-size: 20px; flex-shrink: 0; }
-  .key-feature strong {
-    color: var(--chon-orange-dark);
-    display: block;
-    margin-bottom: 2px;
-    font-size: 12px;
-  }
-  .design-diagram {
-    background: var(--bg-empty);
-    border-radius: 10px;
-    padding: 12px;
-    margin: 8px 0;
-    font-size: 11px;
-    line-height: 1.6;
-    font-family: 'SF Mono', Consolas, monospace;
-    white-space: pre;
-    overflow-x: auto;
-  }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   /* ============================================
      Single-screen mode — 데모 베젤·래퍼 제거 후 phone-screen이 메인
      반응형: 모바일은 edge-to-edge, 데스크톱은 중앙 정렬 + 외곽 배경
@@ -1143,6 +1057,19 @@
     flex-shrink: 0;
   }
   .uh-brand { display: flex; align-items: center; gap: 10px; }
+  .uh-brand-button {
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-family: inherit;
+    color: inherit;
+    text-align: left;
+    transition: opacity 0.15s;
+  }
+  .uh-brand-button:hover { opacity: 0.85; }
+  .uh-brand-button:active { transform: scale(0.97); }
+
   .uh-brand-mark {
     width: 36px; height: 36px;
     border-radius: 11px;
@@ -1283,13 +1210,13 @@
 <div class="phone-screen" id="phone1">
 
   <header class="unified-header">
-    <div class="uh-brand">
+    <button class="uh-brand uh-brand-button" onclick="window.location.href='../main/home.html'" aria-label="홈으로 이동">
       <div class="uh-brand-mark">P</div>
       <div class="uh-brand-text">
         <div class="uh-brand-name">PASS</div>
         <div class="uh-brand-sub">관계형 SNS</div>
       </div>
-    </div>
+    </button>
     <div class="uh-actions">
       <button class="uh-icon-btn" onclick="window.location.href='../main/home.html?page=my'" aria-label="마이">👤</button>
       <button class="uh-icon-btn" onclick="window.location.href='../main/home.html?notif=1'" aria-label="알림">🔔<span class="uh-icon-dot"></span></button>

@@ -83,7 +83,7 @@
      ============================================ */
   .app {
     width: 100%;
-    max-width: 560px;
+    max-width: 480px;
     margin: 0 auto;
     min-height: 100vh;
     min-height: 100dvh;
@@ -300,7 +300,6 @@
     gap: 6px;
     padding: 0 16px 12px;
     overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
   }
   .filter-chips::-webkit-scrollbar { display: none; }
   .chip {
@@ -1240,7 +1239,7 @@
   .modal-fs-save:disabled { background: #CBD5E1; }
   .modal-fs-body {
     flex: 1; overflow-y: auto; padding: 24px;
-    max-width: 560px; margin: 0 auto; width: 100%;
+    max-width: 480px; margin: 0 auto; width: 100%;
   }
   .modal-section { margin-bottom: 24px; }
   .modal-section-label {
@@ -1329,7 +1328,7 @@
       border-radius: 0 0 var(--radius-lg) var(--radius-lg);
     }
     .modal-fs, .chat-detail {
-      max-width: 560px;
+      max-width: 480px;
       left: 50%;
       transform: translateX(-50%);
       border-radius: var(--radius-lg);
@@ -1345,13 +1344,9 @@
     }
   }
   @media (min-width: 1024px) {
-    .app { max-width: 640px; }
     #graphSvg { height: 540px; }
     .friends-grid { grid-template-columns: repeat(4, 1fr); }
     .badges-grid { grid-template-columns: repeat(4, 1fr); }
-  }
-  @media (min-width: 1280px) {
-    .app { max-width: 720px; }
   }
 
   /* ============================================
@@ -1400,6 +1395,19 @@
     flex-shrink: 0;
   }
   .uh-brand { display: flex; align-items: center; gap: 10px; }
+  .uh-brand-button {
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-family: inherit;
+    color: inherit;
+    text-align: left;
+    transition: opacity 0.15s;
+  }
+  .uh-brand-button:hover { opacity: 0.85; }
+  .uh-brand-button:active { transform: scale(0.97); }
+
   .uh-brand-mark {
     width: 36px; height: 36px;
     border-radius: 11px;
@@ -1458,13 +1466,13 @@
 
 <div class="app">
   <header class="unified-header">
-    <div class="uh-brand">
+    <button class="uh-brand uh-brand-button" onclick="window.location.href='./home.html'" aria-label="홈으로 이동">
       <div class="uh-brand-mark">P</div>
       <div class="uh-brand-text">
         <div class="uh-brand-name">PASS</div>
         <div class="uh-brand-sub">관계형 SNS</div>
       </div>
-    </div>
+    </button>
     <div class="uh-actions">
       <button class="uh-icon-btn" onclick="window.location.href='./home.html?page=my'" aria-label="마이">👤</button>
       <button class="uh-icon-btn" onclick="window.location.href='./home.html?notif=1'" aria-label="알림">🔔<span class="uh-icon-dot"></span></button>

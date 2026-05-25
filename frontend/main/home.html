@@ -97,6 +97,18 @@
     align-items: center;
     gap: 10px;
   }
+  .brand-button {
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-family: inherit;
+    color: inherit;
+    text-align: left;
+    transition: opacity 0.15s;
+  }
+  .brand-button:hover { opacity: 0.85; }
+  .brand-button:active { transform: scale(0.97); }
   .brand-mark {
     width: 36px; height: 36px;
     border-radius: 11px;
@@ -163,7 +175,6 @@
     overflow-y: auto;
     overflow-x: hidden;
     padding: 0 16px calc(var(--nav-h) + var(--safe-bottom) + 16px);
-    -webkit-overflow-scrolling: touch;
   }
   .page { display: none; }
   .page.active { display: block; animation: fadeIn 0.2s ease; }
@@ -830,6 +841,19 @@
     font-weight: 900;
     margin: 0 auto 12px;
     box-shadow: 0 8px 24px rgba(247,147,30,0.3);
+    position: relative;
+    overflow: hidden;
+  }
+  .profile-avatar-photo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .profile-avatar-text {
+    position: relative;
+    z-index: 1;
   }
   .profile-name { font-size: 22px; font-weight: 900; margin-bottom: 4px; }
   .profile-phone {
@@ -1142,19 +1166,258 @@
     color: white;
   }
   .edit-btn-save:active { transform: scale(0.97); background: var(--chon-orange-dark); }
+
+  /* Avatar edit (편집 모달 안의 사진 선택 영역) */
+  .avatar-edit-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .avatar-preview {
+    width: 72px;
+    height: 72px;
+    border-radius: 20px;
+    background: var(--chon-orange);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    font-weight: 900;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 14px rgba(247,147,30,0.25);
+  }
+  .avatar-preview-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .avatar-preview-text {
+    position: relative;
+    z-index: 1;
+  }
+  .avatar-edit-actions {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: flex-start;
+  }
+  .avatar-pick-btn {
+    display: inline-block;
+    background: var(--chon-yellow-soft);
+    color: var(--chon-orange-dark);
+    border: 1.5px solid var(--chon-orange);
+    padding: 8px 14px;
+    border-radius: var(--radius-pill);
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s;
+  }
+  .avatar-pick-btn:hover { background: white; }
+  .avatar-remove-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-tertiary);
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 4px 0;
+    text-decoration: underline;
+  }
+  .avatar-remove-btn:active { color: #DC2626; }
+
+  /* ============================================
+     Customer Support sheet (문의/신고 하기)
+     ============================================ */
+  .modal-sheet.support-sheet {
+    max-height: 92vh;
+    overflow-y: auto;
+    padding-top: 14px;
+  }
+  .support-tabs {
+    display: flex;
+    gap: 4px;
+    border-bottom: 1px solid var(--border-light);
+    margin: 0 -20px 16px;
+    padding: 0 12px;
+  }
+  .support-tab {
+    flex: 1;
+    background: transparent;
+    border: none;
+    padding: 12px 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--text-tertiary);
+    font-size: 11px;
+    font-weight: 800;
+    border-bottom: 2.5px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .support-tab.active {
+    color: var(--chon-orange-dark);
+    border-bottom-color: var(--chon-orange);
+  }
+  .support-tab-icon { font-size: 18px; line-height: 1; }
+  .support-panel { display: none; }
+  .support-panel.active { display: block; }
+
+  .support-form { display: flex; flex-direction: column; gap: 14px; }
+  .support-field { display: flex; flex-direction: column; gap: 6px; }
+  .support-label {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--text-secondary);
+  }
+  .support-textarea {
+    min-height: 110px;
+    resize: vertical;
+    line-height: 1.5;
+  }
+  .support-attach-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .support-attach-btn {
+    width: 88px;
+    height: 88px;
+    border: 2px dashed var(--border-light);
+    border-radius: var(--radius-md);
+    background: var(--bg-app);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-secondary);
+    font-family: inherit;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .support-attach-btn:hover {
+    border-color: var(--chon-orange);
+    background: white;
+    color: var(--chon-orange-dark);
+  }
+  .support-attach-icon { font-size: 26px; }
+  .support-attach-text { font-size: 11px; font-weight: 800; margin-top: 4px; }
+  .support-attach-hint {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    font-weight: 700;
+    line-height: 1.4;
+  }
+  .support-attach-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 4px;
+  }
+  .support-attach-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg-app);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-sm);
+    padding: 8px 10px;
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+  .support-attach-item-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 700;
+  }
+  .support-attach-item-size {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    flex-shrink: 0;
+  }
+  .support-attach-remove {
+    background: transparent;
+    border: none;
+    color: #DC2626;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    font-family: inherit;
+    padding: 0 4px;
+  }
+  .support-submit-btn {
+    margin-top: 4px;
+    background: var(--chon-orange);
+    color: white;
+    border: none;
+    padding: 14px;
+    border-radius: var(--radius-pill);
+    font-size: 15px;
+    font-weight: 900;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s;
+  }
+  .support-submit-btn:active { transform: scale(0.98); background: var(--chon-orange-dark); }
+
+  .support-history {
+    min-height: 200px;
+  }
+  .support-history-item {
+    background: white;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  .support-history-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text-primary);
+  }
+  .support-history-meta {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    font-weight: 600;
+  }
+  .support-history-status {
+    align-self: flex-start;
+    background: var(--chon-yellow-soft);
+    color: var(--chon-orange-dark);
+    padding: 2px 10px;
+    border-radius: var(--radius-pill);
+    font-size: 10px;
+    font-weight: 800;
+  }
 </style>
 </head>
 <body>
 
 <div class="app">
   <header class="app-header">
-    <div class="brand">
+    <button class="brand brand-button" onclick="switchPage('home')" aria-label="홈으로 이동">
       <div class="brand-mark">P</div>
       <div class="brand-text">
         <div class="brand-name">PASS</div>
         <div class="brand-sub">관계형 SNS</div>
       </div>
-    </div>
+    </button>
     <div class="header-actions">
       <button class="icon-btn" data-page="my" onclick="switchPage('my')" aria-label="마이">
         👤
@@ -1216,13 +1479,6 @@
           <div class="quick-icon doc">📄</div>
           <div class="quick-label">증명서</div>
         </button>
-      </div>
-
-      <div class="status-pill">
-        <div class="status-icon">✓</div>
-        <div class="status-text">
-          <strong>패턴 인증</strong> 능력이 활성화되었습니다
-        </div>
       </div>
 
     </section>
@@ -1335,7 +1591,10 @@
     <!-- ============ MY (프로필) ============ -->
     <section class="page" id="pageMy">
       <div class="profile-hero">
-        <div class="profile-avatar-big" id="profileAvatar">홍</div>
+        <div class="profile-avatar-big" id="profileAvatar">
+          <img class="profile-avatar-photo is-hidden" id="profileAvatarPhoto" alt=""/>
+          <span class="profile-avatar-text" id="profileAvatarText">홍</span>
+        </div>
         <div class="profile-name" id="profileName">홍길순</div>
         <div class="profile-phone" id="profilePhone">010-****-1234</div>
         <button class="profile-edit-btn" onclick="openEditProfile()">프로필 편집</button>
@@ -1440,6 +1699,11 @@
         </div>
 
         <div class="settings-group">
+          <div class="settings-row" onclick="openSupportSheet()">
+            <div class="settings-icon">📨</div>
+            <div class="settings-label">고객센터 (문의/신고)</div>
+            <div class="settings-arrow">›</div>
+          </div>
           <div class="settings-row" onclick="showToast('⚠️ 분실/도난 신고')">
             <div class="settings-icon warning">⚠️</div>
             <div class="settings-label">분실/도난 신고</div>
@@ -1526,18 +1790,91 @@
   </div>
 </div>
 
+<!-- Customer Support sheet (문의/신고 하기) -->
+<div class="modal-sheet support-sheet" id="supportSheet">
+  <div class="modal-grip"></div>
+  <div class="support-tabs">
+    <button class="support-tab active" data-tab="report" onclick="switchSupportTab('report')">
+      <span class="support-tab-icon">📨</span>
+      <span class="support-tab-label">문의/신고 하기</span>
+    </button>
+    <button class="support-tab" data-tab="history" onclick="switchSupportTab('history')">
+      <span class="support-tab-icon">📋</span>
+      <span class="support-tab-label">나의 문의/신고 내역</span>
+    </button>
+  </div>
+
+  <div class="support-panel active" id="supportPanelReport">
+    <div class="support-form">
+      <div class="support-field">
+        <label class="support-label" for="supportName">성명 <span class="required-mark">*</span></label>
+        <input type="text" class="edit-input" id="supportName" placeholder="홍길순" autocomplete="off"/>
+      </div>
+      <div class="support-field">
+        <label class="support-label" for="supportEmail">이메일 <span class="required-mark">*</span></label>
+        <input type="email" class="edit-input" id="supportEmail" placeholder="example@mail.ai" autocomplete="off"/>
+      </div>
+      <div class="support-field">
+        <label class="support-label" for="supportTitle">제목 <span class="required-mark">*</span></label>
+        <input type="text" class="edit-input" id="supportTitle" placeholder="문의 제목을 입력하세요" autocomplete="off" maxlength="80"/>
+      </div>
+      <div class="support-field">
+        <label class="support-label" for="supportBody">신고내용 <span class="required-mark">*</span></label>
+        <textarea class="edit-input support-textarea" id="supportBody" placeholder="문의/신고 내용을 자세히 적어주세요" rows="5" maxlength="2000"></textarea>
+      </div>
+      <div class="support-field">
+        <label class="support-label">첨부파일</label>
+        <div class="support-attach-row">
+          <label class="support-attach-btn" for="supportFileInput">
+            <span class="support-attach-icon">📁</span>
+            <span class="support-attach-text">파일 추가하기</span>
+          </label>
+          <div class="support-attach-hint">300MB 이하 파일만<br/>업로드 가능합니다.</div>
+        </div>
+        <input type="file" id="supportFileInput" multiple class="is-hidden" onchange="addSupportFiles(event)"/>
+        <div class="support-attach-list" id="supportAttachList"></div>
+      </div>
+      <button class="support-submit-btn" onclick="submitSupportReport()">보내기</button>
+    </div>
+  </div>
+
+  <div class="support-panel" id="supportPanelHistory">
+    <div class="support-history" id="supportHistoryList">
+      <div class="empty-state">
+        <div class="empty-state-icon">📭</div>
+        <div class="empty-state-title">아직 보낸 문의/신고가 없어요</div>
+        <div class="empty-state-desc">문의/신고 하기 탭에서 새로 작성할 수 있습니다.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Edit Profile sheet -->
 <div class="modal-sheet edit-profile-sheet" id="editProfileSheet">
   <div class="modal-grip"></div>
   <div class="modal-title">프로필 편집</div>
-  <div class="modal-sub">표시 이름과 아바타 이니셜을 수정합니다</div>
+  <div class="modal-sub">이름·이니셜·프로필 사진을 수정합니다</div>
   <div class="edit-form">
+    <div class="edit-field">
+      <label class="edit-label">프로필 사진</label>
+      <div class="avatar-edit-row">
+        <div class="avatar-preview" id="avatarPreview">
+          <img class="avatar-preview-img is-hidden" id="avatarPreviewImg" alt=""/>
+          <span class="avatar-preview-text" id="avatarPreviewText">홍</span>
+        </div>
+        <div class="avatar-edit-actions">
+          <label class="avatar-pick-btn" for="editImageInput">📷 사진 선택</label>
+          <input type="file" id="editImageInput" accept="image/*" class="is-hidden" onchange="handleAvatarFile(event)"/>
+          <button class="avatar-remove-btn is-hidden" id="avatarRemoveBtn" onclick="removeAvatarPhoto()">사진 제거</button>
+        </div>
+      </div>
+    </div>
     <div class="edit-field">
       <label class="edit-label" for="editName">이름</label>
       <input type="text" class="edit-input" id="editName" placeholder="홍길순" autocomplete="off" maxlength="20"/>
     </div>
     <div class="edit-field">
-      <label class="edit-label" for="editInitial">아바타 이니셜 (1글자)</label>
+      <label class="edit-label" for="editInitial">아바타 이니셜 (1글자) — 사진 없을 때 표시</label>
       <input type="text" class="edit-input" id="editInitial" placeholder="홍" autocomplete="off" maxlength="1"/>
     </div>
     <div class="edit-actions">
@@ -1701,6 +2038,21 @@ function updateTrust() {
   }).join('');
 }
 
+function setAvatar(initial, photoDataUrl) {
+  const textEl = document.getElementById('profileAvatarText');
+  const photoEl = document.getElementById('profileAvatarPhoto');
+  if (textEl) textEl.textContent = (initial || '?').charAt(0);
+  if (photoEl) {
+    if (photoDataUrl) {
+      photoEl.src = photoDataUrl;
+      photoEl.classList.remove('is-hidden');
+    } else {
+      photoEl.classList.add('is-hidden');
+      photoEl.removeAttribute('src');
+    }
+  }
+}
+
 function maskPhone(phone) {
   // 010-1234-5678 → 010-****-5678
   const digits = (phone || '').replace(/\D/g, '');
@@ -1714,10 +2066,16 @@ async function applyUser() {
 
   // 토큰도 세션도 없으면 → 로그인 페이지로 (데모는 통과)
   if (!hasToken && !session) {
-    document.getElementById('profileAvatar').textContent = '데';
-    document.getElementById('profileName').textContent = '데모 사용자';
+    // 비로그인 상태라도 sessionStorage에 데모 편집한 프로필이 있으면 복원
+    let demoUser = null;
+    try { demoUser = JSON.parse(sessionStorage.getItem('passUser') || 'null'); } catch (e) {}
+    const demoName = (demoUser && demoUser.name) || '데모 사용자';
+    const demoAvatar = (demoUser && demoUser.avatar) || '데';
+    const demoPhoto = (demoUser && demoUser.photo) || null;
+    setAvatar(demoAvatar, demoPhoto);
+    document.getElementById('profileName').textContent = demoName;
     const wn = document.getElementById('welcomeName');
-    if (wn) wn.textContent = '데모 사용자';
+    if (wn) wn.textContent = demoName;
     const ph = document.getElementById('profilePhone');
     if (ph) ph.textContent = '(로그인하지 않음 — 데모)';
     return;
@@ -1742,7 +2100,8 @@ async function applyUser() {
 
   if (user && user.email) {
     const nick = user.name || user.email.split('@')[0];
-    document.getElementById('profileAvatar').textContent = (user.avatar || nick.charAt(0)).toUpperCase();
+    const initial = (user.avatar || nick.charAt(0)).toUpperCase();
+    setAvatar(initial, user.photo || null);
     document.getElementById('profileName').textContent = nick;
     const wn = document.getElementById('welcomeName');
     if (wn) wn.textContent = nick;
@@ -1790,16 +2149,170 @@ function closeAllSheets() {
   closeAuthSheet();
   closeNotifSheet();
   closeEditProfile();
+  closeSupportSheet();
+}
+
+// ============================================================
+// 고객센터 (문의/신고)
+// ============================================================
+let supportAttachments = []; // {name, size, file}
+
+function openSupportSheet() {
+  // 사용자 이름/이메일 prefill
+  try {
+    const u = JSON.parse(sessionStorage.getItem('passUser') || '{}');
+    document.getElementById('supportName').value = u.name || '';
+    document.getElementById('supportEmail').value = u.email || '';
+  } catch (e) {}
+  document.getElementById('supportSheet').classList.add('visible');
+  document.getElementById('modalBackdrop').classList.add('visible');
+  switchSupportTab('report');
+  renderSupportHistory();
+}
+
+function closeSupportSheet() {
+  document.getElementById('supportSheet').classList.remove('visible');
+  document.getElementById('modalBackdrop').classList.remove('visible');
+}
+
+function switchSupportTab(tab) {
+  document.querySelectorAll('.support-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  document.querySelectorAll('.support-panel').forEach(p => p.classList.remove('active'));
+  const id = tab === 'history' ? 'supportPanelHistory' : 'supportPanelReport';
+  document.getElementById(id).classList.add('active');
+  if (tab === 'history') renderSupportHistory();
+}
+
+function formatSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / 1024 / 1024).toFixed(1) + ' MB';
+}
+
+function addSupportFiles(evt) {
+  const files = [...(evt.target.files || [])];
+  for (const f of files) {
+    if (f.size > 300 * 1024 * 1024) { showToast('⚠️ ' + f.name + ' — 300MB 초과'); continue; }
+    supportAttachments.push({ name: f.name, size: f.size, file: f });
+  }
+  renderSupportAttachments();
+  evt.target.value = ''; // allow same file re-add
+}
+
+function removeSupportFile(idx) {
+  supportAttachments.splice(idx, 1);
+  renderSupportAttachments();
+}
+
+function renderSupportAttachments() {
+  const list = document.getElementById('supportAttachList');
+  if (!supportAttachments.length) { list.innerHTML = ''; return; }
+  list.innerHTML = supportAttachments.map((a, i) =>
+    `<div class="support-attach-item">
+      <span class="support-attach-item-name">${escapeHtml(a.name)}</span>
+      <span class="support-attach-item-size">${formatSize(a.size)}</span>
+      <button class="support-attach-remove" onclick="removeSupportFile(${i})" aria-label="제거">✕</button>
+    </div>`
+  ).join('');
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+async function submitSupportReport() {
+  const name = document.getElementById('supportName').value.trim();
+  const email = document.getElementById('supportEmail').value.trim();
+  const title = document.getElementById('supportTitle').value.trim();
+  const body = document.getElementById('supportBody').value.trim();
+  if (!name || !email || !title || !body) {
+    showToast('⚠️ 필수 항목(*)을 모두 입력하세요');
+    return;
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    showToast('⚠️ 올바른 이메일 형식이 아닙니다');
+    return;
+  }
+
+  // 로컬 히스토리에 저장 (백엔드 미연동 — 데모)
+  const report = {
+    id: 'r' + Date.now(),
+    name, email, title, body,
+    attachments: supportAttachments.map(a => ({ name: a.name, size: a.size })),
+    sentAt: Date.now(),
+    status: '접수됨'
+  };
+  try {
+    const list = JSON.parse(sessionStorage.getItem('supportReports') || '[]');
+    list.unshift(report);
+    sessionStorage.setItem('supportReports', JSON.stringify(list));
+  } catch (e) {}
+
+  // 폼 리셋
+  document.getElementById('supportTitle').value = '';
+  document.getElementById('supportBody').value = '';
+  supportAttachments = [];
+  renderSupportAttachments();
+  switchSupportTab('history');
+  showToast('✓ 문의/신고가 접수되었습니다');
+}
+
+function renderSupportHistory() {
+  const wrap = document.getElementById('supportHistoryList');
+  let reports = [];
+  try { reports = JSON.parse(sessionStorage.getItem('supportReports') || '[]'); } catch (e) {}
+  if (!reports.length) {
+    wrap.innerHTML = `<div class="empty-state">
+      <div class="empty-state-icon">📭</div>
+      <div class="empty-state-title">아직 보낸 문의/신고가 없어요</div>
+      <div class="empty-state-desc">문의/신고 하기 탭에서 새로 작성할 수 있습니다.</div>
+    </div>`;
+    return;
+  }
+  wrap.innerHTML = reports.map(r => {
+    const date = new Date(r.sentAt);
+    const dateStr = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')} ${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
+    const attachCount = (r.attachments || []).length;
+    const attachText = attachCount ? ` · 📎 ${attachCount}개` : '';
+    return `<div class="support-history-item">
+      <span class="support-history-status">${escapeHtml(r.status)}</span>
+      <div class="support-history-title">${escapeHtml(r.title)}</div>
+      <div class="support-history-meta">${dateStr}${attachText}</div>
+    </div>`;
+  }).join('');
 }
 
 // ============================================================
 // 프로필 편집
 // ============================================================
+// 편집 중인 임시 이미지 DataURL (취소 시 폐기)
+let pendingAvatarPhoto = null;
+
 function openEditProfile() {
   const nameEl = document.getElementById('profileName');
-  const avatarEl = document.getElementById('profileAvatar');
+  const textEl = document.getElementById('profileAvatarText');
+  const photoEl = document.getElementById('profileAvatarPhoto');
+
   document.getElementById('editName').value = (nameEl.textContent || '').trim();
-  document.getElementById('editInitial').value = (avatarEl.textContent || '').trim().charAt(0);
+  document.getElementById('editInitial').value = (textEl?.textContent || '').trim().charAt(0);
+
+  // 현재 사진을 미리보기에 반영
+  const previewImg = document.getElementById('avatarPreviewImg');
+  const previewText = document.getElementById('avatarPreviewText');
+  const removeBtn = document.getElementById('avatarRemoveBtn');
+  if (photoEl && !photoEl.classList.contains('is-hidden') && photoEl.src) {
+    previewImg.src = photoEl.src;
+    previewImg.classList.remove('is-hidden');
+    removeBtn.classList.remove('is-hidden');
+    pendingAvatarPhoto = photoEl.src;
+  } else {
+    previewImg.classList.add('is-hidden');
+    previewImg.removeAttribute('src');
+    removeBtn.classList.add('is-hidden');
+    pendingAvatarPhoto = null;
+  }
+  previewText.textContent = (textEl?.textContent || '').trim().charAt(0) || '?';
+
   document.getElementById('editProfileSheet').classList.add('visible');
   document.getElementById('modalBackdrop').classList.add('visible');
   setTimeout(() => document.getElementById('editName').focus(), 250);
@@ -1808,6 +2321,33 @@ function openEditProfile() {
 function closeEditProfile() {
   document.getElementById('editProfileSheet').classList.remove('visible');
   document.getElementById('modalBackdrop').classList.remove('visible');
+  pendingAvatarPhoto = null;
+  document.getElementById('editImageInput').value = '';
+}
+
+function handleAvatarFile(evt) {
+  const file = evt.target.files && evt.target.files[0];
+  if (!file) return;
+  if (!file.type.startsWith('image/')) { showToast('⚠️ 이미지 파일만 선택할 수 있습니다'); return; }
+  if (file.size > 5 * 1024 * 1024) { showToast('⚠️ 5MB 이하 이미지로 선택하세요'); return; }
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    pendingAvatarPhoto = e.target.result;
+    const img = document.getElementById('avatarPreviewImg');
+    img.src = pendingAvatarPhoto;
+    img.classList.remove('is-hidden');
+    document.getElementById('avatarRemoveBtn').classList.remove('is-hidden');
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeAvatarPhoto() {
+  pendingAvatarPhoto = null;
+  const img = document.getElementById('avatarPreviewImg');
+  img.classList.add('is-hidden');
+  img.removeAttribute('src');
+  document.getElementById('avatarRemoveBtn').classList.add('is-hidden');
+  document.getElementById('editImageInput').value = '';
 }
 
 async function saveProfile() {
@@ -1815,23 +2355,36 @@ async function saveProfile() {
   const initial = document.getElementById('editInitial').value.trim().charAt(0);
   if (!name) { showToast('⚠️ 이름을 입력하세요'); return; }
   const avatar = (initial || name.charAt(0)).toUpperCase();
+  const photo = pendingAvatarPhoto;
 
-  // 화면 즉시 반영
+  // 화면 즉시 반영 — 이름·이니셜
   document.getElementById('profileName').textContent = name;
-  document.getElementById('welcomeName')?.textContent && (document.getElementById('welcomeName').textContent = name);
   const wn = document.getElementById('welcomeName');
   if (wn) wn.textContent = name;
-  document.getElementById('profileAvatar').textContent = avatar;
+  const textEl = document.getElementById('profileAvatarText');
+  if (textEl) textEl.textContent = avatar;
+
+  // 사진 반영 (있으면 표시, 없으면 숨김)
+  const photoEl = document.getElementById('profileAvatarPhoto');
+  if (photoEl) {
+    if (photo) {
+      photoEl.src = photo;
+      photoEl.classList.remove('is-hidden');
+    } else {
+      photoEl.classList.add('is-hidden');
+      photoEl.removeAttribute('src');
+    }
+  }
 
   // 세션 스토리지 갱신
   try {
     const cur = JSON.parse(sessionStorage.getItem('passUser') || '{}');
-    sessionStorage.setItem('passUser', JSON.stringify({ ...cur, name, avatar }));
+    sessionStorage.setItem('passUser', JSON.stringify({ ...cur, name, avatar, photo: photo || null }));
   } catch (e) {}
 
-  // 백엔드 연동 (로그인 상태면 서버에도 저장)
+  // 백엔드 연동
   if (window.PassAPI && PassAPI.isLoggedIn()) {
-    try { await PassAPI.users.updateMe({ name, avatar }); } catch (e) { /* 실패해도 로컬은 유지 */ }
+    try { await PassAPI.users.updateMe({ name, avatar, photo }); } catch (e) { /* 실패해도 로컬은 유지 */ }
   }
 
   closeEditProfile();
