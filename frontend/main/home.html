@@ -22,6 +22,12 @@
     --text-tertiary: #9CA3AF;
     --border-light: #F1F5F9;
     --success: #10B981;
+    --bg-empty: #F8FAFC;
+    --friend-green: #5BBA6F;
+    --friend-green-dark: #16A34A;
+    --friend-green-light: #ECFDF5;
+    --trust-gold: #EAB308;
+    --trust-gold-bg: #FEF3C7;
     --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
     --shadow-md: 0 4px 14px rgba(0,0,0,0.08);
     --shadow-lg: 0 10px 30px rgba(0,0,0,0.14);
@@ -498,6 +504,37 @@
     font-size: 22px;
     flex-shrink: 0;
   }
+  .mode-cta {
+    flex-shrink: 0;
+    background: white;
+    border: 1.5px solid var(--border-light);
+    padding: 8px 14px;
+    border-radius: var(--radius-pill);
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--text-secondary);
+    transition: all 0.15s;
+    align-self: center;
+    white-space: nowrap;
+  }
+  .mode-cta:active { transform: scale(0.95); }
+  .mode-cta.family {
+    background: var(--chon-orange);
+    border-color: var(--chon-orange);
+    color: white;
+  }
+  .mode-cta.friend {
+    background: #5BBA6F;
+    border-color: #5BBA6F;
+    color: white;
+  }
+  .mode-cta.classid {
+    background: #2563EB;
+    border-color: #2563EB;
+    color: white;
+  }
 
   /* ============================================
      Recent activity
@@ -749,40 +786,362 @@
     font-size: 20px;
   }
   .chev--sm { font-size: 18px; }
-  .profile-card {
-    background: white;
-    border-radius: var(--radius-lg);
-    padding: 22px;
-    text-align: center;
-    margin-top: 8px;
-    border: 1px solid var(--border-light);
-  }
-  .profile-card-avatar {
-    width: 80px;
-    height: 80px;
-    border-radius: 24px;
-    background: var(--chon-orange);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 32px;
-    font-weight: 900;
-    margin: 0 auto 12px;
-  }
-  .profile-card-name {
-    font-size: 20px;
-    font-weight: 900;
-    margin-bottom: 4px;
-  }
-  .profile-card-email {
-    font-size: 13px;
-    color: var(--text-secondary);
-    font-weight: 600;
-  }
   .activity-item--danger { border-color: #FCA5A5; }
   .activity-icon--danger { background: #FEE2E2; color: #DC2626; }
   .activity-title--danger { color: #DC2626; }
+
+  /* ============================================
+     Welcome bar (헤더 바로 아래)
+     ============================================ */
+  .welcome-bar {
+    background: linear-gradient(90deg, var(--chon-yellow-soft), white);
+    border-bottom: 1px solid var(--border-light);
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+    flex-shrink: 0;
+  }
+  .welcome-emoji { font-size: 16px; line-height: 1; }
+  .welcome-msg { flex: 1; }
+  .welcome-msg strong { color: var(--chon-orange-dark); font-weight: 900; }
+
+  /* ============================================
+     PROFILE Section (pageMy)
+     ============================================ */
+  .profile-hero {
+    margin: 14px 16px 12px;
+    background: linear-gradient(135deg, rgba(255,230,200,0.7), white);
+    border: 2px solid rgba(247,147,30,0.6);
+    border-radius: var(--radius-lg);
+    padding: 22px 18px;
+    text-align: center;
+  }
+  .profile-avatar-big {
+    width: 84px; height: 84px;
+    border-radius: 24px;
+    background: var(--chon-orange);
+    color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px;
+    font-weight: 900;
+    margin: 0 auto 12px;
+    box-shadow: 0 8px 24px rgba(247,147,30,0.3);
+  }
+  .profile-name { font-size: 22px; font-weight: 900; margin-bottom: 4px; }
+  .profile-phone {
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-weight: 700;
+    margin-bottom: 14px;
+  }
+  .profile-edit-btn {
+    background: white;
+    color: var(--chon-orange-dark);
+    border: 1.5px solid var(--chon-orange);
+    padding: 8px 20px;
+    border-radius: var(--radius-pill);
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .profile-edit-btn:active { transform: scale(0.97); }
+
+  .profile-stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin: 0 16px 16px;
+  }
+  .profile-stat {
+    background: white;
+    border: 1px solid #E2E8F0;
+    border-radius: var(--radius-md);
+    padding: 14px 8px;
+    text-align: center;
+  }
+  .profile-stat-value { font-size: 22px; font-weight: 900; }
+  .profile-stat-value--green { color: #16A34A; }
+  .profile-stat-value--orange { color: var(--chon-orange-dark); }
+  .profile-stat-value--amber { color: #92400E; }
+  .profile-stat-label {
+    font-size: 10px; font-weight: 800;
+    color: var(--text-tertiary);
+    text-transform: uppercase; letter-spacing: 0.3px;
+    margin-top: 4px;
+  }
+
+  .settings-section { padding: 0 16px 30px; }
+  .settings-group {
+    background: white;
+    border: 1px solid #E2E8F0;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+  .settings-row {
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid #F1F5F9;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  .settings-row:last-child { border-bottom: none; }
+  .settings-row:active { background: #F8FAFC; }
+  .settings-icon {
+    width: 32px; height: 32px;
+    background: #ECFDF5;
+    color: #16A34A;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .settings-icon.danger { background: #FEE2E2; color: #DC2626; }
+  .settings-icon.security { background: #DBEAFE; color: #2563EB; }
+  .settings-icon.warning { background: #FEF3C7; color: #92400E; }
+  .settings-label { flex: 1; font-weight: 700; }
+  .settings-value { color: var(--text-tertiary); font-size: 12px; font-weight: 700; }
+  .settings-value--trusted { color: #10B981; }
+  .settings-label--danger { color: #DC2626; }
+  .settings-arrow { color: var(--text-tertiary); font-size: 14px; }
+
+  /* ============================================
+     TRUST Garden (pageMy 하단)
+     ============================================ */
+  .trust-hero {
+    margin: 14px 16px 12px;
+    background: linear-gradient(135deg, #ECFDF5 0%, #FEF3C7 100%);
+    border: 2px solid var(--friend-green);
+    border-radius: var(--radius-lg);
+    padding: 22px 18px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .trust-stage-emoji {
+    font-size: 64px;
+    line-height: 1;
+    margin-bottom: 8px;
+    filter: drop-shadow(0 4px 12px rgba(91,186,111,0.3));
+  }
+  .trust-stage-name {
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--friend-green-dark);
+    margin-bottom: 2px;
+  }
+  .trust-stage-num {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--text-secondary);
+    margin-bottom: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .trust-progress-wrap {
+    background: rgba(255,255,255,0.7);
+    border-radius: var(--radius-pill);
+    height: 10px;
+    overflow: hidden;
+    margin-bottom: 8px;
+    border: 1px solid rgba(91,186,111,0.3);
+  }
+  .trust-progress-bar {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, var(--friend-green), var(--trust-gold));
+    border-radius: var(--radius-pill);
+    transition: width 0.6s ease;
+  }
+  .trust-progress-text {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 700;
+  }
+  .trust-progress-text strong { color: var(--friend-green-dark); }
+
+  .trust-cards { padding: 0 16px 30px; display: flex; flex-direction: column; gap: 12px; }
+  .trust-card {
+    background: white;
+    border: 1px solid #E2E8F0;
+    border-radius: var(--radius-md);
+    padding: 14px;
+  }
+  .trust-card-title {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .level-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  .level-pill {
+    text-align: center;
+    padding: 10px 4px;
+    border-radius: var(--radius-md);
+    background: var(--bg-empty);
+    border: 1.5px solid #E2E8F0;
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--text-tertiary);
+    position: relative;
+  }
+  .level-pill.current {
+    background: linear-gradient(135deg, var(--friend-green), var(--trust-gold));
+    border-color: var(--trust-gold);
+    color: white;
+    box-shadow: 0 4px 12px rgba(234,179,8,0.3);
+    transform: scale(1.05);
+  }
+  .level-pill-num { font-size: 16px; font-weight: 900; margin-bottom: 2px; }
+  .level-pill-name { font-size: 9px; }
+  .level-desc { font-size: 11px; color: var(--text-secondary); line-height: 1.5; }
+
+  .points-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .points-stat {
+    background: var(--trust-gold-bg);
+    border: 1.5px solid var(--trust-gold);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    text-align: center;
+  }
+  .points-stat-value {
+    font-size: 26px;
+    font-weight: 900;
+    color: #92400E;
+    line-height: 1;
+  }
+  .points-stat-label {
+    font-size: 10px;
+    font-weight: 800;
+    color: #92400E;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-top: 6px;
+  }
+  .points-detail {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #F1F5F9;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .points-row-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+  }
+  .points-row-item strong { color: var(--friend-green-dark); }
+
+  .badges-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .badge {
+    background: var(--bg-empty);
+    border: 1.5px solid #E2E8F0;
+    border-radius: var(--radius-md);
+    padding: 14px 8px;
+    text-align: center;
+    transition: all 0.2s;
+    opacity: 0.45;
+  }
+  .badge.earned {
+    opacity: 1;
+    background: linear-gradient(135deg, var(--friend-green-light), white);
+    border-color: var(--friend-green);
+  }
+  .badge.earned.gold {
+    background: linear-gradient(135deg, var(--trust-gold-bg), white);
+    border-color: var(--trust-gold);
+  }
+  .badge-emoji { font-size: 30px; line-height: 1; margin-bottom: 6px; }
+  .badge-name { font-size: 11px; font-weight: 800; }
+  .badge-desc { font-size: 9px; color: var(--text-tertiary); margin-top: 2px; font-weight: 600; }
+
+  /* ============================================
+     Edit Profile sheet
+     ============================================ */
+  .edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .edit-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .edit-label {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  .edit-input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid var(--border-light);
+    border-radius: var(--radius-md);
+    font-size: 16px;
+    font-family: inherit;
+    color: var(--text-primary);
+    background: var(--bg-app);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .edit-input:focus { border-color: var(--chon-orange); background: white; }
+  .edit-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 6px;
+  }
+  .edit-btn-cancel,
+  .edit-btn-save {
+    flex: 1;
+    padding: 13px;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+    border: 1.5px solid transparent;
+    transition: all 0.15s;
+  }
+  .edit-btn-cancel {
+    background: white;
+    border-color: var(--border-light);
+    color: var(--text-secondary);
+  }
+  .edit-btn-cancel:active { transform: scale(0.97); background: var(--bg-empty); }
+  .edit-btn-save {
+    background: var(--chon-orange);
+    color: white;
+  }
+  .edit-btn-save:active { transform: scale(0.97); background: var(--chon-orange-dark); }
 </style>
 </head>
 <body>
@@ -806,6 +1165,11 @@
       </button>
     </div>
   </header>
+
+  <div class="welcome-bar">
+    <span class="welcome-emoji">👋</span>
+    <span class="welcome-msg"><strong id="welcomeName">사용자</strong>님 환영합니다.</span>
+  </div>
 
   <main class="content">
     <!-- ============ HOME ============ -->
@@ -924,7 +1288,7 @@
             <span>4 세대</span>
           </div>
         </div>
-        <div class="mode-arrow">›</div>
+        <button class="mode-cta family" onclick="event.stopPropagation(); openMode('family')">입력하기 ›</button>
       </div>
 
       <!-- 🌐 모임 -->
@@ -939,7 +1303,7 @@
             <span><strong>2</strong>명 2-hop</span>
           </div>
         </div>
-        <div class="mode-arrow">›</div>
+        <button class="mode-cta friend" onclick="event.stopPropagation(); openMode('friend')">입력하기 ›</button>
       </div>
 
       <!-- 🏫 학급증 -->
@@ -954,7 +1318,7 @@
             <span><strong>2</strong>명 학부모</span>
           </div>
         </div>
-        <div class="mode-arrow">›</div>
+        <button class="mode-cta classid" onclick="event.stopPropagation(); openMode('classid')">입력하기 ›</button>
       </div>
 
       <div class="section-title section-title--mt-22">통합 보기</div>
@@ -968,44 +1332,124 @@
       </div>
     </section>
 
-    <!-- ============ MY ============ -->
+    <!-- ============ MY (프로필) ============ -->
     <section class="page" id="pageMy">
-      <div class="profile-card">
-        <div class="profile-card-avatar" id="profileAvatar">홍</div>
-        <div class="profile-card-name" id="profileName">홍길순</div>
-        <div class="profile-card-email" id="profileEmail">demo@chon.ai</div>
+      <div class="profile-hero">
+        <div class="profile-avatar-big" id="profileAvatar">홍</div>
+        <div class="profile-name" id="profileName">홍길순</div>
+        <div class="profile-phone" id="profilePhone">010-****-1234</div>
+        <button class="profile-edit-btn" onclick="openEditProfile()">프로필 편집</button>
       </div>
 
-      <div class="section-title">CHON DID</div>
-      <div class="activity-item" onclick="showToast('🛡 하드웨어 인증')">
-        <div class="activity-icon green">🛡</div>
-        <div class="activity-info">
-          <div class="activity-title">하드웨어 인증</div>
-          <div class="activity-meta">TRUSTED · 마지막 하트비트 2시간 전</div>
+      <!-- Trust Garden (프로필 편집 아래) -->
+      <div class="trust-hero">
+        <div class="trust-stage-emoji" id="trustStageEmoji">🪴</div>
+        <div class="trust-stage-name" id="trustStageName">묘목</div>
+        <div class="trust-stage-num" id="trustStageNum">Stage 3 / 7</div>
+        <div class="trust-progress-wrap">
+          <div class="trust-progress-bar" id="trustProgressBar"></div>
         </div>
-        <div class="activity-tag">활성</div>
-      </div>
-      <div class="activity-item" onclick="showToast('📱 단말 관리')">
-        <div class="activity-icon blue">📱</div>
-        <div class="activity-info">
-          <div class="activity-title">단말 관리</div>
-          <div class="activity-meta">현재 1대 등록</div>
+        <div class="trust-progress-text" id="trustProgressText">
+          <strong>60</strong> / 100 pts (다음 단계까지 40)
         </div>
       </div>
 
-      <div class="section-title">계정</div>
-      <div class="activity-item" onclick="showToast('🔢 간편 번호 변경')">
-        <div class="activity-icon">🔢</div>
-        <div class="activity-info">
-          <div class="activity-title">간편 번호 (2FA)</div>
-          <div class="activity-meta">이 디바이스 등록됨</div>
+      <div class="trust-cards">
+        <div class="trust-card">
+          <div class="trust-card-title">🎖️ Trust Level</div>
+          <div class="level-row" id="levelRow"></div>
+          <div class="level-desc" id="levelDesc">Lv2 · 관계가 시작됩니다. 모임원을 더 늘려보세요.</div>
+        </div>
+
+        <div class="trust-card">
+          <div class="trust-card-title">💎 Reward Points</div>
+          <div class="points-row">
+            <div class="points-stat">
+              <div class="points-stat-value" id="pointsEarned">60</div>
+              <div class="points-stat-label">누적 획득</div>
+            </div>
+            <div class="points-stat">
+              <div class="points-stat-value" id="pointsBalance">36</div>
+              <div class="points-stat-label">사용 가능</div>
+            </div>
+          </div>
+          <div class="points-detail" id="pointsDetail"></div>
+        </div>
+
+        <div class="trust-card">
+          <div class="trust-card-title">🏆 Badges</div>
+          <div class="badges-grid" id="badgesGrid"></div>
         </div>
       </div>
-      <div class="activity-item activity-item--danger" onclick="logoutPass()">
-        <div class="activity-icon activity-icon--danger">🚪</div>
-        <div class="activity-info">
-          <div class="activity-title activity-title--danger">로그아웃</div>
-          <div class="activity-meta">간편 번호 등록은 유지됩니다</div>
+
+      <div class="profile-stats-row">
+        <div class="profile-stat">
+          <div class="profile-stat-value profile-stat-value--green" id="pStatFriends">3</div>
+          <div class="profile-stat-label">모임원</div>
+        </div>
+        <div class="profile-stat">
+          <div class="profile-stat-value profile-stat-value--orange" id="pStatPosts">0</div>
+          <div class="profile-stat-label">포스트</div>
+        </div>
+        <div class="profile-stat">
+          <div class="profile-stat-value profile-stat-value--amber" id="pStatPoints">60</div>
+          <div class="profile-stat-label">Trust Pts</div>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-group">
+          <div class="settings-row" onclick="showToast('🔔 알림 설정')">
+            <div class="settings-icon">🔔</div>
+            <div class="settings-label">알림</div>
+            <div class="settings-value">켜짐</div>
+            <div class="settings-arrow">›</div>
+          </div>
+          <div class="settings-row" onclick="showToast('🔊 음성 안내')">
+            <div class="settings-icon">🔊</div>
+            <div class="settings-label">음성 안내</div>
+            <div class="settings-value">꺼짐</div>
+            <div class="settings-arrow">›</div>
+          </div>
+          <div class="settings-row" onclick="showToast('🌐 공공장소 모드')">
+            <div class="settings-icon">🌐</div>
+            <div class="settings-label">공공장소 모드</div>
+            <div class="settings-value">꺼짐</div>
+            <div class="settings-arrow">›</div>
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <div class="settings-row" onclick="showToast('🛡️ 하드웨어 인증')">
+            <div class="settings-icon security">🛡️</div>
+            <div class="settings-label">하드웨어 인증</div>
+            <div class="settings-value settings-value--trusted">TRUSTED</div>
+            <div class="settings-arrow">›</div>
+          </div>
+          <div class="settings-row" onclick="showToast('📱 단말 관리')">
+            <div class="settings-icon security">📱</div>
+            <div class="settings-label">단말 관리</div>
+            <div class="settings-value">1대</div>
+            <div class="settings-arrow">›</div>
+          </div>
+          <div class="settings-row" onclick="showToast('🔐 개인정보')">
+            <div class="settings-icon security">🔐</div>
+            <div class="settings-label">개인정보</div>
+            <div class="settings-arrow">›</div>
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <div class="settings-row" onclick="showToast('⚠️ 분실/도난 신고')">
+            <div class="settings-icon warning">⚠️</div>
+            <div class="settings-label">분실/도난 신고</div>
+            <div class="settings-arrow">›</div>
+          </div>
+          <div class="settings-row" onclick="logoutPass()">
+            <div class="settings-icon danger">🚪</div>
+            <div class="settings-label settings-label--danger">로그아웃</div>
+            <div class="settings-arrow">›</div>
+          </div>
         </div>
       </div>
     </section>
@@ -1020,17 +1464,17 @@
       <div class="nav-btn-icon">📰</div>
       <div class="nav-btn-label">Feed</div>
     </button>
-    <button class="nav-btn center" data-page="auth" onclick="switchPage('auth')">
+    <button class="nav-btn center" data-page="rel" onclick="switchPage('rel')">
       <div class="nav-circle">🆔</div>
+      <div class="nav-btn-label">트로피</div>
+    </button>
+    <button class="nav-btn" data-page="auth" onclick="switchPage('auth')">
+      <div class="nav-btn-icon">🤝</div>
       <div class="nav-btn-label">인증</div>
     </button>
-    <button class="nav-btn" onclick="window.location.href='../views/friends.html'">
-      <div class="nav-btn-icon">🌐</div>
-      <div class="nav-btn-label">모임</div>
-    </button>
-    <button class="nav-btn" data-page="rel" onclick="switchPage('rel')">
-      <div class="nav-btn-icon">🌳</div>
-      <div class="nav-btn-label">관계</div>
+    <button class="nav-btn" onclick="window.location.href='./feed.html?section=chat'">
+      <div class="nav-btn-icon">💬</div>
+      <div class="nav-btn-label">채팅</div>
     </button>
   </nav>
 </div>
@@ -1082,6 +1526,27 @@
   </div>
 </div>
 
+<!-- Edit Profile sheet -->
+<div class="modal-sheet edit-profile-sheet" id="editProfileSheet">
+  <div class="modal-grip"></div>
+  <div class="modal-title">프로필 편집</div>
+  <div class="modal-sub">표시 이름과 아바타 이니셜을 수정합니다</div>
+  <div class="edit-form">
+    <div class="edit-field">
+      <label class="edit-label" for="editName">이름</label>
+      <input type="text" class="edit-input" id="editName" placeholder="홍길순" autocomplete="off" maxlength="20"/>
+    </div>
+    <div class="edit-field">
+      <label class="edit-label" for="editInitial">아바타 이니셜 (1글자)</label>
+      <input type="text" class="edit-input" id="editInitial" placeholder="홍" autocomplete="off" maxlength="1"/>
+    </div>
+    <div class="edit-actions">
+      <button class="edit-btn-cancel" onclick="closeEditProfile()">취소</button>
+      <button class="edit-btn-save" onclick="saveProfile()">저장</button>
+    </div>
+  </div>
+</div>
+
 <!-- Auth modal sheet -->
 <div class="modal-backdrop" id="modalBackdrop" onclick="closeAllSheets()"></div>
 <div class="modal-sheet" id="authSheet">
@@ -1126,6 +1591,123 @@ function loadSession() {
   try { return JSON.parse(sessionStorage.getItem('passUser')) || null; } catch (e) { return null; }
 }
 
+// ============================================================
+// Trust Garden — 프로필 페이지 하단에 표시
+// ============================================================
+const TRUST_STAGES = [
+  { emoji: '🌰', name: '씨앗', max: 20 },
+  { emoji: '🌱', name: '새싹', max: 50 },
+  { emoji: '🪴', name: '묘목', max: 100 },
+  { emoji: '🌿', name: '작은나무', max: 200 },
+  { emoji: '🌳', name: '나무', max: 400 },
+  { emoji: '🌲', name: '큰나무', max: 800 },
+  { emoji: '🏞️', name: '숲', max: Infinity }
+];
+const TRUST_LEVELS = [
+  { lv: 1, name: '시작',       desc: '관계의 첫 발걸음을 떼었어요.', threshold: 0 },
+  { lv: 2, name: '관계 시작', desc: '관계가 시작됩니다. 모임원을 더 늘려보세요.', threshold: 3 },
+  { lv: 3, name: '믿음 쌓기', desc: '신뢰가 자라고 있어요.', threshold: 6 },
+  { lv: 4, name: '신뢰 깊어짐', desc: '두터운 신뢰 관계를 만들고 있어요.', threshold: 16 },
+  { lv: 5, name: '신뢰 마스터', desc: '진정한 관계의 달인입니다.', threshold: 51 }
+];
+
+// 데모 상태 — 실제 데이터는 PassAPI에서 받아옴 (TODO)
+const trustDemo = {
+  points: 60,
+  friendsConfirmed: 3,
+  friendsPending: 0,
+  ffConfirmed: 0,
+  postsMine: 0,
+  msgsMine: 0,
+  badges: { b1: true, b2: false, b3: false, b4: false, b5: false, b6: false }
+};
+
+const TRUST_BADGES = [
+  { id: 'b1', emoji: '🌱', name: '첫 모임원',   desc: '모임원 1명' },
+  { id: 'b2', emoji: '🤝', name: '5인 모임',     desc: '모임원 5명' },
+  { id: 'b3', emoji: '🔗', name: '추천 마스터', desc: '2-hop 인증 3명', gold: true },
+  { id: 'b4', emoji: '📝', name: '첫 포스트',   desc: '포스트 1개' },
+  { id: 'b5', emoji: '💬', name: '대화 시작',   desc: '메시지 보내기' },
+  { id: 'b6', emoji: '🏆', name: '신뢰 마스터', desc: 'Trust 200+', gold: true }
+];
+
+function getTrustStage(pts) {
+  let cum = 0;
+  for (let i = 0; i < TRUST_STAGES.length; i++) {
+    const stage = TRUST_STAGES[i];
+    if (pts < stage.max) {
+      return { ...stage, index: i, min: cum, progress: (pts - cum) / (stage.max - cum) };
+    }
+    cum = stage.max;
+  }
+  return { ...TRUST_STAGES[TRUST_STAGES.length - 1], index: TRUST_STAGES.length - 1, min: cum, progress: 1 };
+}
+
+function getTrustLevel(friendsConfirmed) {
+  let lv = TRUST_LEVELS[0];
+  for (const l of TRUST_LEVELS) {
+    if (friendsConfirmed >= l.threshold) lv = l;
+  }
+  return lv;
+}
+
+function updateTrust() {
+  if (!document.getElementById('trustStageName')) return;
+  const s = trustDemo;
+  const pts = s.points;
+  const stage = getTrustStage(pts);
+  const level = getTrustLevel(s.friendsConfirmed);
+
+  document.getElementById('trustStageEmoji').textContent = stage.emoji;
+  document.getElementById('trustStageName').textContent = stage.name;
+  document.getElementById('trustStageNum').textContent = `Stage ${stage.index + 1} / ${TRUST_STAGES.length}`;
+  document.getElementById('trustProgressBar').style.width = (stage.progress * 100).toFixed(0) + '%';
+  if (stage.max === Infinity) {
+    document.getElementById('trustProgressText').innerHTML = `<strong>${pts}</strong> pts · 최고 단계 달성! 🎉`;
+  } else {
+    document.getElementById('trustProgressText').innerHTML = `<strong>${pts}</strong> / ${stage.max} pts (다음 단계까지 ${stage.max - pts})`;
+  }
+
+  document.getElementById('levelRow').innerHTML = TRUST_LEVELS.map(l => `
+    <div class="level-pill ${l.lv === level.lv ? 'current' : ''}">
+      <div class="level-pill-num">Lv${l.lv}</div>
+      <div class="level-pill-name">${l.name}</div>
+    </div>
+  `).join('');
+  document.getElementById('levelDesc').textContent = `Lv${level.lv} · ${level.desc}`;
+
+  document.getElementById('pointsEarned').textContent = pts;
+  document.getElementById('pointsBalance').textContent = Math.floor(pts * 0.6);
+  const breakdown = [
+    { label: '가입 보너스', val: 10 },
+    { label: '모임원 인증 (1-hop)', val: s.friendsConfirmed * 15 },
+    { label: '2-hop 인증', val: s.ffConfirmed * 8 },
+    { label: '포스트', val: s.postsMine * 2 },
+    { label: '대기 관계', val: s.friendsPending * 3 }
+  ].filter(b => b.val > 0);
+  document.getElementById('pointsDetail').innerHTML = breakdown.map(b =>
+    `<div class="points-row-item"><span>${b.label}</span><strong>+${b.val} pt</strong></div>`
+  ).join('');
+
+  document.getElementById('badgesGrid').innerHTML = TRUST_BADGES.map(b => {
+    const earned = !!s.badges[b.id];
+    return `
+      <div class="badge ${earned ? 'earned' : ''} ${earned && b.gold ? 'gold' : ''}">
+        <div class="badge-emoji">${earned ? b.emoji : '🔒'}</div>
+        <div class="badge-name">${b.name}</div>
+        <div class="badge-desc">${b.desc}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function maskPhone(phone) {
+  // 010-1234-5678 → 010-****-5678
+  const digits = (phone || '').replace(/\D/g, '');
+  if (digits.length < 7) return phone || '';
+  return digits.slice(0, 3) + '-****-' + digits.slice(-4);
+}
+
 async function applyUser() {
   const session = loadSession();
   const hasToken = window.PassAPI && PassAPI.isLoggedIn();
@@ -1134,7 +1716,10 @@ async function applyUser() {
   if (!hasToken && !session) {
     document.getElementById('profileAvatar').textContent = '데';
     document.getElementById('profileName').textContent = '데모 사용자';
-    document.getElementById('profileEmail').textContent = '(로그인하지 않음 — 데모)';
+    const wn = document.getElementById('welcomeName');
+    if (wn) wn.textContent = '데모 사용자';
+    const ph = document.getElementById('profilePhone');
+    if (ph) ph.textContent = '(로그인하지 않음 — 데모)';
     return;
   }
 
@@ -1159,7 +1744,10 @@ async function applyUser() {
     const nick = user.name || user.email.split('@')[0];
     document.getElementById('profileAvatar').textContent = (user.avatar || nick.charAt(0)).toUpperCase();
     document.getElementById('profileName').textContent = nick;
-    document.getElementById('profileEmail').textContent = user.email;
+    const wn = document.getElementById('welcomeName');
+    if (wn) wn.textContent = nick;
+    const ph = document.getElementById('profilePhone');
+    if (ph) ph.textContent = user.phone ? maskPhone(user.phone) : user.email;
     if (!sessionStorage.getItem('passWelcomed')) {
       const isNew = session?.isNew;
       setTimeout(() => showToast((isNew ? '🎉 환영합니다 ' : '👋 ') + user.email), 400);
@@ -1201,6 +1789,53 @@ function closeNotifSheet() {
 function closeAllSheets() {
   closeAuthSheet();
   closeNotifSheet();
+  closeEditProfile();
+}
+
+// ============================================================
+// 프로필 편집
+// ============================================================
+function openEditProfile() {
+  const nameEl = document.getElementById('profileName');
+  const avatarEl = document.getElementById('profileAvatar');
+  document.getElementById('editName').value = (nameEl.textContent || '').trim();
+  document.getElementById('editInitial').value = (avatarEl.textContent || '').trim().charAt(0);
+  document.getElementById('editProfileSheet').classList.add('visible');
+  document.getElementById('modalBackdrop').classList.add('visible');
+  setTimeout(() => document.getElementById('editName').focus(), 250);
+}
+
+function closeEditProfile() {
+  document.getElementById('editProfileSheet').classList.remove('visible');
+  document.getElementById('modalBackdrop').classList.remove('visible');
+}
+
+async function saveProfile() {
+  const name = document.getElementById('editName').value.trim();
+  const initial = document.getElementById('editInitial').value.trim().charAt(0);
+  if (!name) { showToast('⚠️ 이름을 입력하세요'); return; }
+  const avatar = (initial || name.charAt(0)).toUpperCase();
+
+  // 화면 즉시 반영
+  document.getElementById('profileName').textContent = name;
+  document.getElementById('welcomeName')?.textContent && (document.getElementById('welcomeName').textContent = name);
+  const wn = document.getElementById('welcomeName');
+  if (wn) wn.textContent = name;
+  document.getElementById('profileAvatar').textContent = avatar;
+
+  // 세션 스토리지 갱신
+  try {
+    const cur = JSON.parse(sessionStorage.getItem('passUser') || '{}');
+    sessionStorage.setItem('passUser', JSON.stringify({ ...cur, name, avatar }));
+  } catch (e) {}
+
+  // 백엔드 연동 (로그인 상태면 서버에도 저장)
+  if (window.PassAPI && PassAPI.isLoggedIn()) {
+    try { await PassAPI.users.updateMe({ name, avatar }); } catch (e) { /* 실패해도 로컬은 유지 */ }
+  }
+
+  closeEditProfile();
+  showToast('✓ 프로필 저장됨');
 }
 function chooseAuth(type) {
   const labels = {
@@ -1276,13 +1911,15 @@ document.addEventListener('keydown', e => {
 
 // Init
 applyUser();
+updateTrust();
 
-// 외부 페이지에서 ?page=auth|rel|my 로 진입 시 해당 탭 활성화
+// 외부 페이지에서 ?page=auth|rel|my 또는 ?notif=1 로 진입 시 처리
 (function applyInitialPage() {
   try {
     const params = new URLSearchParams(location.search);
     const p = params.get('page');
     if (p && ['home', 'auth', 'rel', 'my'].includes(p)) switchPage(p);
+    if (params.get('notif') === '1') setTimeout(openNotifSheet, 100);
   } catch (e) {}
 })();
 </script>

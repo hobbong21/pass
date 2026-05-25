@@ -95,34 +95,8 @@
   }
 
   /* ============================================
-     Header (sticky)
+     (구) Header CSS — 통일 헤더로 교체됨, dead code 제거됨
      ============================================ */
-  .app-header {
-    position: sticky;
-    top: 0;
-    z-index: 30;
-    background: var(--bg-app);
-    padding: calc(14px + var(--safe-top)) 16px 8px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    min-height: calc(56px + var(--safe-top));
-  }
-  .app-brand { display: flex; align-items: center; gap: 10px; }
-  .app-brand-mark {
-    width: 36px; height: 36px;
-    border-radius: 11px;
-    background: linear-gradient(135deg, var(--chon-orange), var(--friend-green));
-    color: white;
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 900; font-size: 14px;
-    letter-spacing: -0.5px;
-    box-shadow: var(--shadow-sm);
-  }
-  .app-brand-text { line-height: 1.1; }
-  .app-brand-title { font-size: 18px; font-weight: 900; letter-spacing: -0.3px; }
-  .app-brand-sub { font-size: 11px; color: var(--text-secondary); font-weight: 700; margin-top: 2px; }
   .header-action {
     background: white;
     border: 1.5px solid var(--friend-green);
@@ -248,9 +222,7 @@
     border-bottom: 1px solid var(--border-light, #F1F5F9);
     overflow-x: auto;
     flex-shrink: 0;
-    position: sticky;
-    top: 0;
-    z-index: 20;
+    /* unified-header가 sticky top:0이므로 section-tabs는 자연스럽게 스크롤 */
   }
   .section-tab {
     flex: 1;
@@ -1412,22 +1384,97 @@
   .list-item-status.confirmed { color: var(--status-confirmed); }
   .list-item-status.pending { color: var(--status-pending); }
   .level-pill-name { font-size: 9px; }
+
+  /* ============================================
+     Unified Header (모든 페이지 공통)
+     ============================================ */
+  .unified-header {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    background: var(--bg-app, #FFFBF0);
+    padding: calc(14px + env(safe-area-inset-top, 0px)) 20px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .uh-brand { display: flex; align-items: center; gap: 10px; }
+  .uh-brand-mark {
+    width: 36px; height: 36px;
+    border-radius: 11px;
+    background: linear-gradient(135deg, var(--chon-orange), #5BBA6F);
+    color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 900; font-size: 16px; letter-spacing: -0.5px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .uh-brand-name { font-size: 20px; font-weight: 900; letter-spacing: -0.5px; color: var(--text-primary); }
+  .uh-brand-sub { font-size: 11px; color: var(--text-secondary); font-weight: 700; margin-top: -2px; }
+  .uh-brand-text { line-height: 1.1; }
+  .uh-actions { display: flex; align-items: center; gap: 8px; }
+  .uh-icon-btn {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: white;
+    border: 1px solid #F1F5F9;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 18px; position: relative;
+    font-family: inherit; transition: background 0.15s;
+  }
+  .uh-icon-btn:active { background: var(--bg-app); }
+  .uh-icon-dot {
+    position: absolute; top: 8px; right: 10px;
+    width: 8px; height: 8px;
+    background: #DC2626;
+    border-radius: 50%;
+    border: 2px solid white;
+  }
+  .welcome-bar {
+    background: linear-gradient(90deg, #FFF3D6, white);
+    border-bottom: 1px solid #F1F5F9;
+    padding: 10px 20px;
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; font-weight: 700; color: var(--text-primary);
+    flex-shrink: 0;
+  }
+  .welcome-emoji { font-size: 16px; line-height: 1; }
+  .welcome-msg { flex: 1; }
+  .welcome-msg strong { color: var(--chon-orange-dark); font-weight: 900; }
+  .welcome-reset {
+    background: white;
+    border: 1px solid #F1F5F9;
+    color: var(--text-secondary);
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px; font-weight: 800;
+    cursor: pointer; font-family: inherit;
+    flex-shrink: 0;
+  }
+  .welcome-reset:active { transform: scale(0.96); }
 </style>
 </head>
 <body>
 
 <div class="app">
-  <header class="app-header">
-    <button class="header-action" onclick="window.location.href='./home.html'">‹ 홈</button>
-    <div class="app-brand">
-      <div class="app-brand-mark">P</div>
-      <div class="app-brand-text">
-        <div class="app-brand-title" id="headerTitle">PASS</div>
-        <div class="app-brand-sub" id="headerSub">관계형 SNS</div>
+  <header class="unified-header">
+    <div class="uh-brand">
+      <div class="uh-brand-mark">P</div>
+      <div class="uh-brand-text">
+        <div class="uh-brand-name">PASS</div>
+        <div class="uh-brand-sub">관계형 SNS</div>
       </div>
     </div>
-    <button class="header-action" onclick="resetAll()">처음부터</button>
+    <div class="uh-actions">
+      <button class="uh-icon-btn" onclick="window.location.href='./home.html?page=my'" aria-label="마이">👤</button>
+      <button class="uh-icon-btn" onclick="window.location.href='./home.html?notif=1'" aria-label="알림">🔔<span class="uh-icon-dot"></span></button>
+    </div>
   </header>
+  <div class="welcome-bar">
+    <span class="welcome-emoji">👋</span>
+    <span class="welcome-msg"><strong id="welcomeName">데모 사용자</strong>님 환영합니다.</span>
+    <button class="welcome-reset" onclick="resetAll()">처음부터</button>
+  </div>
 
   <!-- 내부 섹션 탭 (피드/모임/채팅/Trust/프로필) -->
   <div class="section-tabs">
@@ -1670,17 +1717,17 @@
       <div class="nav-btn-icon">📰</div>
       <div class="nav-btn-label">Feed</div>
     </button>
-    <button class="nav-btn center" onclick="window.location.href='./home.html?page=auth'">
+    <button class="nav-btn center" onclick="window.location.href='./home.html?page=rel'">
       <div class="nav-circle">🆔</div>
+      <div class="nav-btn-label">트로피</div>
+    </button>
+    <button class="nav-btn" onclick="window.location.href='./home.html?page=auth'">
+      <div class="nav-btn-icon">🤝</div>
       <div class="nav-btn-label">인증</div>
     </button>
-    <button class="nav-btn" onclick="window.location.href='../views/friends.html'">
-      <div class="nav-btn-icon">🌐</div>
-      <div class="nav-btn-label">모임</div>
-    </button>
-    <button class="nav-btn" onclick="window.location.href='./home.html?page=rel'">
-      <div class="nav-btn-icon">🌳</div>
-      <div class="nav-btn-label">관계</div>
+    <button class="nav-btn" onclick="switchMain('chat')">
+      <div class="nav-btn-icon">💬</div>
+      <div class="nav-btn-label">채팅</div>
     </button>
   </nav>
 </div>
@@ -3160,6 +3207,24 @@ applyLoggedInUser();
 
 // Init
 renderAll();
+
+(function applyWelcomeName() {
+  try {
+    const u = JSON.parse(sessionStorage.getItem('passUser') || '{}');
+    const nick = u.name || (state.me && state.me.name) || (u.email ? u.email.split('@')[0] : '데모 사용자');
+    const wn = document.getElementById('welcomeName');
+    if (wn) wn.textContent = nick;
+  } catch (e) {}
+})();
+
+// 외부 페이지에서 ?section= 으로 진입 시 해당 섹션 자동 활성화
+(function applyInitialSection() {
+  try {
+    const params = new URLSearchParams(location.search);
+    const s = params.get('section');
+    if (s && ['feed','network','chat','trust','profile'].includes(s)) switchMain(s);
+  } catch (e) {}
+})();
 
 // 로그인 상태면 백엔드에서 실제 데이터 로드 (비로그인 시 데모 데이터 유지)
 if (backendOn()) {

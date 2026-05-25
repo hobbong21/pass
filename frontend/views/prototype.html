@@ -1048,6 +1048,7 @@
     overflow: hidden;
   }
   .pts-progress-fill {
+    width: 0;
     height: 100%;
     background: linear-gradient(90deg, var(--chon-yellow), var(--chon-orange));
     border-radius: 999px;
@@ -2307,20 +2308,95 @@
     margin-top: 1px;
   }
 
+  /* === Utility classes (inline-style removal) === */
+  .mt-8 { margin-top: 8px; }
+  .mt-12 { margin-top: 12px; }
+  .mt-32 { margin-top: 32px; }
+  .fs-8 { font-size: 8px; }
+  .fs-12 { font-size: 12px; }
+  .fs-14 { font-size: 14px; }
+  .fs-15 { font-size: 15px; }
+  .fs-17 { font-size: 17px; }
+  .fs-20 { font-size: 20px; }
+  .spacer-32 { width: 32px; }
+  .is-dimmed { opacity: 0.4; }
+
+  /* Brand swatches — system colors */
+  .swatch-primary       { background: #F7931E; }
+  .swatch-brand-dark    { background: #E87F0A; }
+  .swatch-accent-yellow { background: #FCD34D; }
+  .swatch-cream-bg      { background: #FFFBF0; }
+  .swatch-success       { background: #10B981; }
+  .swatch-warning       { background: #F59E0B; }
+  .swatch-error         { background: #EF4444; }
+  /* Brand swatches — category colors */
+  .swatch-family  { background: #FF7F50; }
+  .swatch-company { background: #4A90E2; }
+  .swatch-school  { background: #7B68EE; }
+  .swatch-general { background: #5BBA6F; }
+
+  /* Brand typography helpers */
+  .tp-caption { font-size: 11px; color: var(--text-secondary); }
+  .brand-type-foot {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin: 10px 0 0;
+    line-height: 1.5;
+  }
+
+  /* Brand shape radii */
+  .sh-box--lg  { border-radius: 28px; }
+  .sh-box--md  { border-radius: 20px; }
+  .sh-box--btn { border-radius: 16px; }
+  .sh-box--pill { border-radius: 999px; }
+
+  /* Reference-screen variants */
+  .ref-screen--cream { background: #FFFBF5; }
+  .ref-pill-icon--outline {
+    background: #FFFFFF;
+    color: var(--chon-orange);
+    border: 2px solid var(--chon-orange);
+  }
+  .ref-nav-icon--bold { font-weight: 900; color: #1F1F1F; }
+  .thumb-id-ko { font-size: 9px; font-weight: 900; }
+  .thumb-id-en { font-size: 7px; opacity: 0.8; }
+
+  /* Workflow graph stat variant */
+  .wf-graph-stat--blue { border-left-color: #4A90E2; }
+  .gs-value--blue-15  { color: #2563EB; font-size: 15px; }
+
+  /* Legend dots */
+  .lg-dot--orange { background: #F7931E; }
+  .lg-dot--coral  { background: #FF7F50; }
+  .lg-dot--blue   { background: #4A90E2; }
+  .lg-dot--green  { background: #5BBA6F; }
+  .lg-dot--gray   { background: #BDBDBD; }
+
+  /* Points auth base-points text */
+  .pts-auth-base {
+    font-weight: 600;
+    color: var(--text-tertiary);
+    font-size: 11px;
+  }
+
+  /* Status indicators (used by JS-generated HTML) */
+  .status-pending   { color: #F59E0B; }
+  .status-confirmed { color: #10B981; }
+
 </style>
 </head>
 <body>
 
 <div class="intro">
   <h1>🌳 CHON DID — 디자인 시스템 + 시스템 구조도 목업</h1>
-  <p style="margin-top: 12px;">
+  <p class="mt-12">
     <span class="badge">v5</span>
     <span class="badge">4단계 모델</span>
     <span class="badge">관계 기반 신원</span>
     <span class="badge">디자인 양식 v1</span>
   </p>
   <p>제공된 디자인 양식 4종(홈 · CHON ID · 인증 요청 · 링크 공유)을 기반으로 디자인 토큰을 추출하고, 3-way 토글(관계도/추가하기/인증현황) 패턴을 적용한 인터랙티브 프로토타입입니다.</p>
-  <p style="margin-top: 8px;"><strong>인터랙션 안내:</strong> 섹션 3의 워크플로우 타임라인으로 디자인 화면 간 이동을 확인하고, 섹션 4에서 카테고리별 인증으로 포인트를 누적할 수 있습니다.</p>
+  <p class="mt-8"><strong>인터랙션 안내:</strong> 섹션 3의 워크플로우 타임라인으로 디자인 화면 간 이동을 확인하고, 섹션 4에서 카테고리별 인증으로 포인트를 누적할 수 있습니다.</p>
 </div>
 
 <!-- ============================================= -->
@@ -2357,13 +2433,13 @@
     <div class="brand-block">
       <h4>🎨 컬러 팔레트</h4>
       <div class="brand-swatches">
-        <div class="brand-swatch"><span class="sw-chip" style="background:#F7931E"></span><span class="sw-name">CHON Orange</span> <span class="sw-hex">#F7931E · Primary</span></div>
-        <div class="brand-swatch"><span class="sw-chip" style="background:#E87F0A"></span><span class="sw-name">Brand Dark</span> <span class="sw-hex">#E87F0A · Hover</span></div>
-        <div class="brand-swatch"><span class="sw-chip" style="background:#FCD34D"></span><span class="sw-name">Accent Yellow</span> <span class="sw-hex">#FCD34D · Secondary</span></div>
-        <div class="brand-swatch"><span class="sw-chip" style="background:#FFFBF0"></span><span class="sw-name">Cream BG</span> <span class="sw-hex">#FFFBF0 · 배경</span></div>
-        <div class="brand-swatch"><span class="sw-chip" style="background:#10B981"></span><span class="sw-name">Success</span> <span class="sw-hex">#10B981 · 인증</span></div>
-        <div class="brand-swatch"><span class="sw-chip" style="background:#F59E0B"></span><span class="sw-name">Warning</span> <span class="sw-hex">#F59E0B · 대기</span></div>
-        <div class="brand-swatch"><span class="sw-chip" style="background:#EF4444"></span><span class="sw-name">Error</span> <span class="sw-hex">#EF4444 · 거절</span></div>
+        <div class="brand-swatch"><span class="sw-chip swatch-primary"></span><span class="sw-name">CHON Orange</span> <span class="sw-hex">#F7931E · Primary</span></div>
+        <div class="brand-swatch"><span class="sw-chip swatch-brand-dark"></span><span class="sw-name">Brand Dark</span> <span class="sw-hex">#E87F0A · Hover</span></div>
+        <div class="brand-swatch"><span class="sw-chip swatch-accent-yellow"></span><span class="sw-name">Accent Yellow</span> <span class="sw-hex">#FCD34D · Secondary</span></div>
+        <div class="brand-swatch"><span class="sw-chip swatch-cream-bg"></span><span class="sw-name">Cream BG</span> <span class="sw-hex">#FFFBF0 · 배경</span></div>
+        <div class="brand-swatch"><span class="sw-chip swatch-success"></span><span class="sw-name">Success</span> <span class="sw-hex">#10B981 · 인증</span></div>
+        <div class="brand-swatch"><span class="sw-chip swatch-warning"></span><span class="sw-name">Warning</span> <span class="sw-hex">#F59E0B · 대기</span></div>
+        <div class="brand-swatch"><span class="sw-chip swatch-error"></span><span class="sw-name">Error</span> <span class="sw-hex">#EF4444 · 거절</span></div>
       </div>
     </div>
 
@@ -2371,10 +2447,10 @@
     <div class="brand-block">
       <h4>🏷 관계 카테고리</h4>
       <div class="brand-swatches">
-        <div class="brand-swatch"><span class="sw-chip" style="background:#FF7F50"></span><span class="sw-name">가족 (Family)</span> <span class="sw-hex">#FF7F50</span></div>
-        <div class="brand-swatch"><span class="sw-chip" style="background:#4A90E2"></span><span class="sw-name">회사 (Company)</span> <span class="sw-hex">#4A90E2</span></div>
-        <div class="brand-swatch"><span class="sw-chip" style="background:#7B68EE"></span><span class="sw-name">학교 (School)</span> <span class="sw-hex">#7B68EE</span></div>
-        <div class="brand-swatch"><span class="sw-chip" style="background:#5BBA6F"></span><span class="sw-name">모임 (General)</span> <span class="sw-hex">#5BBA6F</span></div>
+        <div class="brand-swatch"><span class="sw-chip swatch-family"></span><span class="sw-name">가족 (Family)</span> <span class="sw-hex">#FF7F50</span></div>
+        <div class="brand-swatch"><span class="sw-chip swatch-company"></span><span class="sw-name">회사 (Company)</span> <span class="sw-hex">#4A90E2</span></div>
+        <div class="brand-swatch"><span class="sw-chip swatch-school"></span><span class="sw-name">학교 (School)</span> <span class="sw-hex">#7B68EE</span></div>
+        <div class="brand-swatch"><span class="sw-chip swatch-general"></span><span class="sw-name">모임 (General)</span> <span class="sw-hex">#5BBA6F</span></div>
       </div>
     </div>
 
@@ -2382,23 +2458,23 @@
     <div class="brand-block">
       <h4>🔤 타이포그래피</h4>
       <div class="brand-type-list">
-        <div class="brand-type-row"><span class="tp-label" style="font-size:20px;">Display</span><span class="tp-spec">32–40pt · Bold</span></div>
-        <div class="brand-type-row"><span class="tp-label" style="font-size:17px;">Title</span><span class="tp-spec">20–28pt · Bold</span></div>
-        <div class="brand-type-row"><span class="tp-label" style="font-size:15px;">Body</span><span class="tp-spec">14–16pt · Regular</span></div>
-        <div class="brand-type-row"><span class="tp-label" style="font-size:12px;">Label</span><span class="tp-spec">12–13pt · Medium</span></div>
-        <div class="brand-type-row"><span class="tp-label" style="font-size:11px;color:var(--text-secondary)">Caption</span><span class="tp-spec">11pt · Regular</span></div>
+        <div class="brand-type-row"><span class="tp-label fs-20">Display</span><span class="tp-spec">32–40pt · Bold</span></div>
+        <div class="brand-type-row"><span class="tp-label fs-17">Title</span><span class="tp-spec">20–28pt · Bold</span></div>
+        <div class="brand-type-row"><span class="tp-label fs-15">Body</span><span class="tp-spec">14–16pt · Regular</span></div>
+        <div class="brand-type-row"><span class="tp-label fs-12">Label</span><span class="tp-spec">12–13pt · Medium</span></div>
+        <div class="brand-type-row"><span class="tp-label tp-caption">Caption</span><span class="tp-spec">11pt · Regular</span></div>
       </div>
-      <p style="font-size:11px;color:var(--text-secondary);margin:10px 0 0;line-height:1.5;">한국어: Pretendard / Noto Sans KR · 영문·숫자: SF Pro / Roboto</p>
+      <p class="brand-type-foot">한국어: Pretendard / Noto Sans KR · 영문·숫자: SF Pro / Roboto</p>
     </div>
 
     <!-- 모양 토큰 -->
     <div class="brand-block">
       <h4>📐 모양 토큰</h4>
       <div class="brand-shapes">
-        <div class="brand-shape"><div class="sh-box" style="border-radius:28px;"></div>Card LG · 28px</div>
-        <div class="brand-shape"><div class="sh-box" style="border-radius:20px;"></div>Card MD · 20px</div>
-        <div class="brand-shape"><div class="sh-box" style="border-radius:16px;"></div>Button · 16px</div>
-        <div class="brand-shape"><div class="sh-box" style="border-radius:999px;"></div>Pill · full</div>
+        <div class="brand-shape"><div class="sh-box sh-box--lg"></div>Card LG · 28px</div>
+        <div class="brand-shape"><div class="sh-box sh-box--md"></div>Card MD · 20px</div>
+        <div class="brand-shape"><div class="sh-box sh-box--btn"></div>Button · 16px</div>
+        <div class="brand-shape"><div class="sh-box sh-box--pill"></div>Pill · full</div>
       </div>
     </div>
 
@@ -2443,7 +2519,7 @@
             <div class="status-icons">▲ ◢ █</div>
           </div>
 
-          <div class="ref-screen" style="background:#FFFBF5;">
+          <div class="ref-screen ref-screen--cream">
             <div class="ref-top-bar">
               <div class="ref-logo">
                 <span class="ref-logo-icon">
@@ -2489,8 +2565,8 @@
                 </div>
                 <div class="ref-mutual-card-thumb">
                   <div class="thumb-icon">👤</div>
-                  <div style="font-size:9px;font-weight:900;">나의 ID</div>
-                  <div style="font-size:7px;opacity:0.8;">My CHON ID</div>
+                  <div class="thumb-id-ko">나의 ID</div>
+                  <div class="thumb-id-en">My CHON ID</div>
                   <div class="thumb-qr"></div>
                 </div>
               </div>
@@ -2502,7 +2578,7 @@
                   <div class="ref-pill-label">연락하기<br>(가계도)</div>
                 </div>
                 <div class="ref-pill-item">
-                  <div class="ref-pill-icon" style="background:#FFFFFF;color:var(--chon-orange);border:2px solid var(--chon-orange);">⌗</div>
+                  <div class="ref-pill-icon ref-pill-icon--outline">⌗</div>
                   <div class="ref-pill-label">QR 코드</div>
                 </div>
                 <div class="ref-pill-item">
@@ -2522,7 +2598,7 @@
                 <span>홈</span>
               </div>
               <div class="ref-nav-item">
-                <div class="ref-nav-icon" style="font-weight:900;color:#1F1F1F;">A<sup style="font-size:8px;">+</sup></div>
+                <div class="ref-nav-icon ref-nav-icon--bold">A<sup class="fs-8">+</sup></div>
                 <span>CHON</span>
               </div>
               <div class="ref-nav-item center">
@@ -2558,7 +2634,7 @@
             <div class="ref-top-bar">
               <button class="ref-back">←</button>
               <div></div>
-              <div style="width:32px;"></div>
+              <div class="spacer-32"></div>
             </div>
 
             <div class="ref-chonid-body">
@@ -2602,7 +2678,7 @@
                   </svg>
                 </div>
                 <div class="ref-chonid-foot">
-                  <span style="font-size:14px;">⊛</span>
+                  <span class="fs-14">⊛</span>
                   <span>CHON</span>
                 </div>
               </div>
@@ -2614,7 +2690,7 @@
                 <span>홈</span>
               </div>
               <div class="ref-nav-item">
-                <div class="ref-nav-icon" style="font-weight:900;color:#1F1F1F;">A<sup style="font-size:8px;">+</sup></div>
+                <div class="ref-nav-icon ref-nav-icon--bold">A<sup class="fs-8">+</sup></div>
                 <span>CHON</span>
               </div>
               <div class="ref-nav-item center">
@@ -2650,7 +2726,7 @@
             <div class="ref-top-bar">
               <button class="ref-back">←</button>
               <div></div>
-              <div style="width:32px;"></div>
+              <div class="spacer-32"></div>
             </div>
 
             <div class="ref-auth-body">
@@ -2683,7 +2759,7 @@
                 <span>홈</span>
               </div>
               <div class="ref-nav-item">
-                <div class="ref-nav-icon" style="font-weight:900;color:#1F1F1F;">A<sup style="font-size:8px;">+</sup></div>
+                <div class="ref-nav-icon ref-nav-icon--bold">A<sup class="fs-8">+</sup></div>
                 <span>CHON</span>
               </div>
               <div class="ref-nav-item center">
@@ -2719,10 +2795,10 @@
             <div class="ref-top-bar">
               <button class="ref-back">←</button>
               <div></div>
-              <div style="width:32px;"></div>
+              <div class="spacer-32"></div>
             </div>
 
-            <div class="ref-auth-body" style="opacity:0.4;">
+            <div class="ref-auth-body is-dimmed">
               <div class="ref-auth-title">
                 상호인증 요청하기를 눌러<br>나를 확인 받으세요
               </div>
@@ -2792,7 +2868,7 @@
                 <span>홈</span>
               </div>
               <div class="ref-nav-item">
-                <div class="ref-nav-icon" style="font-weight:900;color:#1F1F1F;">A<sup style="font-size:8px;">+</sup></div>
+                <div class="ref-nav-icon ref-nav-icon--bold">A<sup class="fs-8">+</sup></div>
                 <span>CHON</span>
               </div>
               <div class="ref-nav-item center">
@@ -2816,7 +2892,7 @@
   </div>
 </div>
 
-<div class="phase-header" style="margin-top:32px;">
+<div class="phase-header mt-32">
   <span class="phase-badge tobe">TO BE</span>
   <span class="phase-desc">관계 기반 신원으로 확장 — 가계도·인증현황·그룹 추가 등 매트릭스 구조 화면</span>
 </div>
@@ -2930,16 +3006,16 @@
           <div class="gs-value" id="wfGraphCount">0</div>
           <div class="gs-desc" id="wfGraphDesc">아직 연결된 관계가 없습니다.</div>
         </div>
-        <div class="wf-graph-stat" style="border-left-color:#4A90E2;">
+        <div class="wf-graph-stat wf-graph-stat--blue">
           <div class="gs-label">활성 그룹</div>
-          <div class="gs-value" id="wfGraphCats" style="color:#2563EB;font-size:15px;">—</div>
+          <div class="gs-value gs-value--blue-15" id="wfGraphCats">—</div>
         </div>
         <div class="wf-graph-legend">
-          <span><span class="lg-dot" style="background:#F7931E"></span>나</span>
-          <span><span class="lg-dot" style="background:#FF7F50"></span>가족</span>
-          <span><span class="lg-dot" style="background:#4A90E2"></span>학급</span>
-          <span><span class="lg-dot" style="background:#5BBA6F"></span>모임</span>
-          <span><span class="lg-dot" style="background:#BDBDBD"></span>미인증</span>
+          <span><span class="lg-dot lg-dot--orange"></span>나</span>
+          <span><span class="lg-dot lg-dot--coral"></span>가족</span>
+          <span><span class="lg-dot lg-dot--blue"></span>학급</span>
+          <span><span class="lg-dot lg-dot--green"></span>모임</span>
+          <span><span class="lg-dot lg-dot--gray"></span>미인증</span>
         </div>
       </div>
     </div>
@@ -3084,7 +3160,7 @@
           <span class="label" id="ptsStageLabel">씨앗</span>
         </div>
         <div class="pts-progress-bar">
-          <div class="pts-progress-fill" id="ptsProgressFill" style="width: 0%;"></div>
+          <div class="pts-progress-fill" id="ptsProgressFill"></div>
         </div>
         <div class="pts-progress-text" id="ptsProgressText">다음: 🌿 <strong>새싹</strong>까지 <strong>100P</strong></div>
       </div>
@@ -3103,7 +3179,7 @@
 
       <div class="pts-auth-card" data-cat="family" id="authCard-family">
         <div class="pts-auth-head">
-          <span class="pts-auth-name">👨‍👩‍👧 가족 <span style="font-weight:600;color:var(--text-tertiary);font-size:11px;">기본 100P</span></span>
+          <span class="pts-auth-name">👨‍👩‍👧 가족 <span class="pts-auth-base">기본 100P</span></span>
           <span class="pts-auth-score"><span id="authScore-family">0</span> P</span>
         </div>
         <div class="pts-auth-steps" id="authSteps-family"></div>
@@ -3112,7 +3188,7 @@
 
       <div class="pts-auth-card" data-cat="company" id="authCard-company">
         <div class="pts-auth-head">
-          <span class="pts-auth-name">🏢 회사 <span style="font-weight:600;color:var(--text-tertiary);font-size:11px;">기본 70P</span></span>
+          <span class="pts-auth-name">🏢 회사 <span class="pts-auth-base">기본 70P</span></span>
           <span class="pts-auth-score"><span id="authScore-company">0</span> P</span>
         </div>
         <div class="pts-auth-steps" id="authSteps-company"></div>
@@ -3121,7 +3197,7 @@
 
       <div class="pts-auth-card" data-cat="school" id="authCard-school">
         <div class="pts-auth-head">
-          <span class="pts-auth-name">🎓 학교 <span style="font-weight:600;color:var(--text-tertiary);font-size:11px;">기본 50P</span></span>
+          <span class="pts-auth-name">🎓 학교 <span class="pts-auth-base">기본 50P</span></span>
           <span class="pts-auth-score"><span id="authScore-school">0</span> P</span>
         </div>
         <div class="pts-auth-steps" id="authSteps-school"></div>
@@ -3130,7 +3206,7 @@
 
       <div class="pts-auth-card" data-cat="general" id="authCard-general">
         <div class="pts-auth-head">
-          <span class="pts-auth-name">🌐 모임 <span style="font-weight:600;color:var(--text-tertiary);font-size:11px;">기본 30P</span></span>
+          <span class="pts-auth-name">🌐 모임 <span class="pts-auth-base">기본 30P</span></span>
           <span class="pts-auth-score"><span id="authScore-general">0</span> P</span>
         </div>
         <div class="pts-auth-steps" id="authSteps-general"></div>
@@ -3350,13 +3426,13 @@
     let actions = [];
 
     if (node.status === 'pending') {
-      meta = `상태: <strong style="color: #F59E0B;">대기 중</strong><br>주소록에서 자동 매칭된 후보입니다`;
+      meta = `상태: <strong class="status-pending">대기 중</strong><br>주소록에서 자동 매칭된 후보입니다`;
       actions = [
         { label: '인증 요청', primary: true, onClick: () => confirmRelation(node) },
         { label: '나중에', onClick: () => hideInfo() }
       ];
     } else if (node.status === 'confirmed') {
-      meta = `상태: <strong style="color: #10B981;">인증됨</strong><br>카테고리: ${node.cat}`;
+      meta = `상태: <strong class="status-confirmed">인증됨</strong><br>카테고리: ${node.cat}`;
       actions = [
         { label: '관계 정보', onClick: () => hideInfo() }
       ];

@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PASS 모임 — 모임 + 모임원 추천</title>
 <script src="../lib/pass-api.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -140,24 +140,6 @@
     flex-direction: column;
   }
 
-  /* 모바일 — 폰 목업 베젤 제거, 도구를 전체 화면으로 */
-  @media (max-width: 480px) {
-    body { background: var(--bg-app); }
-    .demo-wrap { padding: 0; max-width: 100%; }
-    .demo-header, .phone-caption { display: none; }
-    .phones-grid { display: block; gap: 0; }
-    .phone-wrapper { width: 100%; }
-    .phone {
-      width: 100%;
-      height: 100vh;
-      height: 100dvh;
-      border-radius: 0;
-      padding: 0;
-      box-shadow: none;
-      background: var(--bg-app);
-    }
-    .phone-screen { border-radius: 0; }
-  }
   .status-bar {
     height: 40px;
     display: flex;
@@ -851,11 +833,6 @@
   }
   .desc-section ul { padding-left: 18px; }
 
-  @media (max-width: 900px) {
-    .device-row { flex-direction: column; align-items: center; }
-    .desc-panel { width: 100%; max-width: 600px; }
-  }
-
   /* ============================================
      Single-screen mode — 데모 베젤·래퍼 제거 후 phone-screen이 메인
      반응형: 모바일은 edge-to-edge, 데스크톱은 중앙 정렬 + 외곽 배경
@@ -921,6 +898,74 @@
   }
 
   /* ============================================
+     Unified Header (모든 페이지 공통)
+     ============================================ */
+  .unified-header {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    background: var(--bg-app, #FFFBF0);
+    padding: calc(14px + env(safe-area-inset-top, 0px)) 20px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .uh-brand { display: flex; align-items: center; gap: 10px; }
+  .uh-brand-mark {
+    width: 36px; height: 36px;
+    border-radius: 11px;
+    background: linear-gradient(135deg, var(--chon-orange), #5BBA6F);
+    color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 900; font-size: 16px; letter-spacing: -0.5px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .uh-brand-name { font-size: 20px; font-weight: 900; letter-spacing: -0.5px; color: var(--text-primary); }
+  .uh-brand-sub { font-size: 11px; color: var(--text-secondary); font-weight: 700; margin-top: -2px; }
+  .uh-brand-text { line-height: 1.1; }
+  .uh-actions { display: flex; align-items: center; gap: 8px; }
+  .uh-icon-btn {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: white;
+    border: 1px solid #F1F5F9;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 18px; position: relative;
+    font-family: inherit; transition: background 0.15s;
+  }
+  .uh-icon-btn:active { background: var(--bg-app); }
+  .uh-icon-dot {
+    position: absolute; top: 8px; right: 10px;
+    width: 8px; height: 8px;
+    background: #DC2626;
+    border-radius: 50%;
+    border: 2px solid white;
+  }
+  .welcome-bar {
+    background: linear-gradient(90deg, #FFF3D6, white);
+    border-bottom: 1px solid #F1F5F9;
+    padding: 10px 20px;
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; font-weight: 700; color: var(--text-primary);
+    flex-shrink: 0;
+  }
+  .welcome-emoji { font-size: 16px; line-height: 1; }
+  .welcome-msg { flex: 1; }
+  .welcome-msg strong { color: var(--chon-orange-dark); font-weight: 900; }
+  .welcome-reset {
+    background: white;
+    border: 1px solid #F1F5F9;
+    color: var(--text-secondary);
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px; font-weight: 800;
+    cursor: pointer; font-family: inherit;
+    flex-shrink: 0;
+  }
+  .welcome-reset:active { transform: scale(0.96); }
+
+  /* ============================================
      Unified Bottom Nav (전체 페이지 통일)
      ============================================ */
   .bottom-nav {
@@ -982,16 +1027,23 @@
 <body>
 
 <div class="phone-screen">
-  <div class="status-bar">
-    <span>9:30</span>
-    <div class="camera-dot"></div>
-    <div>▲ ◢ █</div>
-  </div>
-
-  <div class="app-header">
-    <button class="header-action home" onclick="window.location.href='../main/home.html'">‹ 홈</button>
-    <h1>🌐 모임</h1>
-    <button class="header-action" onclick="resetAll()">처음부터</button>
+  <header class="unified-header">
+    <div class="uh-brand">
+      <div class="uh-brand-mark">P</div>
+      <div class="uh-brand-text">
+        <div class="uh-brand-name">PASS</div>
+        <div class="uh-brand-sub">관계형 SNS</div>
+      </div>
+    </div>
+    <div class="uh-actions">
+      <button class="uh-icon-btn" onclick="window.location.href='../main/home.html?page=my'" aria-label="마이">👤</button>
+      <button class="uh-icon-btn" onclick="window.location.href='../main/home.html?notif=1'" aria-label="알림">🔔<span class="uh-icon-dot"></span></button>
+    </div>
+  </header>
+  <div class="welcome-bar">
+    <span class="welcome-emoji">👋</span>
+    <span class="welcome-msg"><strong id="welcomeName">데모 사용자</strong>님 환영합니다.</span>
+    <button class="welcome-reset" onclick="resetAll()">처음부터</button>
   </div>
 
   <div class="content">
@@ -1058,17 +1110,17 @@
       <div class="nav-btn-icon">📰</div>
       <div class="nav-btn-label">Feed</div>
     </button>
-    <button class="nav-btn center" onclick="window.location.href='../main/home.html?page=auth'">
+    <button class="nav-btn center" onclick="window.location.href='../main/home.html?page=rel'">
       <div class="nav-circle">🆔</div>
+      <div class="nav-btn-label">트로피</div>
+    </button>
+    <button class="nav-btn" onclick="window.location.href='../main/home.html?page=auth'">
+      <div class="nav-btn-icon">🤝</div>
       <div class="nav-btn-label">인증</div>
     </button>
-    <button class="nav-btn active">
-      <div class="nav-btn-icon">🌐</div>
-      <div class="nav-btn-label">모임</div>
-    </button>
-    <button class="nav-btn" onclick="window.location.href='../main/home.html?page=rel'">
-      <div class="nav-btn-icon">🌳</div>
-      <div class="nav-btn-label">관계</div>
+    <button class="nav-btn" onclick="window.location.href='../main/feed.html?section=chat'">
+      <div class="nav-btn-icon">💬</div>
+      <div class="nav-btn-label">채팅</div>
     </button>
   </nav>
 </div>
@@ -1843,6 +1895,16 @@ document.getElementById('modalFsName').addEventListener('keypress', e => {
 });
 
 renderAll();
+
+// 환영 메시지: sessionStorage의 이름 표시
+(function applyWelcomeName() {
+  try {
+    const u = JSON.parse(sessionStorage.getItem('passUser') || '{}');
+    const nick = u.name || (u.email ? u.email.split('@')[0] : '데모 사용자');
+    const wn = document.getElementById('welcomeName');
+    if (wn) wn.textContent = nick;
+  } catch (e) {}
+})();
 </script>
 
 <!-- 백엔드 그래프 영속 연동 (CHON graphs API) — 비로그인 시 데모로 동작 -->

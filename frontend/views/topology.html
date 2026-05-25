@@ -319,6 +319,22 @@
 
   /* SVG node click visual */
   .v-node-group { cursor: pointer; }
+
+  /* Inline style replacements */
+  .code-inline {
+    background: #F1F5F9;
+    padding: 2px 6px;
+    border-radius: 3px;
+    color: var(--chon-orange-dark);
+  }
+  .principle-summary { margin-top: 16px; }
+  .principle-card--clan { border-left-color: var(--clan-purple-dark); }
+  .principle-card--org { border-left-color: var(--org-green-dark); }
+  .principle-bullets {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.8;
+  }
 </style>
 </head>
 <body>
@@ -328,7 +344,7 @@
   <div class="doc-header">
     <h1>🎨 CHON 시각화 토폴로지 v3 — 정렬 원칙 일반화</h1>
     <p class="subtitle"><strong>출생 순서 정렬 원칙을 가족 → 종친회 → 조직도로 확장.</strong></p>
-    <p class="subtitle">한 페이지에서 <strong>3개 토폴로지를 토글</strong>하며 동일한 정렬 규칙이 어떻게 적용되는지 확인하실 수 있습니다. 모든 토폴로지가 <code style="background:#F1F5F9;padding:2px 6px;border-radius:3px;color:var(--chon-orange-dark);">sortOrder</code> 필드 하나로 통일.</p>
+    <p class="subtitle">한 페이지에서 <strong>3개 토폴로지를 토글</strong>하며 동일한 정렬 규칙이 어떻게 적용되는지 확인하실 수 있습니다. 모든 토폴로지가 <code class="code-inline">sortOrder</code> 필드 하나로 통일.</p>
     <div class="badge-row">
       <span class="badge">v3</span>
       <span class="badge">정렬 일반화</span>
@@ -536,13 +552,13 @@
   <span class="field">managerId</span>?: <span class="string">string</span>;      <span class="comment">// = parentId 별명</span>
 }</div>
 
-    <p style="margin-top: 16px;"><strong>핵심 통찰</strong>: 가족의 <code>birthOrder</code>, 종친회의 <code>generation+birthOrder</code>, 조직의 <code>rankLevel+hireDate</code>는 모두 <strong>"같은 상위 노드 아래에서 어떻게 형제들을 정렬할 것인가"</strong>라는 동일한 문제의 답입니다.</p>
+    <p class="principle-summary"><strong>핵심 통찰</strong>: 가족의 <code>birthOrder</code>, 종친회의 <code>generation+birthOrder</code>, 조직의 <code>rankLevel+hireDate</code>는 모두 <strong>"같은 상위 노드 아래에서 어떻게 형제들을 정렬할 것인가"</strong>라는 동일한 문제의 답입니다.</p>
   </div>
 
-  <div class="principle-card" style="border-left-color: var(--clan-purple-dark);">
+  <div class="principle-card principle-card--clan">
     <h2>🔄 토폴로지 간 변환 일관성</h2>
     <p>같은 사람이 여러 토폴로지에 속할 때 정렬 규칙은 각각 독립적으로 적용됩니다:</p>
-    <ul style="font-size: 13px; color: var(--text-secondary); line-height: 1.8;">
+    <ul class="principle-bullets">
       <li><strong>김광수</strong> (가족에선 부모의 셋째 자녀) ← <code>birthOrder=3</code></li>
       <li><strong>김광수</strong> (종친회에선 광 항렬의 둘째) ← <code>generation+birthOrder=(2,2)</code></li>
       <li><strong>김광수</strong> (회사에선 팀장) ← <code>rankLevel=3</code></li>
@@ -553,9 +569,9 @@
   <!-- ============================================
        Next Steps
        ============================================ -->
-  <div class="principle-card" style="border-left-color: var(--org-green-dark);">
+  <div class="principle-card principle-card--org">
     <h2>⏭️ 다음 단계</h2>
-    <ul style="font-size: 13px; color: var(--text-secondary); line-height: 1.8;">
+    <ul class="principle-bullets">
       <li><strong>DESIGN.md v6 §6.10</strong>에 <code>SortableNode</code> 인터페이스 정식 반영</li>
       <li><strong>DB 스키마</strong>: <code>sort_order INTEGER</code>, <code>generation INTEGER</code>, <code>rank_level INTEGER</code> 필드 추가</li>
       <li><strong>Memgraph 쿼리</strong>: <code>ORDER BY sort_order ASC</code> 자동 추가</li>
