@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PASS 모임 — 모임 + 모임원 추천</title>
+<script src="../lib/auth-guard.js" data-require="login"></script>
 <script src="../lib/pass-api.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800;900&display=swap" rel="stylesheet">
@@ -1042,7 +1043,6 @@
       </div>
     </button>
     <div class="uh-actions">
-      <button class="uh-icon-btn" onclick="window.location.href='../main/home.html?page=my'" aria-label="마이">👤</button>
       <button class="uh-icon-btn" onclick="window.location.href='../main/home.html?notif=1'" aria-label="알림">🔔<span class="uh-icon-dot"></span></button>
     </div>
   </header>
@@ -1114,19 +1114,19 @@
     </button>
     <button class="nav-btn" onclick="window.location.href='../main/feed.html'">
       <div class="nav-btn-icon">📰</div>
-      <div class="nav-btn-label">Feed</div>
+      <div class="nav-btn-label">연락처</div>
     </button>
     <button class="nav-btn center" onclick="window.location.href='../main/home.html?page=rel'">
       <div class="nav-circle">🆔</div>
-      <div class="nav-btn-label">트로피</div>
+      <div class="nav-btn-label">증명서</div>
     </button>
     <button class="nav-btn" onclick="window.location.href='../main/home.html?page=auth'">
       <div class="nav-btn-icon">🤝</div>
       <div class="nav-btn-label">인증</div>
     </button>
-    <button class="nav-btn" onclick="window.location.href='../main/feed.html?section=chat'">
-      <div class="nav-btn-icon">💬</div>
-      <div class="nav-btn-label">채팅</div>
+    <button type="button" class="nav-btn" onclick="location.href='../main/home.html?page=my'">
+      <div class="nav-btn-icon">👤</div>
+      <div class="nav-btn-label">마이페이지</div>
     </button>
   </nav>
 </div>
@@ -1905,7 +1905,7 @@ renderAll();
 // 환영 메시지: sessionStorage의 이름 표시
 (function applyWelcomeName() {
   try {
-    const u = JSON.parse(sessionStorage.getItem('passUser') || '{}');
+    const u = JSON.parse(localStorage.getItem('passUser') || '{}');
     const nick = u.name || (u.email ? u.email.split('@')[0] : '데모 사용자');
     const wn = document.getElementById('welcomeName');
     if (wn) wn.textContent = nick;

@@ -42,19 +42,22 @@ export class SignupDto {
   name?: string;
 
   @IsString()
+  @Length(8, 64, { message: '비밀번호는 8~64자입니다' })
+  password: string;
+
+  @IsString()
   @Length(6, 6, { message: 'OTP는 6자리입니다' })
   @Matches(/^\d{6}$/)
   otp: string;
 }
 
-export class LoginEmailOtpDto {
+export class LoginPasswordDto {
   @IsEmail()
   email: string;
 
   @IsString()
-  @Length(6, 6)
-  @Matches(/^\d{6}$/)
-  code: string;
+  @Length(8, 64)
+  password: string;
 
   @IsOptional()
   @IsString()

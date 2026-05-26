@@ -22,7 +22,7 @@
 |------|------|
 | `frontend/views/family-tree.html` | 가계도 — 박스 포함 디자인 |
 | `frontend/views/class-id.html` | 학급증 — 3-way 토글 |
-| `frontend/views/topology.html` | 시각화 토폴로지 |
+| `frontend/views/friends.html` | 친구/모임 관계도 |
 
 ---
 

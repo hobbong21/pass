@@ -5,8 +5,9 @@
    localStorage 키:
      pass_device_trust  { email, pin?, deviceId, registeredAt }  ← 이 디바이스 신뢰
      pass_tokens        { accessToken, refreshToken, expiresAt }  ← 세션 토큰
-   sessionStorage:
-     passUser           { email, name, isNew?, loginAt }          ← 현재 로그인 표시용
+     passUser           { email, name, isNew?, loginAt }          ← 현재 로그인 (file:// origin 호환 위해 localStorage 사용)
+     selfIdCreated      '1'                                       ← Self ID 생성 완료 플래그
+     passWelcomed       '1'                                       ← 환영 메시지 1회 표시 플래그
    ============================================================ */
 (function (global) {
   const DEFAULT_BASE = (function () {
@@ -132,17 +133,17 @@
 
     // ---------- AUTH ----------
     auth: {
-      requestOtp: (channel, target, purpose = 'login') =>
+      requestOtp: (channel, target, purpose = 'register') =>
         request('/auth/otp/request', { method: 'POST', auth: false, body: { channel, target, purpose } }),
 
-      verifyOtp: (channel, target, code, purpose = 'login') =>
+      verifyOtp: (channel, target, code, purpose = 'register') =>
         request('/auth/otp/verify', { method: 'POST', auth: false, body: { channel, target, code, purpose } }),
 
-      signup: (email, phone, otp, name) =>
-        request('/auth/signup', { method: 'POST', auth: false, body: { email, phone, otp, name } }),
+      signup: (email, phone, password, otp, name) =>
+        request('/auth/signup', { method: 'POST', auth: false, body: { email, phone, password, otp, name } }),
 
-      loginEmailOtp: (email, code) =>
-        request('/auth/login/email-otp', { method: 'POST', auth: false, body: { email, code, deviceId: getDeviceId() } }),
+      loginPassword: (email, password) =>
+        request('/auth/login/password', { method: 'POST', auth: false, body: { email, password, deviceId: getDeviceId() } }),
 
       loginPin: (pin) =>
         request('/auth/login/pin', { method: 'POST', auth: false, body: { deviceId: getDeviceId(), pin } }),
@@ -161,6 +162,12 @@
       me: () => request('/users/me'),
       updateMe: (body) => request('/users/me', { method: 'PATCH', body }),
       deleteMe: () => request('/users/me', { method: 'DELETE' }),
+    },
+
+    // ---------- CONTACTS ----------
+    contacts: {
+      list: () => request('/contacts'),
+      sync: (contacts) => request('/contacts/sync', { method: 'POST', body: { contacts } }),
     },
 
     // ---------- RELATIONS ----------
@@ -221,7 +228,7 @@
     saveSession(loginResp, opts = {}) {
       setTokens(loginResp);
       try {
-        sessionStorage.setItem('passUser', JSON.stringify({
+        localStorage.setItem('passUser', JSON.stringify({
           email: loginResp.user.email,
           name: loginResp.user.name,
           isNew: !!opts.isNew,
@@ -234,9 +241,11 @@
     clearSession() {
       clearTokens();
       try {
-        sessionStorage.removeItem('passUser');
-        sessionStorage.removeItem('passWelcomed');
+        localStorage.removeItem('passUser');
+        localStorage.removeItem('passWelcomed');
+        localStorage.removeItem('selfIdCreated');
       } catch (e) {}
+      // pass_device_trust(PIN), pass_tutorial_seen은 디바이스 단위라 유지
     },
     isLoggedIn() {
       return !!getTokens()?.accessToken;

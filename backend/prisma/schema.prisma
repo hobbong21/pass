@@ -20,6 +20,9 @@ model User {
   email         String    @unique
   phone         String    @unique
   phoneVerified Boolean   @default(false) @map("phone_verified")
+  passwordHash  String?   @map("password_hash") // bcrypt — 가입 시 설정
+  passwordFailedTries Int  @default(0) @map("password_failed_tries")
+  passwordLockedUntil DateTime? @map("password_locked_until")
   status        String    @default("active") // active | suspended | deleted
   name          String?
   avatar        String?

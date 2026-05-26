@@ -3,7 +3,7 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import {
-  RequestOtpDto, VerifyOtpDto, SignupDto, LoginEmailOtpDto,
+  RequestOtpDto, VerifyOtpDto, SignupDto, LoginPasswordDto,
   SetupPinDto, LoginPinDto, RefreshDto,
 } from './dto/auth.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -33,10 +33,10 @@ export class AuthController {
   }
 
   // ---------- Login ----------
-  @Post('login/email-otp')
+  @Post('login/password')
   @HttpCode(200)
-  loginByEmailOtp(@Body() dto: LoginEmailOtpDto, @Ip() ip: string) {
-    return this.auth.loginEmailOtp(dto, ip);
+  loginByPassword(@Body() dto: LoginPasswordDto, @Ip() ip: string) {
+    return this.auth.loginPassword(dto, ip);
   }
 
   @Post('login/pin')

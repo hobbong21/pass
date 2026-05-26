@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#FFA000">
-<title>PASS — 피드</title>
+<title>PASS — Contact</title>
+<script src="../lib/auth-guard.js" data-require="login"></script>
 <script src="../lib/pass-api.js"></script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/static/pretendard.min.css" rel="stylesheet">
@@ -12,75 +13,49 @@
   :root {
     --chon-orange: #F7931E;
     --chon-orange-dark: #E87F0A;
+    --chon-orange-light: #FFC78A;
+    --chon-yellow: #FFC300;
     --chon-yellow-soft: #FFF3D6;
     --bg-app: #FFFBF0;
-    --bg-content: #FFFFFF;
-    --bg-empty: #F8FAFC;
+    --bg-card: #FFFFFF;
     --text-primary: #1F1F1F;
-    --text-secondary: #64748B;
-    --text-tertiary: #94A3B8;
+    --text-secondary: #5B5B5B;
+    --text-tertiary: #9CA3AF;
+    --border-light: #F1F5F9;
 
-    --friend-green: #5BBA6F;
-    --friend-green-dark: #16A34A;
-    --friend-green-bg: #DCFCE7;
-    --friend-green-light: #ECFDF5;
+    --chon-green: #16A34A;
+    --chon-green-soft: #ECFDF5;
+    --chon-green-mid: #D1FAE5;
 
-    --node-male: #DBEAFE;
-    --node-male-border: #6FA8DC;
-    --node-female: #FCE7F3;
-    --node-female-border: #E89BAA;
-    --node-self-bg: #FFFFFF;
-    --node-self-border: #F7931E;
-    --node-friend-bg: #DCFCE7;
-    --node-friend-border: #5BBA6F;
-    --node-ff-bg: #F0FDF4;
-    --node-ff-border: #BBF7D0;
-
-    --container-friends: rgba(91, 186, 111, 0.08);
-    --container-friends-border: rgba(91, 186, 111, 0.35);
-    --container-ff: rgba(187, 247, 208, 0.25);
-    --container-ff-border: rgba(187, 247, 208, 0.6);
-    --container-me: rgba(255, 230, 200, 0.7);
-    --container-me-border: rgba(247, 147, 30, 0.6);
-
-    --status-confirmed: #10B981;
-    --status-pending: #F59E0B;
-
-    --chat-mine: #DCFCE7;
-    --chat-other: #F1F5F9;
-    --trust-gold: #EAB308;
-    --trust-gold-bg: #FEF3C7;
+    --avatar-purple: #7C3AED;
+    --avatar-magenta: #DB2777;
+    --avatar-pink: #EC4899;
+    --avatar-orange: #F59E0B;
+    --avatar-teal: #14B8A6;
+    --avatar-blue: #3B82F6;
 
     --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
-    --shadow-md: 0 4px 14px rgba(0,0,0,0.08);
-    --shadow-lg: 0 10px 30px rgba(0,0,0,0.14);
-
-    --radius-sm: 8px;
+    --radius-pill: 999px;
     --radius-md: 14px;
     --radius-lg: 20px;
-    --radius-pill: 999px;
-
     --safe-top: env(safe-area-inset-top, 0px);
     --safe-bottom: env(safe-area-inset-bottom, 0px);
-    --nav-h: 64px;
+    --nav-h: 76px;
+    --cta-h: 76px;
   }
 
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
   html, body { height: 100%; }
   body {
     margin: 0;
     padding: 0;
     font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
-    background: linear-gradient(180deg, #FFE9C7 0%, var(--bg-app) 280px);
+    background: var(--bg-app);
     color: var(--text-primary);
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
   }
 
-  /* ============================================
-     App Shell
-     ============================================ */
   .app {
     width: 100%;
     max-width: 480px;
@@ -93,52 +68,336 @@
     position: relative;
     box-shadow: 0 0 40px rgba(0,0,0,0.06);
   }
+  @media (min-width: 768px) {
+    body { padding: 32px 0; background: #F5F7FB; }
+    .app {
+      border-radius: 28px;
+      overflow: hidden;
+      min-height: calc(100dvh - 64px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.14);
+    }
+  }
 
   /* ============================================
-     (구) Header CSS — 통일 헤더로 교체됨, dead code 제거됨
+     Unified Header (home.html 과 동일)
      ============================================ */
-  .header-action {
-    background: white;
-    border: 1.5px solid var(--friend-green);
-    color: var(--friend-green-dark);
-    padding: 6px 14px;
-    border-radius: var(--radius-pill);
-    font-size: 12px;
-    font-weight: 800;
+  .app-header {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    background: var(--bg-app);
+    padding: calc(14px + var(--safe-top)) 20px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .brand-button {
+    background: transparent;
+    border: none;
+    padding: 0;
     cursor: pointer;
     font-family: inherit;
-    flex-shrink: 0;
+    color: inherit;
+    text-align: left;
+    transition: opacity 0.15s;
   }
-  .header-action:active { transform: scale(0.97); }
-  .header-icon-btn {
+  .brand-button:hover { opacity: 0.85; }
+  .brand-button:active { transform: scale(0.97); }
+  .brand-mark {
+    width: 36px; height: 36px;
+    border-radius: 11px;
+    background: linear-gradient(135deg, var(--chon-orange), #5BBA6F);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 16px;
+    letter-spacing: -0.5px;
+    box-shadow: var(--shadow-sm);
+  }
+  .brand-name { font-size: 20px; font-weight: 900; letter-spacing: -0.5px; color: var(--text-primary); }
+  .brand-sub { font-size: 11px; color: var(--text-secondary); font-weight: 700; margin-top: -2px; }
+  .brand-text { line-height: 1.1; }
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .icon-btn {
+    width: 40px; height: 40px;
+    border-radius: 50%;
     background: white;
-    border: 1.5px solid #E2E8F0;
-    width: 38px; height: 38px;
-    border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
+    border: 1px solid var(--border-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
     font-size: 18px;
+    position: relative;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .icon-btn:active { background: var(--bg-app); }
+  .icon-btn-dot {
+    position: absolute;
+    top: 8px; right: 10px;
+    width: 8px; height: 8px;
+    background: #DC2626;
+    border-radius: 50%;
+    border: 2px solid white;
+  }
+
+  .welcome-bar {
+    background: linear-gradient(90deg, var(--chon-yellow-soft), white);
+    border-bottom: 1px solid var(--border-light);
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+    flex-shrink: 0;
+  }
+  .welcome-emoji { font-size: 16px; line-height: 1; }
+  .welcome-msg { flex: 1; }
+  .welcome-msg strong { color: var(--chon-orange-dark); font-weight: 900; }
+
+  /* ============================================
+     Page Header (페이지 내 제목)
+     ============================================ */
+  .page-header {
+    padding: 20px 24px 8px;
+  }
+  .page-title {
+    font-size: 30px;
+    font-weight: 900;
+    letter-spacing: -0.6px;
+    margin: 0 0 6px;
+    color: var(--text-primary);
+  }
+  .page-sub {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin: 0;
+    font-weight: 500;
   }
 
   /* ============================================
-     Content + Main Sections
+     Search Box
+     ============================================ */
+  .search-wrap {
+    padding: 16px 20px 8px;
+  }
+  .search-box {
+    position: relative;
+    background: #FFFFFF;
+    border: 1.5px solid #E5E7EB;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    transition: border-color 0.15s;
+  }
+  .search-box:focus-within {
+    border-color: var(--chon-orange);
+  }
+  .search-icon {
+    width: 18px; height: 18px;
+    color: var(--text-tertiary);
+    flex-shrink: 0;
+    margin-right: 10px;
+  }
+  .search-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-family: inherit;
+    font-size: 15px;
+    color: var(--text-primary);
+  }
+  .search-input::placeholder { color: var(--text-tertiary); }
+
+  /* ============================================
+     Sections / Badges
      ============================================ */
   .content {
     flex: 1;
-    background: var(--bg-content);
-    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-    overflow-x: hidden;
-    padding-bottom: calc(var(--nav-h) + var(--safe-bottom) + 16px);
+    overflow-y: auto;
+    padding: 8px 0 calc(var(--cta-h) + var(--nav-h) + var(--safe-bottom) + 16px);
   }
-  .main-section { display: none; animation: fadeIn 0.2s ease; }
-  .main-section.active { display: block; }
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(6px); }
-    to { opacity: 1; transform: translateY(0); }
+  .section {
+    margin-top: 18px;
+  }
+  .section-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 20px 12px;
+    padding: 8px 14px;
+    background: var(--chon-green-soft);
+    color: var(--chon-green);
+    border-radius: var(--radius-pill);
+    font-size: 13px;
+    font-weight: 800;
+  }
+  .section-badge.invite {
+    background: #F3F4F6;
+    color: var(--text-secondary);
+  }
+  .section-badge .count {
+    background: rgba(255,255,255,0.6);
+    padding: 1px 9px;
+    border-radius: var(--radius-pill);
+    font-weight: 800;
+    font-size: 12px;
+  }
+  .section-badge.invite .count {
+    background: #E5E7EB;
+  }
+  .section-block {
+    padding: 0 16px;
   }
 
   /* ============================================
-     Bottom Nav (sticky bottom)
+     Contact Item
+     ============================================ */
+  .contact-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 12px;
+    background: transparent;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border-light);
+    transition: background 0.12s;
+  }
+  .contact-item:last-child { border-bottom: none; }
+  .contact-item:hover { background: rgba(0,0,0,0.02); }
+  .contact-item:active { background: rgba(0,0,0,0.04); }
+
+  .avatar {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: #E5E7EB;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #FFFFFF;
+    font-weight: 900;
+    font-size: 18px;
+    flex-shrink: 0;
+    overflow: hidden;
+    position: relative;
+  }
+  .avatar img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+  }
+  .avatar.ring-green {
+    box-shadow: 0 0 0 2.5px var(--chon-green);
+  }
+
+  .contact-info {
+    flex: 1;
+    min-width: 0;
+  }
+  .contact-name {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .contact-phone {
+    font-size: 13px;
+    color: var(--text-tertiary);
+    margin-top: 2px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+  }
+
+  .contact-arrow {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 900;
+    flex-shrink: 0;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    transition: transform 0.12s;
+  }
+  .contact-arrow:active { transform: scale(0.93); }
+  .contact-arrow.green {
+    background: var(--chon-green-soft);
+    color: var(--chon-green);
+  }
+  .contact-arrow.orange {
+    background: var(--chon-yellow-soft);
+    color: var(--chon-orange-dark);
+  }
+
+  /* Hash avatar colors (cycling) */
+  .avatar.hash {
+    background: var(--avatar-purple);
+    font-size: 22px;
+  }
+  .avatar.hash[data-c="1"] { background: var(--avatar-magenta); }
+  .avatar.hash[data-c="2"] { background: var(--avatar-pink); }
+  .avatar.hash[data-c="3"] { background: var(--avatar-orange); }
+  .avatar.hash[data-c="4"] { background: var(--avatar-teal); }
+  .avatar.hash[data-c="5"] { background: var(--avatar-blue); }
+
+  .empty-row {
+    padding: 20px 16px;
+    text-align: center;
+    color: var(--text-tertiary);
+    font-size: 13px;
+  }
+
+  /* ============================================
+     Bottom CTA
+     ============================================ */
+  .cta-area {
+    position: fixed;
+    bottom: calc(var(--nav-h) + var(--safe-bottom));
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
+    padding: 12px 16px;
+    background: linear-gradient(180deg, rgba(255,251,240,0) 0%, var(--bg-app) 30%);
+    z-index: 35;
+  }
+  .cta-btn {
+    width: 100%;
+    padding: 16px;
+    background: var(--chon-orange);
+    color: #FFFFFF;
+    border: none;
+    border-radius: var(--radius-pill);
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(247,147,30,0.32);
+    transition: transform 0.12s, background 0.15s;
+  }
+  .cta-btn:active { transform: scale(0.98); background: var(--chon-orange-dark); }
+
+  /* ============================================
+     Bottom Nav (home.html 과 동일)
      ============================================ */
   .bottom-nav {
     position: fixed;
@@ -148,7 +407,7 @@
     width: 100%;
     max-width: 480px;
     background: white;
-    border-top: 1px solid var(--border-light, #F1F5F9);
+    border-top: 1px solid var(--border-light);
     padding: 8px 8px calc(8px + var(--safe-bottom));
     display: grid;
     grid-template-columns: repeat(5, 1fr);
@@ -169,25 +428,10 @@
     color: var(--text-tertiary);
     border-radius: 12px;
     transition: color 0.15s;
-    position: relative;
   }
   .nav-btn-icon { font-size: 22px; line-height: 1; }
   .nav-btn-label { font-size: 10px; font-weight: 800; }
   .nav-btn.active { color: var(--chon-orange-dark); }
-  .nav-btn-badge {
-    position: absolute;
-    top: 4px; right: 14px;
-    min-width: 16px; height: 16px;
-    background: #DC2626;
-    color: white;
-    border-radius: 999px;
-    font-size: 9px;
-    font-weight: 900;
-    padding: 0 4px;
-    display: flex; align-items: center; justify-content: center;
-    border: 2px solid white;
-  }
-  /* Center button — large prominent circle (home.html과 동일 패턴) */
   .nav-btn.center {
     position: relative;
     padding-top: 0;
@@ -195,7 +439,7 @@
   .nav-btn.center .nav-circle {
     width: 56px; height: 56px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--chon-yellow, #FFC300), var(--chon-orange));
+    background: linear-gradient(135deg, var(--chon-yellow), var(--chon-orange));
     color: white;
     display: flex;
     align-items: center;
@@ -212,3096 +456,265 @@
   }
 
   /* ============================================
-     Section Tabs (feed 내부 5섹션 전환 — 상단 위치)
-     ============================================ */
-  .section-tabs {
-    display: flex;
-    gap: 4px;
-    padding: 6px 12px;
-    background: white;
-    border-bottom: 1px solid var(--border-light, #F1F5F9);
-    overflow-x: auto;
-    flex-shrink: 0;
-    /* unified-header가 sticky top:0이므로 section-tabs는 자연스럽게 스크롤 */
-  }
-  .section-tab {
-    flex: 1;
-    min-width: 60px;
-    background: transparent;
-    border: none;
-    padding: 8px 6px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-    cursor: pointer;
-    font-family: inherit;
-    color: var(--text-tertiary);
-    border-radius: var(--radius-sm);
-    position: relative;
-    transition: color 0.15s, background 0.15s;
-  }
-  .section-tab:active { background: var(--bg-app); }
-  .section-tab.active { color: var(--chon-orange-dark); }
-  .section-tab.active .section-tab-icon { transform: translateY(-1px); }
-  .section-tab-icon { font-size: 18px; line-height: 1; transition: transform 0.15s; }
-  .section-tab-label { font-size: 10px; font-weight: 800; }
-  .section-tab-badge {
-    position: absolute;
-    top: 2px; right: 8px;
-    min-width: 16px; height: 16px;
-    background: #DC2626;
-    color: white;
-    border-radius: 999px;
-    font-size: 9px;
-    font-weight: 900;
-    padding: 0 4px;
-    display: flex; align-items: center; justify-content: center;
-    border: 2px solid white;
-  }
-
-  /* ============================================
-     FEED Section
-     ============================================ */
-  .compose-card {
-    background: linear-gradient(135deg, var(--friend-green-light), white);
-    margin: 14px 16px 12px;
-    padding: 12px 14px;
-    border-radius: var(--radius-md);
-    border: 1px solid var(--node-friend-border);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
-  }
-  .compose-avatar {
-    width: 38px; height: 38px;
-    border-radius: 12px;
-    background: var(--chon-orange);
-    color: white;
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 800;
-    font-size: 13px;
-    flex-shrink: 0;
-  }
-  .compose-placeholder {
-    flex: 1;
-    background: white;
-    border: 1px solid #E2E8F0;
-    border-radius: var(--radius-pill);
-    padding: 9px 14px;
-    font-size: 13px;
-    color: var(--text-tertiary);
-  }
-  .compose-card:active .compose-placeholder { background: var(--friend-green-light); }
-
-  .filter-chips {
-    display: flex;
-    gap: 6px;
-    padding: 0 16px 12px;
-    overflow-x: auto;
-  }
-  .filter-chips::-webkit-scrollbar { display: none; }
-  .chip {
-    background: white;
-    border: 1.5px solid #E2E8F0;
-    padding: 6px 12px;
-    border-radius: var(--radius-pill);
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    color: var(--text-secondary);
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-  .chip.active {
-    background: var(--friend-green);
-    color: white;
-    border-color: var(--friend-green);
-  }
-
-  .feed-list { padding: 0 16px 30px; }
-  .post {
-    background: white;
-    border: 1px solid #E2E8F0;
-    border-radius: var(--radius-md);
-    padding: 14px;
-    margin-bottom: 12px;
-    transition: box-shadow 0.15s;
-  }
-  .post:hover { box-shadow: var(--shadow-md); }
-  .post-head {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 10px;
-  }
-  .post-avatar {
-    width: 40px; height: 40px;
-    border-radius: 12px;
-    background: var(--friend-green);
-    color: white;
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 800;
-    font-size: 14px;
-    flex-shrink: 0;
-  }
-  .post-avatar.self { background: var(--chon-orange); }
-  .post-avatar.ff { background: var(--text-tertiary); }
-  .post-author { flex: 1; min-width: 0; }
-  .post-name-row { display: flex; align-items: center; gap: 6px; }
-  .post-name { font-size: 14px; font-weight: 800; }
-  .post-hop-badge {
-    font-size: 9px;
-    font-weight: 800;
-    padding: 2px 7px;
-    border-radius: var(--radius-pill);
-    background: var(--friend-green-bg);
-    color: var(--friend-green-dark);
-    border: 1px solid var(--friend-green);
-  }
-  .post-hop-badge.ff {
-    background: white;
-    border-style: dashed;
-  }
-  .post-hop-badge.self {
-    background: rgba(247,147,30,0.15);
-    color: var(--chon-orange-dark);
-    border-color: var(--chon-orange);
-  }
-  .post-time { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; }
-  .post-menu {
-    background: none; border: none; cursor: pointer;
-    font-size: 18px; color: var(--text-tertiary);
-    width: 28px; height: 28px;
-    border-radius: 8px;
-  }
-  .post-content {
-    font-size: 14px;
-    line-height: 1.55;
-    color: var(--text-primary);
-    margin-bottom: 10px;
-    white-space: pre-wrap;
-  }
-  .post-image {
-    width: 100%;
-    height: 180px;
-    background: linear-gradient(135deg, #E0E7FF, #F3E8FF);
-    border-radius: var(--radius-md);
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 60px;
-  }
-  .post-actions {
-    display: flex;
-    gap: 4px;
-    padding-top: 8px;
-    border-top: 1px solid #F1F5F9;
-  }
-  .post-action-btn {
-    flex: 1;
-    background: none;
-    border: none;
-    padding: 8px 4px;
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--text-secondary);
-    cursor: pointer;
-    border-radius: var(--radius-sm);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    font-family: inherit;
-  }
-  .post-action-btn.liked { color: #DC2626; }
-  .post-action-btn:active { background: #F8FAFC; }
-
-  /* ============================================
-     NETWORK Section (same as v1)
-     ============================================ */
-  .net-toggle {
-    display: flex;
-    gap: 6px;
-    padding: 12px 16px 14px;
-    background: var(--bg-app);
-  }
-  .net-toggle-btn {
-    flex: 1;
-    background: white;
-    border: 1.5px solid #E2E8F0;
-    color: var(--text-secondary);
-    padding: 11px 6px;
-    border-radius: var(--radius-md);
-    font-size: 13px;
-    font-weight: 800;
-    cursor: pointer;
-    font-family: inherit;
-    display: flex; align-items: center; justify-content: center;
-    gap: 6px;
-    transition: all 0.15s;
-  }
-  .net-toggle-btn.active {
-    background: var(--friend-green);
-    color: white;
-    border-color: var(--friend-green);
-    box-shadow: 0 6px 16px rgba(91,186,111,0.32);
-  }
-  .net-panel { display: none; }
-  .net-panel.active { display: block; animation: fadeIn 0.18s ease; }
-
-  .summary-card {
-    background: linear-gradient(135deg, var(--friend-green-light), white);
-    margin: 0 16px 12px;
-    padding: 14px 16px;
-    border-radius: var(--radius-md);
-    display: flex; align-items: center; gap: 12px;
-    border: 1px solid var(--node-friend-border);
-  }
-  .summary-avatar {
-    width: 52px; height: 52px;
-    border-radius: 14px;
-    background: white;
-    border: 2.5px solid var(--friend-green);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 24px;
-    flex-shrink: 0;
-  }
-  .summary-info { flex: 1; min-width: 0; }
-  .summary-name { font-size: 16px; font-weight: 900; margin-bottom: 4px; }
-  .summary-stats {
-    font-size: 12px;
-    color: var(--friend-green-dark);
-    font-weight: 700;
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
-
-  .verify-summary { display: flex; gap: 8px; padding: 4px 16px 16px; }
-  .verify-stat-card {
-    flex: 1;
-    background: white;
-    border: 1.5px solid #E2E8F0;
-    border-radius: var(--radius-md);
-    padding: 14px 8px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-  .verify-stat-card.confirmed { border-color: rgba(16,185,129,0.4); background: rgba(16,185,129,0.06); }
-  .verify-stat-card.pending { border-color: rgba(245,158,11,0.4); background: rgba(245,158,11,0.06); }
-  .verify-stat-card:active { transform: scale(0.97); }
-  .verify-stat-value { font-size: 24px; font-weight: 900; line-height: 1; }
-  .verify-stat-value.confirmed { color: var(--status-confirmed); }
-  .verify-stat-value.pending { color: var(--status-pending); }
-  .verify-stat-label {
-    font-size: 10px; color: var(--text-tertiary); font-weight: 800;
-    text-transform: uppercase; letter-spacing: 0.3px; margin-top: 6px;
-  }
-  .verify-quick-btn {
-    background: var(--friend-green); color: white; border: none;
-    padding: 6px 12px; border-radius: var(--radius-pill);
-    font-size: 11px; font-weight: 800; cursor: pointer;
-    font-family: inherit; margin-left: 4px;
-  }
-
-  .tree-canvas { padding: 14px 16px 30px; }
-  .me-block {
-    background: var(--container-me);
-    border: 2px solid var(--container-me-border);
-    border-radius: var(--radius-md);
-    padding: 14px 12px 12px;
-    margin-bottom: 16px;
-    position: relative;
-  }
-  .me-block-label, .friends-box-label, .ff-box-label {
-    position: absolute; top: -10px; left: 14px;
-    background: white; padding: 2px 10px;
-    border-radius: var(--radius-pill);
-    font-size: 11px; font-weight: 800;
-  }
-  .me-block-label { color: var(--chon-orange-dark); border: 1px solid var(--chon-orange-dark); font-size: 10px; }
-  .me-block-row { display: flex; justify-content: center; }
-
-  .friends-box {
-    background: var(--container-friends);
-    border: 2px solid var(--container-friends-border);
-    border-radius: var(--radius-md);
-    padding: 18px 12px 12px;
-    margin-bottom: 16px;
-    position: relative;
-  }
-  .friends-box-label { color: var(--friend-green-dark); border: 1px solid var(--friend-green); }
-  .friends-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-
-  .ff-box {
-    background: var(--container-ff);
-    border: 2px dashed var(--container-ff-border);
-    border-radius: var(--radius-md);
-    padding: 18px 12px 12px;
-    margin-bottom: 16px;
-    position: relative;
-  }
-  .ff-box-label { color: var(--friend-green-dark); border: 1px dashed var(--friend-green); }
-
-  .person-node {
-    background: white;
-    border: 2px solid #CBD5E1;
-    border-radius: 10px;
-    padding: 9px 10px;
-    text-align: center;
-    cursor: pointer;
-    position: relative;
-    transition: all 0.15s;
-  }
-  .person-node:active { transform: scale(0.97); }
-  .person-node.male { background: var(--node-male); border-color: var(--node-male-border); }
-  .person-node.female { background: var(--node-female); border-color: var(--node-female-border); }
-  .person-node.self {
-    background: var(--node-self-bg);
-    border-color: var(--node-self-border);
-    border-width: 2.5px;
-    box-shadow: 0 0 0 3px rgba(247,147,30,0.15);
-  }
-  .person-node.friend { background: var(--node-friend-bg); border-color: var(--node-friend-border); }
-  .person-node.ff { background: var(--node-ff-bg); border-color: var(--node-ff-border); border-style: dashed; }
-  .person-node.selected { box-shadow: 0 0 0 3px rgba(91,186,111,0.35); border-color: var(--friend-green); }
-  .person-node-name { font-size: 13px; font-weight: 800; line-height: 1.2; }
-  .person-node.self .person-node-name { color: var(--chon-orange); }
-  .person-node-meta { font-size: 9px; color: rgba(0,0,0,0.4); margin-top: 2px; font-weight: 600; }
-  .person-confirm-badge {
-    position: absolute; top: -5px; right: -5px;
-    width: 16px; height: 16px;
-    background: var(--status-confirmed);
-    color: white; border-radius: 50%;
-    font-size: 9px; font-weight: 900;
-    display: flex; align-items: center; justify-content: center;
-    border: 1.5px solid white;
-  }
-  .person-confirm-badge.pending { background: var(--status-pending); }
-
-  .empty-slot {
-    background: white;
-    border: 2px dashed #CBD5E1;
-    border-radius: 10px;
-    padding: 12px 10px;
-    text-align: center;
-    cursor: pointer;
-    color: var(--text-tertiary);
-    font-size: 11px;
-    font-weight: 800;
-    display: flex; align-items: center; justify-content: center;
-    min-height: 52px;
-  }
-  .empty-slot:active {
-    background: var(--friend-green-light);
-    border-color: var(--friend-green);
-    color: var(--friend-green-dark);
-  }
-
-  .action-panel {
-    position: absolute;
-    background: white;
-    border: 2px solid var(--friend-green);
-    border-radius: var(--radius-md);
-    padding: 8px;
-    box-shadow: var(--shadow-lg);
-    z-index: 50;
-    display: flex; flex-direction: column; gap: 4px;
-    min-width: 180px;
-    animation: panelPop 0.18s ease;
-  }
-  @keyframes panelPop {
-    from { transform: scale(0.85); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-  }
-  .action-panel::before {
-    content: '';
-    position: absolute; top: -8px; left: 50%; transform: translateX(-50%);
-    width: 0; height: 0;
-    border-left: 8px solid transparent;
-    border-right: 8px solid transparent;
-    border-bottom: 8px solid var(--friend-green);
-  }
-  .ap-btn {
-    background: white;
-    border: 1.5px solid #E2E8F0;
-    border-radius: var(--radius-sm);
-    padding: 10px 12px;
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    font-family: inherit;
-    text-align: left;
-  }
-  .ap-btn.confirm { border-color: var(--status-confirmed); color: var(--status-confirmed); }
-  .ap-btn.promote { border-color: var(--friend-green); color: var(--friend-green-dark); }
-  .ap-btn.delete { border-color: #FCA5A5; color: #DC2626; }
-
-  .graph-canvas-wrap {
-    margin: 0 16px;
-    background: var(--bg-empty);
-    border: 1px solid #E2E8F0;
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    position: relative;
-  }
-  #graphSvg { width: 100%; height: 480px; display: block; }
-  .graph-node-group { cursor: pointer; transition: filter 0.15s; }
-  .graph-node-group:hover .graph-node-rect { filter: brightness(1.05); }
-  .graph-node-group.me-glow .graph-node-rect { filter: drop-shadow(0 0 6px rgba(247,147,30,0.4)); }
-  .graph-node-label {
-    font-family: 'Pretendard', sans-serif;
-    font-size: 10px; font-weight: 700;
-    fill: var(--text-primary);
-    pointer-events: none; text-anchor: middle;
-  }
-  .graph-node-rel {
-    font-family: 'Pretendard', sans-serif;
-    font-size: 8.5px; font-weight: 500;
-    fill: var(--text-tertiary);
-    pointer-events: none; text-anchor: middle;
-  }
-  .graph-node-avatar {
-    font-size: 26px;
-    pointer-events: none;
-    text-anchor: middle;
-    dominant-baseline: central;
-  }
-  .graph-tier-label {
-    font-family: 'Pretendard', sans-serif;
-    font-size: 9px; font-weight: 700;
-    fill: var(--text-tertiary);
-    pointer-events: none; text-anchor: start;
-    text-transform: uppercase; letter-spacing: 0.3px;
-  }
-  .graph-legend {
-    margin: 12px 16px 0;
-    display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
-    font-size: 11px; color: var(--text-secondary);
-  }
-  .gl-item { display: flex; align-items: center; gap: 6px; font-weight: 600; }
-  .gl-dot {
-    width: 12px; height: 12px; border-radius: 50%;
-    border: 2px solid; display: inline-block;
-  }
-
-  .section-header { padding: 8px 16px; display: flex; align-items: center; }
-  .section-header h2 { margin: 0; font-size: 14px; font-weight: 800; color: var(--text-secondary); }
-  .list-section { padding: 0 16px 30px; }
-  .list-tier { margin-bottom: 18px; }
-  .list-tier-header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 6px 4px; margin-bottom: 8px;
-  }
-  .tier-badge {
-    background: var(--friend-green-light);
-    color: var(--friend-green-dark);
-    padding: 3px 10px;
-    border-radius: var(--radius-pill);
-    font-size: 11px; font-weight: 800;
-    border: 1px solid var(--friend-green);
-  }
-  .tier-badge.ff { background: white; border-style: dashed; }
-  .tier-count { color: var(--text-tertiary); font-size: 11px; font-weight: 700; }
-  .list-item {
-    background: white;
-    border: 1px solid #E2E8F0;
-    border-radius: var(--radius-md);
-    padding: 11px 12px;
-    margin-bottom: 8px;
-    display: flex; align-items: center; gap: 10px;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-  .list-item:active { transform: scale(0.98); }
-  .list-item.friend { border-left: 4px solid var(--friend-green); }
-  .list-item.ff { border-left: 4px dashed var(--friend-green); }
-  .list-item.self { border-left: 4px solid var(--chon-orange); }
-  .list-item-avatar {
-    width: 38px; height: 38px;
-    border-radius: 11px;
-    background: var(--friend-green);
-    color: white;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 14px; font-weight: 800;
-    flex-shrink: 0;
-  }
-  .list-item.self .list-item-avatar { background: var(--chon-orange); }
-  .list-item.ff .list-item-avatar { background: var(--text-tertiary); }
-  .list-item-info { flex: 1; min-width: 0; }
-  .list-item-name { font-size: 14px; font-weight: 800; margin-bottom: 2px; }
-  .list-item-meta { font-size: 11px; color: var(--text-tertiary); }
-  .list-item-status { font-size: 18px; font-weight: 900; }
-
-  /* ============================================
-     CHAT Section
-     ============================================ */
-  .chat-search-wrap {
-    padding: 12px 16px;
-  }
-  .chat-search {
-    width: 100%;
-    background: var(--bg-empty);
-    border: 1.5px solid #E2E8F0;
-    border-radius: var(--radius-pill);
-    padding: 10px 16px;
-    font-size: 13px;
-    font-family: inherit;
-  }
-  .chat-search:focus { outline: none; border-color: var(--friend-green); background: white; }
-
-  .chat-list { padding: 0 16px 30px; }
-  .chat-item {
-    background: white;
-    border: 1px solid #E2E8F0;
-    border-radius: var(--radius-md);
-    padding: 12px;
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-  .chat-item:active { transform: scale(0.98); }
-  .chat-item.unread { border-color: var(--friend-green); background: var(--friend-green-light); }
-  .chat-avatar {
-    width: 46px; height: 46px;
-    border-radius: 14px;
-    background: var(--friend-green);
-    color: white;
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 800;
-    font-size: 16px;
-    flex-shrink: 0;
-    position: relative;
-  }
-  .chat-avatar.ff { background: var(--text-tertiary); }
-  .chat-avatar-hop {
-    position: absolute;
-    bottom: -2px; right: -2px;
-    background: white;
-    border-radius: 999px;
-    width: 18px; height: 18px;
-    border: 2px solid var(--friend-green);
-    color: var(--friend-green-dark);
-    font-size: 10px;
-    font-weight: 800;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .chat-info { flex: 1; min-width: 0; }
-  .chat-name-row { display: flex; align-items: center; justify-content: space-between; }
-  .chat-name { font-size: 14px; font-weight: 800; }
-  .chat-time { font-size: 11px; color: var(--text-tertiary); }
-  .chat-preview {
-    font-size: 12px;
-    color: var(--text-secondary);
-    margin-top: 3px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .chat-unread-badge {
-    background: #DC2626;
-    color: white;
-    border-radius: 999px;
-    min-width: 18px;
-    height: 18px;
-    font-size: 10px;
-    font-weight: 900;
-    padding: 0 6px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    margin-left: 6px;
-  }
-
-  /* Chat Detail (fullscreen overlay) */
-  .chat-detail {
-    position: fixed;
-    inset: 0;
-    background: var(--bg-app);
-    z-index: 90;
-    display: none;
-    flex-direction: column;
-  }
-  .chat-detail.visible {
-    display: flex;
-    animation: slideIn 0.25s ease;
-  }
-  @keyframes slideIn {
-    from { transform: translateX(100%); }
-    to { transform: translateX(0); }
-  }
-  .chat-detail-header {
-    padding: calc(12px + var(--safe-top)) 12px 12px;
-    background: white;
-    border-bottom: 1px solid #E2E8F0;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .chat-back-btn {
-    background: none;
-    border: none;
-    font-size: 22px;
-    width: 38px; height: 38px;
-    cursor: pointer;
-    color: var(--text-primary);
-  }
-  .chat-detail-avatar {
-    width: 36px; height: 36px;
-    border-radius: 11px;
-    background: var(--friend-green);
-    color: white;
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 800;
-  }
-  .chat-detail-name { font-size: 15px; font-weight: 800; }
-  .chat-detail-sub { font-size: 11px; color: var(--friend-green-dark); font-weight: 700; }
-  .chat-messages {
-    flex: 1;
-    overflow-y: auto;
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    background: var(--bg-empty);
-  }
-  .msg {
-    max-width: 75%;
-    padding: 10px 14px;
-    border-radius: 18px;
-    font-size: 13px;
-    line-height: 1.5;
-    word-wrap: break-word;
-  }
-  .msg.mine {
-    background: var(--chat-mine);
-    color: var(--friend-green-dark);
-    align-self: flex-end;
-    border-bottom-right-radius: 6px;
-  }
-  .msg.other {
-    background: var(--chat-other);
-    color: var(--text-primary);
-    align-self: flex-start;
-    border-bottom-left-radius: 6px;
-  }
-  .msg-time {
-    font-size: 9px;
-    color: var(--text-tertiary);
-    margin-top: 2px;
-    align-self: flex-end;
-  }
-  .msg-time.other { align-self: flex-start; }
-  .chat-input-bar {
-    background: white;
-    border-top: 1px solid #E2E8F0;
-    padding: 10px 12px calc(10px + var(--safe-bottom));
-    display: flex;
-    gap: 8px;
-    align-items: center;
-  }
-  .chat-input {
-    flex: 1;
-    background: var(--bg-empty);
-    border: 1px solid #E2E8F0;
-    border-radius: var(--radius-pill);
-    padding: 10px 16px;
-    font-size: 14px;
-    font-family: inherit;
-  }
-  .chat-input:focus { outline: none; border-color: var(--friend-green); background: white; }
-  .chat-send-btn {
-    background: var(--friend-green);
-    color: white;
-    border: none;
-    width: 40px; height: 40px;
-    border-radius: 50%;
-    font-size: 16px;
-    cursor: pointer;
-    flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .chat-send-btn:disabled { background: #CBD5E1; cursor: not-allowed; }
-
-  /* ============================================
-     TRUST Section
-     ============================================ */
-  .trust-hero {
-    margin: 14px 16px 12px;
-    background: linear-gradient(135deg, #ECFDF5 0%, #FEF3C7 100%);
-    border: 2px solid var(--friend-green);
-    border-radius: var(--radius-lg);
-    padding: 22px 18px;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-  }
-  .trust-stage-emoji {
-    font-size: 64px;
-    line-height: 1;
-    margin-bottom: 8px;
-    filter: drop-shadow(0 4px 12px rgba(91,186,111,0.3));
-  }
-  .trust-stage-name {
-    font-size: 22px;
-    font-weight: 900;
-    color: var(--friend-green-dark);
-    margin-bottom: 2px;
-  }
-  .trust-stage-num {
-    font-size: 11px;
-    font-weight: 800;
-    color: var(--text-secondary);
-    margin-bottom: 14px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-  .trust-progress-wrap {
-    background: rgba(255,255,255,0.7);
-    border-radius: var(--radius-pill);
-    height: 10px;
-    overflow: hidden;
-    margin-bottom: 8px;
-    border: 1px solid rgba(91,186,111,0.3);
-  }
-  .trust-progress-bar {
-    height: 100%;
-    background: linear-gradient(90deg, var(--friend-green), var(--trust-gold));
-    border-radius: var(--radius-pill);
-    transition: width 0.6s ease;
-  }
-  .trust-progress-text {
-    font-size: 12px;
-    color: var(--text-secondary);
-    font-weight: 700;
-  }
-  .trust-progress-text strong { color: var(--friend-green-dark); }
-
-  .trust-cards { padding: 0 16px 30px; display: flex; flex-direction: column; gap: 12px; }
-  .trust-card {
-    background: white;
-    border: 1px solid #E2E8F0;
-    border-radius: var(--radius-md);
-    padding: 14px;
-  }
-  .trust-card-title {
-    font-size: 13px;
-    font-weight: 800;
-    color: var(--text-secondary);
-    margin-bottom: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .level-row {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 6px;
-    margin-bottom: 8px;
-  }
-  .level-pill {
-    text-align: center;
-    padding: 10px 4px;
-    border-radius: var(--radius-md);
-    background: var(--bg-empty);
-    border: 1.5px solid #E2E8F0;
-    font-size: 11px;
-    font-weight: 800;
-    color: var(--text-tertiary);
-    position: relative;
-  }
-  .level-pill.current {
-    background: linear-gradient(135deg, var(--friend-green), var(--trust-gold));
-    border-color: var(--trust-gold);
-    color: white;
-    box-shadow: 0 4px 12px rgba(234,179,8,0.3);
-    transform: scale(1.05);
-  }
-  .level-pill-num { font-size: 16px; font-weight: 900; margin-bottom: 2px; }
-  .level-desc { font-size: 11px; color: var(--text-secondary); line-height: 1.5; }
-
-  .points-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-  .points-stat {
-    background: var(--trust-gold-bg);
-    border: 1.5px solid var(--trust-gold);
-    border-radius: var(--radius-md);
-    padding: 14px;
-    text-align: center;
-  }
-  .points-stat-value {
-    font-size: 26px;
-    font-weight: 900;
-    color: #92400E;
-    line-height: 1;
-  }
-  .points-stat-label {
-    font-size: 10px;
-    font-weight: 800;
-    color: #92400E;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-    margin-top: 6px;
-  }
-  .points-detail {
-    margin-top: 12px;
-    padding-top: 12px;
-    border-top: 1px solid #F1F5F9;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-  .points-row-item {
-    display: flex;
-    justify-content: space-between;
-    font-size: 12px;
-  }
-  .points-row-item strong { color: var(--friend-green-dark); }
-
-  .badges-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-  }
-  .badge {
-    background: var(--bg-empty);
-    border: 1.5px solid #E2E8F0;
-    border-radius: var(--radius-md);
-    padding: 14px 8px;
-    text-align: center;
-    transition: all 0.2s;
-    opacity: 0.45;
-  }
-  .badge.earned {
-    opacity: 1;
-    background: linear-gradient(135deg, var(--friend-green-light), white);
-    border-color: var(--friend-green);
-  }
-  .badge.earned.gold {
-    background: linear-gradient(135deg, var(--trust-gold-bg), white);
-    border-color: var(--trust-gold);
-  }
-  .badge-emoji { font-size: 30px; line-height: 1; margin-bottom: 6px; }
-  .badge-name { font-size: 11px; font-weight: 800; }
-  .badge-desc { font-size: 9px; color: var(--text-tertiary); margin-top: 2px; font-weight: 600; }
-
-  /* ============================================
-     PROFILE Section
-     ============================================ */
-  .profile-hero {
-    margin: 14px 16px 12px;
-    background: linear-gradient(135deg, var(--container-me), white);
-    border: 2px solid var(--container-me-border);
-    border-radius: var(--radius-lg);
-    padding: 22px 18px;
-    text-align: center;
-  }
-  .profile-avatar-big {
-    width: 84px; height: 84px;
-    border-radius: 24px;
-    background: var(--chon-orange);
-    color: white;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 36px;
-    font-weight: 900;
-    margin: 0 auto 12px;
-    box-shadow: 0 8px 24px rgba(247,147,30,0.3);
-  }
-  .profile-name { font-size: 22px; font-weight: 900; margin-bottom: 4px; }
-  .profile-phone { font-size: 13px; color: var(--text-secondary); font-weight: 700; margin-bottom: 14px; }
-  .profile-edit-btn {
-    background: white;
-    color: var(--chon-orange-dark);
-    border: 1.5px solid var(--chon-orange);
-    padding: 8px 20px;
-    border-radius: var(--radius-pill);
-    font-size: 13px;
-    font-weight: 800;
-    cursor: pointer;
-    font-family: inherit;
-  }
-
-  .profile-stats-row {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    margin: 0 16px 16px;
-  }
-  .profile-stat {
-    background: white;
-    border: 1px solid #E2E8F0;
-    border-radius: var(--radius-md);
-    padding: 14px 8px;
-    text-align: center;
-  }
-  .profile-stat-value { font-size: 22px; font-weight: 900; }
-  .profile-stat-label {
-    font-size: 10px; font-weight: 800;
-    color: var(--text-tertiary);
-    text-transform: uppercase; letter-spacing: 0.3px;
-    margin-top: 4px;
-  }
-
-  .settings-section { padding: 0 16px 30px; }
-  .settings-group {
-    background: white;
-    border: 1px solid #E2E8F0;
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    margin-bottom: 12px;
-  }
-  .settings-row {
-    padding: 14px 16px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    border-bottom: 1px solid #F1F5F9;
-    cursor: pointer;
-    font-size: 14px;
-  }
-  .settings-row:last-child { border-bottom: none; }
-  .settings-row:active { background: var(--bg-empty); }
-  .settings-icon {
-    width: 32px; height: 32px;
-    background: var(--friend-green-light);
-    color: var(--friend-green-dark);
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px;
-    flex-shrink: 0;
-  }
-  .settings-icon.danger { background: #FEE2E2; color: #DC2626; }
-  .settings-icon.security { background: #DBEAFE; color: #2563EB; }
-  .settings-icon.warning { background: #FEF3C7; color: #92400E; }
-  .settings-label { flex: 1; font-weight: 700; }
-  .settings-value { color: var(--text-tertiary); font-size: 12px; font-weight: 700; }
-  .settings-arrow { color: var(--text-tertiary); font-size: 14px; }
-
-  /* ============================================
-     Modal (shared)
-     ============================================ */
-  .modal-backdrop {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.4);
-    z-index: 99;
-    display: none;
-    animation: backdropFade 0.2s ease;
-  }
-  .modal-backdrop.visible { display: block; }
-  @keyframes backdropFade { from { opacity: 0; } to { opacity: 1; } }
-
-  .modal-fs {
-    position: fixed;
-    inset: 0;
-    background: var(--bg-app);
-    z-index: 100;
-    display: none;
-    flex-direction: column;
-    overflow: hidden;
-  }
-  .modal-fs.visible { display: flex; animation: slideUp 0.28s ease; }
-  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-  .modal-fs-header {
-    padding: calc(14px + var(--safe-top)) 16px 14px;
-    background: white;
-    border-bottom: 1px solid #E2E8F0;
-    display: flex; align-items: center; justify-content: space-between;
-    flex-shrink: 0;
-  }
-  .modal-fs-close {
-    background: none; border: none;
-    font-size: 22px; color: var(--text-secondary);
-    cursor: pointer; width: 32px; height: 32px;
-  }
-  .modal-fs-title { font-size: 16px; font-weight: 900; text-align: center; flex: 1; }
-  .modal-fs-save {
-    background: var(--friend-green);
-    color: white; border: none;
-    padding: 7px 18px;
-    border-radius: var(--radius-pill);
-    font-size: 13px; font-weight: 800;
-    cursor: pointer; font-family: inherit;
-  }
-  .modal-fs-save:disabled { background: #CBD5E1; }
-  .modal-fs-body {
-    flex: 1; overflow-y: auto; padding: 24px;
-    max-width: 480px; margin: 0 auto; width: 100%;
-  }
-  .modal-section { margin-bottom: 24px; }
-  .modal-section-label {
-    font-size: 12px; font-weight: 800;
-    color: var(--text-secondary);
-    margin-bottom: 10px;
-    text-transform: uppercase; letter-spacing: 0.5px;
-  }
-  .modal-input {
-    width: 100%;
-    padding: 14px 16px;
-    border: 2px solid #E2E8F0;
-    border-radius: var(--radius-md);
-    font-size: 16px;
-    font-family: inherit;
-    background: white;
-  }
-  .modal-input:focus { outline: none; border-color: var(--friend-green); }
-  .modal-textarea {
-    width: 100%;
-    min-height: 140px;
-    padding: 14px 16px;
-    border: 2px solid #E2E8F0;
-    border-radius: var(--radius-md);
-    font-size: 16px;
-    font-family: inherit;
-    background: white;
-    resize: vertical;
-    line-height: 1.5;
-  }
-  .modal-textarea:focus { outline: none; border-color: var(--friend-green); }
-
-  .gender-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .gender-option {
-    padding: 16px;
-    text-align: center;
-    border-radius: var(--radius-md);
-    border: 2px solid #E2E8F0;
-    cursor: pointer;
-    font-weight: 700;
-    background: white;
-    font-size: 14px;
-  }
-  .gender-option.selected.male { background: var(--node-male); border-color: var(--node-male-border); color: #1E3A8A; }
-  .gender-option.selected.female { background: var(--node-female); border-color: var(--node-female-border); color: #831843; }
-
-  /* ============================================
      Toast
      ============================================ */
   .toast {
     position: fixed;
-    bottom: calc(var(--nav-h) + var(--safe-bottom) + 16px);
+    bottom: calc(var(--nav-h) + var(--cta-h) + var(--safe-bottom) + 16px);
     left: 50%;
     transform: translateX(-50%) translateY(40px);
-    background: var(--text-primary);
+    background: #1F1F1F;
     color: white;
-    padding: 13px 22px;
+    padding: 12px 22px;
     border-radius: var(--radius-pill);
-    font-size: 13px; font-weight: 700;
+    font-size: 13px;
+    font-weight: 700;
     opacity: 0;
     transition: all 0.3s;
     z-index: 200;
-    display: flex; gap: 8px;
-    box-shadow: var(--shadow-lg);
     white-space: nowrap;
   }
   .toast.visible {
     transform: translateX(-50%) translateY(0);
     opacity: 1;
   }
-
-  /* ============================================
-     Responsive
-     ============================================ */
-  @media (min-width: 768px) {
-    body { padding: 32px 0; background: #F5F7FB; }
-    .app {
-      border-radius: var(--radius-lg);
-      overflow: hidden;
-      min-height: calc(100vh - 64px);
-      min-height: calc(100dvh - 64px);
-      box-shadow: var(--shadow-lg);
-    }
-    .bottom-nav {
-      bottom: 32px;
-      border-radius: 0 0 var(--radius-lg) var(--radius-lg);
-    }
-    .modal-fs, .chat-detail {
-      max-width: 480px;
-      left: 50%;
-      transform: translateX(-50%);
-      border-radius: var(--radius-lg);
-      top: 32px;
-      bottom: 32px;
-      inset: auto;
-      height: auto;
-    }
-    .modal-fs.visible { animation: modalPop 0.25s ease; }
-    @keyframes modalPop {
-      from { transform: translateX(-50%) translateY(20px); opacity: 0; }
-      to { transform: translateX(-50%) translateY(0); opacity: 1; }
-    }
-  }
-  @media (min-width: 1024px) {
-    #graphSvg { height: 540px; }
-    .friends-grid { grid-template-columns: repeat(4, 1fr); }
-    .badges-grid { grid-template-columns: repeat(4, 1fr); }
-  }
-
-  /* ============================================
-     Utility classes — inline style 대체
-     ============================================ */
-  .gl-dot--friend { background: var(--node-friend-bg); border-color: var(--node-friend-border); }
-  .gl-dot--ff { background: var(--node-ff-bg); border-color: var(--node-ff-border); border-style: dashed; }
-  .trust-progress-bar { width: 0%; }
-  .profile-stat-value--green { color: var(--friend-green-dark); }
-  .profile-stat-value--orange { color: var(--chon-orange-dark); }
-  .profile-stat-value--amber { color: #92400E; }
-  .settings-value--trusted { color: var(--status-confirmed); }
-  .settings-label--danger { color: #DC2626; }
-  .is-hidden { display: none !important; }
-  .empty-state {
-    text-align: center;
-    padding: 50px 20px;
-    color: var(--text-tertiary);
-  }
-  .empty-state-icon { font-size: 48px; margin-bottom: 12px; }
-  .empty-state-title { font-weight: 700; font-size: 14px; }
-  .empty-state-sub { font-size: 12px; margin-top: 6px; }
-  .self-tag { font-size: 9px; }
-  .name-self { color: var(--chon-orange); }
-  .tier-badge--me {
-    background: rgba(247,147,30,0.15);
-    border-color: var(--chon-orange);
-    color: var(--chon-orange-dark);
-  }
-  .list-item-status.confirmed { color: var(--status-confirmed); }
-  .list-item-status.pending { color: var(--status-pending); }
-  .level-pill-name { font-size: 9px; }
-
-  /* ============================================
-     Unified Header (모든 페이지 공통)
-     ============================================ */
-  .unified-header {
-    position: sticky;
-    top: 0;
-    z-index: 30;
-    background: var(--bg-app, #FFFBF0);
-    padding: calc(14px + env(safe-area-inset-top, 0px)) 20px 12px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-shrink: 0;
-  }
-  .uh-brand { display: flex; align-items: center; gap: 10px; }
-  .uh-brand-button {
-    background: transparent;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    font-family: inherit;
-    color: inherit;
-    text-align: left;
-    transition: opacity 0.15s;
-  }
-  .uh-brand-button:hover { opacity: 0.85; }
-  .uh-brand-button:active { transform: scale(0.97); }
-
-  .uh-brand-mark {
-    width: 36px; height: 36px;
-    border-radius: 11px;
-    background: linear-gradient(135deg, var(--chon-orange), #5BBA6F);
-    color: white;
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 900; font-size: 16px; letter-spacing: -0.5px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-  }
-  .uh-brand-name { font-size: 20px; font-weight: 900; letter-spacing: -0.5px; color: var(--text-primary); }
-  .uh-brand-sub { font-size: 11px; color: var(--text-secondary); font-weight: 700; margin-top: -2px; }
-  .uh-brand-text { line-height: 1.1; }
-  .uh-actions { display: flex; align-items: center; gap: 8px; }
-  .uh-icon-btn {
-    width: 40px; height: 40px;
-    border-radius: 50%;
-    background: white;
-    border: 1px solid #F1F5F9;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; font-size: 18px; position: relative;
-    font-family: inherit; transition: background 0.15s;
-  }
-  .uh-icon-btn:active { background: var(--bg-app); }
-  .uh-icon-dot {
-    position: absolute; top: 8px; right: 10px;
-    width: 8px; height: 8px;
-    background: #DC2626;
-    border-radius: 50%;
-    border: 2px solid white;
-  }
-  .welcome-bar {
-    background: linear-gradient(90deg, #FFF3D6, white);
-    border-bottom: 1px solid #F1F5F9;
-    padding: 10px 20px;
-    display: flex; align-items: center; gap: 8px;
-    font-size: 13px; font-weight: 700; color: var(--text-primary);
-    flex-shrink: 0;
-  }
-  .welcome-emoji { font-size: 16px; line-height: 1; }
-  .welcome-msg { flex: 1; }
-  .welcome-msg strong { color: var(--chon-orange-dark); font-weight: 900; }
-  .welcome-reset {
-    background: white;
-    border: 1px solid #F1F5F9;
-    color: var(--text-secondary);
-    padding: 4px 10px;
-    border-radius: 999px;
-    font-size: 11px; font-weight: 800;
-    cursor: pointer; font-family: inherit;
-    flex-shrink: 0;
-  }
-  .welcome-reset:active { transform: scale(0.96); }
 </style>
 </head>
 <body>
 
 <div class="app">
-  <header class="unified-header">
-    <button class="uh-brand uh-brand-button" onclick="window.location.href='./home.html'" aria-label="홈으로 이동">
-      <div class="uh-brand-mark">P</div>
-      <div class="uh-brand-text">
-        <div class="uh-brand-name">PASS</div>
-        <div class="uh-brand-sub">관계형 SNS</div>
+  <header class="app-header">
+    <button type="button" class="brand brand-button" onclick="location.href='./home.html'" aria-label="홈으로 이동">
+      <div class="brand-mark">P</div>
+      <div class="brand-text">
+        <div class="brand-name">PASS</div>
+        <div class="brand-sub">관계형 SNS</div>
       </div>
     </button>
-    <div class="uh-actions">
-      <button class="uh-icon-btn" onclick="window.location.href='./home.html?page=my'" aria-label="마이">👤</button>
-      <button class="uh-icon-btn" onclick="window.location.href='./home.html?notif=1'" aria-label="알림">🔔<span class="uh-icon-dot"></span></button>
+    <div class="header-actions">
+      <button type="button" class="icon-btn" onclick="location.href='./home.html?notif=1'" aria-label="알림">
+        🔔
+        <span class="icon-btn-dot"></span>
+      </button>
     </div>
   </header>
+
   <div class="welcome-bar">
     <span class="welcome-emoji">👋</span>
-    <span class="welcome-msg"><strong id="welcomeName">데모 사용자</strong>님 환영합니다.</span>
-    <button class="welcome-reset" onclick="resetAll()">처음부터</button>
+    <span class="welcome-msg"><strong id="welcomeName">사용자</strong>님 환영합니다.</span>
   </div>
 
-  <!-- 내부 섹션 탭 (피드/모임/채팅/Trust/프로필) -->
-  <div class="section-tabs">
-    <button class="section-tab active" data-section="feed" onclick="switchMain('feed')">
-      <span class="section-tab-icon">🏠</span>
-      <span class="section-tab-label">피드</span>
-    </button>
-    <button class="section-tab" data-section="network" onclick="switchMain('network')">
-      <span class="section-tab-icon">🌐</span>
-      <span class="section-tab-label">모임</span>
-    </button>
-    <button class="section-tab" data-section="chat" onclick="switchMain('chat')">
-      <span class="section-tab-icon">💬</span>
-      <span class="section-tab-label">채팅</span>
-      <span class="section-tab-badge is-hidden" id="navChatBadge">0</span>
-    </button>
-    <button class="section-tab" data-section="trust" onclick="switchMain('trust')">
-      <span class="section-tab-icon">🌱</span>
-      <span class="section-tab-label">Trust</span>
-    </button>
-    <button class="section-tab" data-section="profile" onclick="switchMain('profile')">
-      <span class="section-tab-icon">👤</span>
-      <span class="section-tab-label">프로필</span>
-    </button>
+  <div class="search-wrap">
+    <label class="search-box">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <path d="M21 21l-4.35-4.35"></path>
+      </svg>
+      <input type="text" class="search-input" id="searchInput" placeholder="이름 또는 전화번호 검색" oninput="onSearch()"/>
+    </label>
   </div>
 
   <main class="content">
-    <!-- ============ FEED ============ -->
-    <section class="main-section active" id="sectionFeed">
-      <div class="compose-card" onclick="openComposePost()">
-        <div class="compose-avatar" id="composeAvatar">홍</div>
-        <div class="compose-placeholder">내 모임에게 공유해 보세요...</div>
+    <!-- CHON 가족 -->
+    <section class="section">
+      <div class="section-badge">
+        CHON 가족 <span class="count" id="countChon">0</span>
       </div>
-      <div class="filter-chips" id="feedChips">
-        <div class="chip active" data-filter="all" onclick="setFeedFilter('all')">전체</div>
-        <div class="chip" data-filter="friends" onclick="setFeedFilter('friends')">모임원만</div>
-        <div class="chip" data-filter="ff" onclick="setFeedFilter('ff')">추천</div>
-        <div class="chip" data-filter="self" onclick="setFeedFilter('self')">내 글</div>
-      </div>
-      <div class="feed-list" id="feedList"></div>
+      <div class="section-block" id="listChon"></div>
     </section>
 
-    <!-- ============ NETWORK ============ -->
-    <section class="main-section" id="sectionNetwork">
-      <div class="graph-tools-card">
-        <div class="graph-tools-title">관계도 만들기 · 가계도 / 모임 / 학급</div>
-        <div class="graph-tools-row">
-          <button class="graph-tool-btn" onclick="openGraphTool('family')"><span>🌳</span><span>가계도</span></button>
-          <button class="graph-tool-btn" onclick="openGraphTool('group')"><span>🌐</span><span>모임</span></button>
-          <button class="graph-tool-btn" onclick="openGraphTool('class')"><span>🏫</span><span>학급</span></button>
-        </div>
+    <!-- 초대 가능 -->
+    <section class="section">
+      <div class="section-badge invite">
+        초대 가능 <span class="count" id="countInvite">0</span>
       </div>
-      <div class="net-toggle">
-        <button class="net-toggle-btn active" id="toggleGraph" onclick="switchNetView('graph')">
-          <span>🌐</span><span>모임</span>
-        </button>
-        <button class="net-toggle-btn" id="toggleTree" onclick="switchNetView('tree')">
-          <span>➕</span><span>추가하기</span>
-        </button>
-        <button class="net-toggle-btn" id="toggleList" onclick="switchNetView('list')">
-          <span>✓</span><span>인증현황</span>
-        </button>
-      </div>
-
-      <div class="summary-card">
-        <div class="summary-avatar">🌐</div>
-        <div class="summary-info">
-          <div class="summary-name">내 PASS 네트워크</div>
-          <div class="summary-stats">
-            <span>👥 <strong id="statTotal">5</strong>명</span>
-            <span>✓ <strong id="statConfirmed">3</strong>명</span>
-            <span>🔗 <strong id="statFf">2</strong>명(2-hop)</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="net-panel active" id="viewGraph">
-        <div class="graph-canvas-wrap">
-          <svg id="graphSvg" viewBox="0 0 360 500" preserveAspectRatio="xMidYMid meet">
-            <g id="graphEdges"></g>
-            <g id="graphNodes"></g>
-          </svg>
-        </div>
-        <div class="graph-legend">
-          <div class="gl-item"><span class="gl-dot gl-dot--friend"></span> 모임원 (1-hop)</div>
-          <div class="gl-item"><span class="gl-dot gl-dot--ff"></span> 모임원 추천 (2-hop)</div>
-        </div>
-      </div>
-
-      <div class="net-panel" id="viewTree">
-        <div class="tree-canvas" id="treeCanvas"></div>
-      </div>
-
-      <div class="net-panel" id="viewList">
-        <div class="verify-summary" id="verifySummary"></div>
-        <div class="section-header"><h2>✓ 인증 현황</h2></div>
-        <div class="list-section" id="resultList"></div>
-      </div>
-    </section>
-
-    <!-- ============ CHAT ============ -->
-    <section class="main-section" id="sectionChat">
-      <div class="chat-search-wrap">
-        <input type="text" class="chat-search" placeholder="🔍 대화 검색..." id="chatSearchInput" oninput="renderChatList()"/>
-      </div>
-      <div class="chat-list" id="chatList"></div>
-    </section>
-
-    <!-- ============ TRUST ============ -->
-    <section class="main-section" id="sectionTrust">
-      <div class="trust-hero">
-        <div class="trust-stage-emoji" id="trustStageEmoji">🌱</div>
-        <div class="trust-stage-name" id="trustStageName">새싹</div>
-        <div class="trust-stage-num" id="trustStageNum">Stage 2 / 7</div>
-        <div class="trust-progress-wrap">
-          <div class="trust-progress-bar" id="trustProgressBar"></div>
-        </div>
-        <div class="trust-progress-text" id="trustProgressText">
-          <strong>0</strong> / 0 pts
-        </div>
-      </div>
-
-      <div class="trust-cards">
-        <div class="trust-card">
-          <div class="trust-card-title">🎖️ Trust Level</div>
-          <div class="level-row" id="levelRow"></div>
-          <div class="level-desc" id="levelDesc">관계가 시작됩니다. 모임원을 더 늘려보세요.</div>
-        </div>
-
-        <div class="trust-card">
-          <div class="trust-card-title">💎 Reward Points</div>
-          <div class="points-row">
-            <div class="points-stat">
-              <div class="points-stat-value" id="pointsEarned">0</div>
-              <div class="points-stat-label">누적 획득</div>
-            </div>
-            <div class="points-stat">
-              <div class="points-stat-value" id="pointsBalance">0</div>
-              <div class="points-stat-label">사용 가능</div>
-            </div>
-          </div>
-          <div class="points-detail" id="pointsDetail"></div>
-        </div>
-
-        <div class="trust-card">
-          <div class="trust-card-title">🏆 Badges</div>
-          <div class="badges-grid" id="badgesGrid"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============ PROFILE ============ -->
-    <section class="main-section" id="sectionProfile">
-      <div class="profile-hero">
-        <div class="profile-avatar-big" id="profileAvatar">홍</div>
-        <div class="profile-name" id="profileName">홍길순</div>
-        <div class="profile-phone">010-****-1234</div>
-        <button class="profile-edit-btn" onclick="openEditProfile()">프로필 편집</button>
-      </div>
-
-      <div class="profile-stats-row">
-        <div class="profile-stat">
-          <div class="profile-stat-value profile-stat-value--green" id="pStatFriends">3</div>
-          <div class="profile-stat-label">모임원</div>
-        </div>
-        <div class="profile-stat">
-          <div class="profile-stat-value profile-stat-value--orange" id="pStatPosts">0</div>
-          <div class="profile-stat-label">포스트</div>
-        </div>
-        <div class="profile-stat">
-          <div class="profile-stat-value profile-stat-value--amber" id="pStatPoints">0</div>
-          <div class="profile-stat-label">Trust Pts</div>
-        </div>
-      </div>
-
-      <div class="settings-section">
-        <div class="settings-group">
-          <div class="settings-row" onclick="showToast('🔔','알림 설정')">
-            <div class="settings-icon">🔔</div>
-            <div class="settings-label">알림</div>
-            <div class="settings-value">켜짐</div>
-            <div class="settings-arrow">›</div>
-          </div>
-          <div class="settings-row" onclick="showToast('🔊','음성 안내')">
-            <div class="settings-icon">🔊</div>
-            <div class="settings-label">음성 안내</div>
-            <div class="settings-value">꺼짐</div>
-            <div class="settings-arrow">›</div>
-          </div>
-          <div class="settings-row" onclick="showToast('🌐','공공장소 모드')">
-            <div class="settings-icon">🌐</div>
-            <div class="settings-label">공공장소 모드</div>
-            <div class="settings-value">꺼짐</div>
-            <div class="settings-arrow">›</div>
-          </div>
-        </div>
-
-        <div class="settings-group">
-          <div class="settings-row" onclick="showToast('🛡️','하드웨어 인증')">
-            <div class="settings-icon security">🛡️</div>
-            <div class="settings-label">하드웨어 인증</div>
-            <div class="settings-value settings-value--trusted">TRUSTED</div>
-            <div class="settings-arrow">›</div>
-          </div>
-          <div class="settings-row" onclick="showToast('📱','단말 관리')">
-            <div class="settings-icon security">📱</div>
-            <div class="settings-label">단말 관리</div>
-            <div class="settings-value">1대</div>
-            <div class="settings-arrow">›</div>
-          </div>
-          <div class="settings-row" onclick="showToast('🔐','개인정보')">
-            <div class="settings-icon security">🔐</div>
-            <div class="settings-label">개인정보</div>
-            <div class="settings-arrow">›</div>
-          </div>
-        </div>
-
-        <div class="settings-group">
-          <div class="settings-row" onclick="showToast('⚠️','분실 신고')">
-            <div class="settings-icon warning">⚠️</div>
-            <div class="settings-label">분실/도난 신고</div>
-            <div class="settings-arrow">›</div>
-          </div>
-          <div class="settings-row" onclick="logoutPass()">
-            <div class="settings-icon danger">🚪</div>
-            <div class="settings-label settings-label--danger">로그아웃</div>
-            <div class="settings-arrow">›</div>
-          </div>
-        </div>
-      </div>
+      <div class="section-block" id="listInvite"></div>
     </section>
   </main>
 
+  <div class="cta-area">
+    <button class="cta-btn" onclick="openManualInput()">전화번호로 직접 입력</button>
+  </div>
+
   <nav class="bottom-nav">
-    <button class="nav-btn" onclick="window.location.href='./home.html'">
+    <button type="button" class="nav-btn" onclick="location.href='./home.html'">
       <div class="nav-btn-icon">🏠</div>
       <div class="nav-btn-label">홈</div>
     </button>
-    <button class="nav-btn active">
+    <button type="button" class="nav-btn active">
       <div class="nav-btn-icon">📰</div>
-      <div class="nav-btn-label">Feed</div>
+      <div class="nav-btn-label">연락처</div>
     </button>
-    <button class="nav-btn center" onclick="window.location.href='./home.html?page=rel'">
+    <button type="button" class="nav-btn center" onclick="location.href='./home.html?page=rel'">
       <div class="nav-circle">🆔</div>
-      <div class="nav-btn-label">트로피</div>
+      <div class="nav-btn-label">증명서</div>
     </button>
-    <button class="nav-btn" onclick="window.location.href='./home.html?page=auth'">
+    <button type="button" class="nav-btn" onclick="location.href='./home.html?page=auth'">
       <div class="nav-btn-icon">🤝</div>
       <div class="nav-btn-label">인증</div>
     </button>
-    <button class="nav-btn" onclick="switchMain('chat')">
-      <div class="nav-btn-icon">💬</div>
-      <div class="nav-btn-label">채팅</div>
+    <button type="button" class="nav-btn" onclick="location.href='./home.html?page=my'">
+      <div class="nav-btn-icon">👤</div>
+      <div class="nav-btn-label">마이페이지</div>
     </button>
   </nav>
 </div>
 
-<!-- Backdrop -->
-<div class="modal-backdrop" id="modalBackdrop" onclick="closeAllModals()"></div>
-
-<!-- Add Person Modal -->
-<div class="modal-fs" id="modalAddPerson">
-  <div class="modal-fs-header">
-    <button class="modal-fs-close" onclick="closeAllModals()">✕</button>
-    <div class="modal-fs-title" id="modalFsTitle">새 모임원 추가</div>
-    <button class="modal-fs-save" onclick="confirmFsAdd()">완료</button>
-  </div>
-  <div class="modal-fs-body">
-    <div class="modal-section">
-      <div class="modal-section-label">이름</div>
-      <input type="text" class="modal-input" id="modalFsName" placeholder="홍길동" autocomplete="off"/>
-    </div>
-    <div class="modal-section">
-      <div class="modal-section-label">성별</div>
-      <div class="gender-toggle">
-        <div class="gender-option male selected" onclick="selectGender('male')">남성</div>
-        <div class="gender-option female" onclick="selectGender('female')">여성</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Compose Post Modal -->
-<div class="modal-fs" id="modalCompose">
-  <div class="modal-fs-header">
-    <button class="modal-fs-close" onclick="closeAllModals()">✕</button>
-    <div class="modal-fs-title">새 포스트</div>
-    <button class="modal-fs-save" onclick="confirmComposePost()">게시</button>
-  </div>
-  <div class="modal-fs-body">
-    <div class="modal-section">
-      <div class="modal-section-label">내용</div>
-      <textarea class="modal-textarea" id="composeText" placeholder="무슨 생각을 하고 계신가요?" autocomplete="off"></textarea>
-    </div>
-    <div class="modal-section">
-      <div class="modal-section-label">공개 범위</div>
-      <div class="gender-toggle">
-        <div class="gender-option male selected" onclick="setComposeAudience('friends')" id="audFriends">👫 모임원</div>
-        <div class="gender-option" onclick="setComposeAudience('all')" id="audAll">🌐 전체 (2-hop)</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Edit Profile Modal -->
-<div class="modal-fs" id="modalEditProfile">
-  <div class="modal-fs-header">
-    <button class="modal-fs-close" onclick="closeAllModals()">✕</button>
-    <div class="modal-fs-title">프로필 편집</div>
-    <button class="modal-fs-save" onclick="confirmEditProfile()">저장</button>
-  </div>
-  <div class="modal-fs-body">
-    <div class="modal-section">
-      <div class="modal-section-label">이름</div>
-      <input type="text" class="modal-input" id="editProfileName" autocomplete="off"/>
-    </div>
-    <div class="modal-section">
-      <div class="modal-section-label">성별</div>
-      <div class="gender-toggle">
-        <div class="gender-option male" onclick="selectEditGender('male')" id="editGenderMale">남성</div>
-        <div class="gender-option female selected" onclick="selectEditGender('female')" id="editGenderFemale">여성</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Chat Detail -->
-<div class="chat-detail" id="chatDetail">
-  <div class="chat-detail-header">
-    <button class="chat-back-btn" onclick="closeChatDetail()">‹</button>
-    <div class="chat-detail-avatar" id="chatDetailAvatar">?</div>
-    <div>
-      <div class="chat-detail-name" id="chatDetailName">-</div>
-      <div class="chat-detail-sub" id="chatDetailSub">-</div>
-    </div>
-  </div>
-  <div class="chat-messages" id="chatMessages"></div>
-  <div class="chat-input-bar">
-    <input type="text" class="chat-input" id="chatInput" placeholder="메시지 보내기..." autocomplete="off"/>
-    <button class="chat-send-btn" onclick="sendChatMessage()">➤</button>
-  </div>
-</div>
-
-<!-- Toast -->
-<div class="toast" id="toast">
-  <span id="toastEmoji">✓</span><span id="toastText"></span>
-</div>
+<div class="toast" id="toast"></div>
 
 <script>
 // ============================================================
-// Initial Data
+// 페이지 라우팅
 // ============================================================
-const initialMe = {
-  id: 'me', name: '홍길순', gender: 'female', isSelf: true, confirmed: true
-};
-const initialPeople = [
-  { id: 'f1', name: '김민수', gender: 'male', hopLevel: 1, confirmed: true, knows: ['f2'] },
-  { id: 'f2', name: '박지영', gender: 'female', hopLevel: 1, confirmed: true, knows: ['f3'] },
-  { id: 'f3', name: '이상호', gender: 'male', hopLevel: 1, confirmed: true },
-  { id: 'ff1', name: '최서연', gender: 'female', hopLevel: 2, confirmed: false, viaFriend: 'f1' },
-  { id: 'ff2', name: '정태우', gender: 'male', hopLevel: 2, confirmed: false, viaFriends: ['f2', 'f1'] },
-  { id: 'ff3', name: '강하늘', gender: 'male', hopLevel: 2, confirmed: false, viaFriends: ['f1', 'f2', 'f3'] }
-];
-const initialPosts = [
-  { id: 'p1', authorId: 'f1', content: '오늘 한강에서 자전거 타고 왔어요 🚴 날씨가 너무 좋네요!', time: Date.now() - 3600000 * 2, likes: 5, liked: false, comments: 2 },
-  { id: 'p2', authorId: 'f2', content: '새로 배운 라떼아트 ☕\n바리스타가 되고 싶은 1人', image: '☕', time: Date.now() - 3600000 * 6, likes: 12, liked: true, comments: 4 },
-  { id: 'p3', authorId: 'f3', content: '주말에 등산 같이 가실 분?\n북한산 가볍게 다녀올 예정입니다.', time: Date.now() - 3600000 * 12, likes: 3, liked: false, comments: 8 },
-  { id: 'p4', authorId: 'ff1', content: '드디어 PASS 가입했어요! 안녕하세요 👋', time: Date.now() - 3600000 * 24, likes: 7, liked: false, comments: 3 }
-];
-const initialChats = [
-  { id: 'c1', personId: 'f1', messages: [
-    { from: 'f1', text: '안녕! 잘 지내?', time: Date.now() - 3600000 * 3 },
-    { from: 'me', text: '응 잘 지내고 있어 ㅎㅎ', time: Date.now() - 3600000 * 3 + 60000 },
-    { from: 'f1', text: '주말에 시간 돼?', time: Date.now() - 3600000 * 2 }
-  ], unread: 1 },
-  { id: 'c2', personId: 'f2', messages: [
-    { from: 'f2', text: '라떼아트 영상 보내드릴게요', time: Date.now() - 3600000 * 7 },
-    { from: 'me', text: '오 좋아요!', time: Date.now() - 3600000 * 7 + 30000 }
-  ], unread: 0 },
-  { id: 'c3', personId: 'f3', messages: [
-    { from: 'f3', text: '등산 같이 가요!', time: Date.now() - 3600000 * 14 }
-  ], unread: 0 }
-];
-
-// ============================================================
-// State
-// ============================================================
-let state = {
-  currentMain: 'feed',
-  currentNet: 'graph',
-  feedFilter: 'all',
-  me: { ...initialMe },
-  people: JSON.parse(JSON.stringify(initialPeople)),
-  posts: JSON.parse(JSON.stringify(initialPosts)),
-  chats: JSON.parse(JSON.stringify(initialChats)),
-  currentChatId: null,
-  feedAuthors: {}
-};
-let selectedNodeId = null;
-let pendingGender = 'male';
-let pendingAction = null;
-let composeAudience = 'friends';
-let editGender = 'female';
-
-// ============================================================
-// Trust Garden Definition
-// ============================================================
-const TRUST_STAGES = [
-  { emoji: '🌰', name: '씨앗', max: 20 },
-  { emoji: '🌱', name: '새싹', max: 50 },
-  { emoji: '🪴', name: '묘목', max: 100 },
-  { emoji: '🌿', name: '작은나무', max: 200 },
-  { emoji: '🌳', name: '나무', max: 400 },
-  { emoji: '🌲', name: '큰나무', max: 800 },
-  { emoji: '🏞️', name: '숲', max: Infinity }
-];
-const TRUST_LEVELS = [
-  { lv: 1, name: '시작', desc: '관계의 첫 발걸음을 떼었어요.', threshold: 0 },
-  { lv: 2, name: '관계 시작', desc: '관계가 시작됩니다. 모임원을 더 늘려보세요.', threshold: 3 },
-  { lv: 3, name: '믿음 쌓기', desc: '신뢰가 자라고 있어요.', threshold: 6 },
-  { lv: 4, name: '신뢰 깊어짐', desc: '두터운 신뢰 관계를 만들고 있어요.', threshold: 16 },
-  { lv: 5, name: '신뢰 마스터', desc: '진정한 관계의 달인입니다.', threshold: 51 }
-];
-const BADGES = [
-  { id: 'b1', emoji: '🌱', name: '첫 모임원', desc: '모임원 1명', check: s => s.people.filter(p => p.hopLevel === 1 && p.confirmed).length >= 1 },
-  { id: 'b2', emoji: '🤝', name: '5인 모임', desc: '모임원 5명', check: s => s.people.filter(p => p.hopLevel === 1 && p.confirmed).length >= 5 },
-  { id: 'b3', emoji: '🔗', name: '추천 마스터', desc: '2-hop 인증 3명', check: s => s.people.filter(p => p.hopLevel === 2 && p.confirmed).length >= 3, gold: true },
-  { id: 'b4', emoji: '📝', name: '첫 포스트', desc: '포스트 1개', check: s => s.posts.filter(p => p.authorId === 'me').length >= 1 },
-  { id: 'b5', emoji: '💬', name: '대화 시작', desc: '메시지 보내기', check: s => s.chats.some(c => c.messages.some(m => m.from === 'me')) },
-  { id: 'b6', emoji: '🏆', name: '신뢰 마스터', desc: 'Trust 200+', check: s => calcTrustPoints(s) >= 200, gold: true }
-];
-
-function calcTrustPoints(s = state) {
-  let pts = 10; // 기본 가입 보너스
-  pts += s.people.filter(p => p.hopLevel === 1 && p.confirmed).length * 15;
-  pts += s.people.filter(p => p.hopLevel === 1 && !p.confirmed).length * 3;
-  pts += s.people.filter(p => p.hopLevel === 2 && p.confirmed).length * 8;
-  pts += s.people.filter(p => p.hopLevel === 2 && !p.confirmed).length * 1;
-  pts += s.posts.filter(p => p.authorId === 'me').length * 2;
-  // 채팅 메시지 (capped 20)
-  const myMsgs = s.chats.reduce((sum, c) => sum + c.messages.filter(m => m.from === 'me').length, 0);
-  pts += Math.min(myMsgs, 20) * 1;
-  return pts;
-}
-
-function getTrustStage(pts) {
-  let cum = 0;
-  for (let i = 0; i < TRUST_STAGES.length; i++) {
-    const stage = TRUST_STAGES[i];
-    if (pts < stage.max) {
-      return { ...stage, index: i, min: cum, progress: (pts - cum) / (stage.max - cum) };
-    }
-    cum = stage.max;
-  }
-  return { ...TRUST_STAGES[TRUST_STAGES.length - 1], index: TRUST_STAGES.length - 1, min: cum, progress: 1 };
-}
-
-function getTrustLevel(s = state) {
-  const friendCount = s.people.filter(p => p.hopLevel === 1 && p.confirmed).length;
-  let lv = TRUST_LEVELS[0];
-  for (const l of TRUST_LEVELS) {
-    if (friendCount >= l.threshold) lv = l;
-  }
-  return lv;
-}
-
-// ============================================================
-// Helpers
-// ============================================================
-function getPerson(id) {
-  if (id === 'me' || id === state.me.id) return state.me;
-  return state.people.find(x => x.id === id) || state.feedAuthors[id];
-}
-function getViaList(p) {
-  if (Array.isArray(p.viaFriends)) return p.viaFriends.slice();
-  if (p.viaFriend) return [p.viaFriend];
-  return [];
-}
-function timeAgo(ts) {
-  const diff = Date.now() - ts;
-  const min = Math.floor(diff / 60000);
-  if (min < 1) return '방금';
-  if (min < 60) return `${min}분 전`;
-  const hr = Math.floor(min / 60);
-  if (hr < 24) return `${hr}시간 전`;
-  const d = Math.floor(hr / 24);
-  return `${d}일 전`;
-}
-function escHtml(s) {
-  return String(s)
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
-}
-
-// ============================================================
-// Backend 연동 — 로그인 상태면 백엔드, 아니면 데모 데이터로 동작
-// ============================================================
-function backendOn() {
-  return !!(window.PassAPI && PassAPI.isLoggedIn());
-}
-
-// 백엔드 피드 필터 → 데모 필터 매핑 (데모: all/friends/ff/self)
-function serverFeedFilter(f) {
-  return f === 'ff' ? 'extended' : (f || 'all');
-}
-
-// 백엔드 post → 데모 post 형태로 변환. 작성자는 state.feedAuthors 에 캐시.
-function mapServerPost(sp) {
-  const authorId = sp.isMine ? 'me' : sp.authorId;
-  if (!sp.isMine && sp.author) {
-    state.feedAuthors[sp.authorId] = {
-      id: sp.authorId,
-      name: sp.author.name || sp.author.email || '사용자',
-      hopLevel: sp.hop === 2 ? 2 : 1,
-      confirmed: true
-    };
-  }
-  return {
-    id: sp.id,
-    authorId,
-    content: sp.content,
-    image: sp.imageUrl || null,
-    time: sp.createdAt ? new Date(sp.createdAt).getTime() : Date.now(),
-    likes: sp.likeCount || 0,
-    liked: !!sp.liked,
-    comments: sp.commentCount || 0
+function goPage(page) {
+  const map = {
+    home:    './home.html',
+    id:      './home.html?page=rel',
+    family:  '../views/family-tree.html',
+    profile: './home.html?page=my',
   };
+  if (map[page]) location.href = map[page];
 }
 
-// 백엔드에서 피드를 불러와 state.posts 에 반영 후 렌더
-async function loadFeed(filter) {
-  if (!backendOn()) { renderFeed(); return; }
-  try {
-    const res = await PassAPI.posts.feed(serverFeedFilter(filter || state.feedFilter));
-    const arr = Array.isArray(res) ? res : (res.posts || res.items || []);
-    state.posts = arr.map(mapServerPost);
-    renderFeed();
-  } catch (e) {
-    showToast('⚠️', '피드를 불러오지 못했습니다');
-    renderFeed();
-  }
-}
-
-// 백엔드 conversation → 데모 chat 형태로 변환
-function mapServerConv(c) {
-  if (c.other) {
-    state.feedAuthors[c.other.id] = state.feedAuthors[c.other.id] || {
-      id: c.other.id,
-      name: c.other.name || c.other.email || '사용자',
-      hopLevel: 1, confirmed: true
-    };
-  }
-  return {
-    id: c.id,
-    personId: c.other ? c.other.id : null,
-    messages: c.lastMessage
-      ? [{ from: c.other ? c.other.id : 'other', text: c.lastMessage,
-           time: c.lastAt ? new Date(c.lastAt).getTime() : Date.now() }]
-      : [],
-    unread: c.unread || 0
-  };
-}
-
-// 백엔드에서 대화방 목록을 불러와 state.chats 에 반영
-async function loadChats() {
-  if (!backendOn()) { renderChatList(); return; }
-  try {
-    const res = await PassAPI.chat.list();
-    const arr = Array.isArray(res) ? res : (res.items || res.conversations || []);
-    state.chats = arr.map(mapServerConv);
-    renderChatList();
-    updateChatBadge();
-  } catch (e) {
-    showToast('⚠️', '대화 목록을 불러오지 못했습니다');
-    renderChatList();
-  }
-}
-
-// ============================================================
-// Main Navigation
-// ============================================================
-function switchMain(section) {
-  state.currentMain = section;
-  document.querySelectorAll('.section-tab').forEach(b => b.classList.remove('active'));
-  const tab = document.querySelector(`.section-tab[data-section="${section}"]`);
-  if (tab) tab.classList.add('active');
-  document.querySelectorAll('.main-section').forEach(s => s.classList.remove('active'));
-  const map = { feed: 'sectionFeed', network: 'sectionNetwork', chat: 'sectionChat', trust: 'sectionTrust', profile: 'sectionProfile' };
-  document.getElementById(map[section]).classList.add('active');
-
-  const subMap = {
-    feed: '피드',
-    network: '관계 네트워크',
-    chat: '메시지',
-    trust: '🌱 Trust Garden',
-    profile: '내 프로필'
-  };
-  document.getElementById('headerSub').textContent = subMap[section] || '관계형 SNS';
-
-  // Render the active section
-  if (section === 'feed') renderFeed();
-  else if (section === 'network') {
-    if (state.currentNet === 'graph') renderGraph();
-    else if (state.currentNet === 'tree') renderTree();
-    else renderList();
-    updateSummary();
-  } else if (section === 'chat') { if (backendOn()) loadChats(); else renderChatList(); }
-  else if (section === 'trust') renderTrust();
-  else if (section === 'profile') renderProfile();
-
-  // Scroll to top
-  document.querySelector('.content').scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-// ============================================================
-// Network: 3-way toggle
-// ============================================================
-function switchNetView(view) {
-  state.currentNet = view;
-  document.querySelectorAll('.net-toggle-btn').forEach(b => b.classList.remove('active'));
-  const btnMap = { tree: 'toggleTree', graph: 'toggleGraph', list: 'toggleList' };
-  const panelMap = { tree: 'viewTree', graph: 'viewGraph', list: 'viewList' };
-  document.getElementById(btnMap[view]).classList.add('active');
-  document.querySelectorAll('.net-panel').forEach(p => p.classList.remove('active'));
-  document.getElementById(panelMap[view]).classList.add('active');
-  if (view === 'tree') renderTree();
-  else if (view === 'graph') renderGraph();
-  else renderList();
-  document.querySelectorAll('.action-panel').forEach(p => p.remove());
-}
-
-// ============================================================
-// FEED
-// ============================================================
-function setFeedFilter(f) {
-  state.feedFilter = f;
-  document.querySelectorAll('.filter-chips .chip').forEach(c => c.classList.toggle('active', c.dataset.filter === f));
-  if (backendOn()) loadFeed(f);
-  else renderFeed();
-}
-
-function renderFeed() {
-  const list = document.getElementById('feedList');
-  if (!list) return;
-
-  document.getElementById('composeAvatar').textContent = state.me.name.charAt(0);
-
-  let posts = state.posts.slice().sort((a, b) => b.time - a.time);
-  // 백엔드 연동 시 필터는 서버가 이미 적용 — 클라이언트 재필터 생략
-  if (!backendOn()) {
-    if (state.feedFilter === 'friends') {
-      posts = posts.filter(p => {
-        if (p.authorId === 'me') return false;
-        const author = getPerson(p.authorId);
-        return author && author.hopLevel === 1;
-      });
-    } else if (state.feedFilter === 'ff') {
-      posts = posts.filter(p => {
-        const author = getPerson(p.authorId);
-        return author && author.hopLevel === 2;
-      });
-    } else if (state.feedFilter === 'self') {
-      posts = posts.filter(p => p.authorId === 'me');
-    }
-  }
-
-  if (posts.length === 0) {
-    list.innerHTML = `<div class="empty-state">
-      <div class="empty-state-icon">📭</div>
-      <div class="empty-state-title">아직 포스트가 없어요</div>
-      <div class="empty-state-sub">첫 번째 글을 작성해보세요</div>
-    </div>`;
-    return;
-  }
-
-  list.innerHTML = posts.map(post => makePostHtml(post)).join('');
-
-  // Bind events
-  list.querySelectorAll('[data-action="like"]').forEach(btn => {
-    btn.onclick = (e) => { e.stopPropagation(); toggleLike(btn.dataset.postId); };
-  });
-  list.querySelectorAll('[data-action="chat"]').forEach(btn => {
-    btn.onclick = (e) => { e.stopPropagation(); openChatWith(btn.dataset.personId); };
-  });
-}
-
-function makePostHtml(post) {
-  const author = post.authorId === 'me' ? state.me : getPerson(post.authorId);
-  if (!author) return '';
-  let avatarClass = '';
-  let hopClass = '';
-  let hopLabel = '';
-  if (author.isSelf) { avatarClass = 'self'; hopClass = 'self'; hopLabel = '나'; }
-  else if (author.hopLevel === 1) { hopClass = ''; hopLabel = '모임원'; }
-  else if (author.hopLevel === 2) { avatarClass = 'ff'; hopClass = 'ff'; hopLabel = '2-hop'; }
-
-  const imgHtml = post.image ? `<div class="post-image">${post.image}</div>` : '';
-  const chatBtn = author.isSelf ? '' : `<button class="post-action-btn" data-action="chat" data-person-id="${author.id}"><span>💬</span><span>메시지</span></button>`;
-
-  return `
-    <article class="post" data-post-id="${post.id}">
-      <div class="post-head">
-        <div class="post-avatar ${avatarClass}">${escHtml(author.name.charAt(0))}</div>
-        <div class="post-author">
-          <div class="post-name-row">
-            <div class="post-name">${escHtml(author.name)}</div>
-            <span class="post-hop-badge ${hopClass}">${hopLabel}</span>
-          </div>
-          <div class="post-time">${timeAgo(post.time)}</div>
-        </div>
-        <button class="post-menu" aria-label="더보기">⋯</button>
-      </div>
-      <div class="post-content">${escHtml(post.content)}</div>
-      ${imgHtml}
-      <div class="post-actions">
-        <button class="post-action-btn ${post.liked ? 'liked' : ''}" data-action="like" data-post-id="${post.id}">
-          <span>${post.liked ? '❤️' : '🤍'}</span><span>${post.likes}</span>
-        </button>
-        <button class="post-action-btn">
-          <span>💭</span><span>${post.comments}</span>
-        </button>
-        ${chatBtn || '<button class="post-action-btn"><span>🔄</span><span>공유</span></button>'}
-      </div>
-    </article>
-  `;
-}
-
-async function toggleLike(postId) {
-  const post = state.posts.find(p => p.id === postId);
-  if (!post) return;
-  if (backendOn()) {
-    try {
-      const r = await PassAPI.posts.toggleLike(postId);
-      post.liked = !!r.liked;
-      post.likes = Math.max(0, post.likes + (post.liked ? 1 : -1));
-    } catch (e) { showToast('⚠️', '처리에 실패했습니다'); return; }
-  } else {
-    post.liked = !post.liked;
-    post.likes += post.liked ? 1 : -1;
-  }
-  renderFeed();
-}
-
-function openComposePost() {
-  document.getElementById('composeText').value = '';
-  composeAudience = 'friends';
-  document.getElementById('audFriends').classList.add('selected', 'male');
-  document.getElementById('audAll').classList.remove('selected', 'male');
-  document.getElementById('modalCompose').classList.add('visible');
-  document.getElementById('modalBackdrop').classList.add('visible');
-  setTimeout(() => document.getElementById('composeText').focus(), 350);
-}
-
-function setComposeAudience(a) {
-  composeAudience = a;
-  document.getElementById('audFriends').classList.toggle('selected', a === 'friends');
-  document.getElementById('audFriends').classList.toggle('male', a === 'friends');
-  document.getElementById('audAll').classList.toggle('selected', a === 'all');
-  document.getElementById('audAll').classList.toggle('male', a === 'all');
-}
-
-async function confirmComposePost() {
-  const text = document.getElementById('composeText').value.trim();
-  if (!text) { showToast('⚠️', '내용을 입력하세요'); return; }
-  if (backendOn()) {
-    try {
-      await PassAPI.posts.create(text, composeAudience === 'all' ? 'public' : 'friends');
-    } catch (e) { showToast('⚠️', '게시에 실패했습니다'); return; }
-    closeAllModals();
-    if (state.currentMain !== 'feed') switchMain('feed');
-    await loadFeed(state.feedFilter);
-  } else {
-    state.posts.unshift({
-      id: 'p' + Date.now(),
-      authorId: 'me',
-      content: text,
-      time: Date.now(),
-      likes: 0,
-      liked: false,
-      comments: 0
-    });
-    closeAllModals();
-    if (state.currentMain !== 'feed') switchMain('feed');
-    else renderFeed();
-  }
-  showToast('📝', '포스트 게시됨');
-}
-
-// ============================================================
-// NETWORK Views (Tree / Graph / List) — from v1
-// ============================================================
-function renderTree() {
-  const canvas = document.getElementById('treeCanvas');
-  if (!canvas) return;
-  canvas.innerHTML = '';
-
-  const meBlock = document.createElement('div');
-  meBlock.className = 'me-block';
-  meBlock.innerHTML = '<div class="me-block-label">🏠 나</div>';
-  const meRow = document.createElement('div');
-  meRow.className = 'me-block-row';
-  meRow.appendChild(makePersonNode(state.me));
-  meBlock.appendChild(meRow);
-  canvas.appendChild(meBlock);
-
-  const friends = state.people.filter(p => p.hopLevel === 1);
-  const fBox = document.createElement('div');
-  fBox.className = 'friends-box';
-  fBox.innerHTML = `<div class="friends-box-label">👫 모임원 (${friends.length}명, 1-hop)</div>`;
-  const fGrid = document.createElement('div');
-  fGrid.className = 'friends-grid';
-  friends.forEach(p => fGrid.appendChild(makePersonNode(p)));
-  const fSlot = document.createElement('div');
-  fSlot.className = 'empty-slot';
-  fSlot.textContent = '+ 모임원';
-  fSlot.onclick = (e) => { e.stopPropagation(); openAddRoot('friend'); };
-  fGrid.appendChild(fSlot);
-  fBox.appendChild(fGrid);
-  canvas.appendChild(fBox);
-
-  const ffs = state.people.filter(p => p.hopLevel === 2);
-  const ffBox = document.createElement('div');
-  ffBox.className = 'ff-box';
-  ffBox.innerHTML = `<div class="ff-box-label">🔗 모임원 추천 (${ffs.length}명, 2-hop)</div>`;
-  const ffGrid = document.createElement('div');
-  ffGrid.className = 'friends-grid';
-  ffs.forEach(p => ffGrid.appendChild(makePersonNode(p)));
-  const ffSlot = document.createElement('div');
-  ffSlot.className = 'empty-slot';
-  ffSlot.textContent = '+ 추천받은 사람';
-  ffSlot.onclick = (e) => { e.stopPropagation(); openAddRoot('ff'); };
-  ffGrid.appendChild(ffSlot);
-  ffBox.appendChild(ffGrid);
-  canvas.appendChild(ffBox);
-}
-
-function makePersonNode(person) {
-  const node = document.createElement('div');
-  let classes = ['person-node'];
-  if (person.isSelf) classes.push('self');
-  else if (person.hopLevel === 1) classes.push('friend');
-  else if (person.hopLevel === 2) classes.push('ff');
-  if (person.id === selectedNodeId) classes.push('selected');
-  node.className = classes.join(' ');
-
-  let meta = '';
-  if (person.hopLevel === 1) meta = '모임원';
-  else if (person.hopLevel === 2) {
-    const vias = getViaList(person).map(id => getPerson(id)).filter(Boolean);
-    if (vias.length === 0) meta = '소개';
-    else if (vias.length === 1) meta = `via ${vias[0].name}`;
-    else meta = `via ${vias[0].name} 외 ${vias.length - 1}명`;
-  }
-
-  node.innerHTML = `
-    <div class="person-node-name">${escHtml(person.name)}${person.isSelf ? ' <span class="self-tag">(나)</span>' : ''}</div>
-    ${meta ? `<div class="person-node-meta">${meta}</div>` : ''}
-    ${!person.isSelf ? `<div class="person-confirm-badge ${person.confirmed ? '' : 'pending'}">${person.confirmed ? '✓' : '!'}</div>` : ''}
-  `;
-
-  node.onclick = (e) => { e.stopPropagation(); selectNode(person.id); };
-  return node;
-}
-
-function selectNode(id) {
-  if (selectedNodeId === id) selectedNodeId = null;
-  else selectedNodeId = id;
-  renderTree();
-  if (selectedNodeId) setTimeout(showActionPanelForSelected, 50);
-}
-
-function showActionPanelForSelected() {
-  if (!selectedNodeId) return;
-  const person = getPerson(selectedNodeId);
-  if (!person) return;
-  const nodes = document.querySelectorAll('.person-node.selected');
-  if (nodes.length === 0) return;
-  const node = nodes[0];
-  const canvas = document.getElementById('treeCanvas');
-  const nodeRect = node.getBoundingClientRect();
-  const canvasRect = canvas.getBoundingClientRect();
-
-  document.querySelectorAll('.action-panel').forEach(p => p.remove());
-
-  const panel = document.createElement('div');
-  panel.className = 'action-panel';
-
-  const buttons = [];
-  if (!person.isSelf) {
-    if (person.hopLevel === 2 && !person.confirmed) {
-      buttons.push({ label: '🤝 모임원으로 인증 (승격)', className: 'promote', onClick: () => promoteToFriend(person.id) });
-    } else {
-      buttons.push({ label: person.confirmed ? '⏱ 대기로' : '✓ 인증', className: 'confirm', onClick: () => toggleConfirm(person.id) });
-    }
-    buttons.push({ label: '💬 메시지 보내기', className: 'promote', onClick: () => { closePanel(); openChatWith(person.id); } });
-    buttons.push({ label: '🗑 삭제', className: 'delete', onClick: () => deletePerson(person.id) });
-  }
-  buttons.forEach(b => {
-    const btn = document.createElement('button');
-    btn.className = `ap-btn ${b.className || ''}`;
-    btn.innerHTML = b.label;
-    btn.onclick = b.onClick;
-    panel.appendChild(btn);
-  });
-
-  const cx = nodeRect.left + nodeRect.width / 2 - canvasRect.left;
-  const by = nodeRect.bottom - canvasRect.top + 12;
-  panel.style.position = 'absolute';
-  panel.style.left = `${cx - 90}px`;
-  panel.style.top = `${by}px`;
-  canvas.style.position = 'relative';
-  canvas.appendChild(panel);
-}
-
-function closePanel() { document.querySelectorAll('.action-panel').forEach(p => p.remove()); }
-
-function renderGraph() {
-  const svg = document.getElementById('graphSvg');
-  if (!svg) return;
-  const edgesG = document.getElementById('graphEdges');
-  const nodesG = document.getElementById('graphNodes');
-  edgesG.innerHTML = '';
-  nodesG.innerHTML = '';
-
-  const friends = state.people.filter(p => p.hopLevel === 1);
-  const ffs = state.people.filter(p => p.hopLevel === 2);
-  const W = 360;
-  const cx = W / 2;
-  const cy = 240;
-  const positions = {};
-
-  positions[state.me.id] = { x: cx, y: cy };
-  const fRadius = 85;
-  const fCount = friends.length;
-  friends.forEach((f, i) => {
-    const angle = (-Math.PI / 2) + (i / Math.max(fCount, 1)) * Math.PI * 2;
-    positions[f.id] = { x: cx + Math.cos(angle) * fRadius, y: cy + Math.sin(angle) * fRadius };
-  });
-  const ffRadius = 150;
-  const ffCount = ffs.length;
-  ffs.forEach((ff, i) => {
-    const viaList = getViaList(ff).filter(id => positions[id]);
-    let ffAngle;
-    if (viaList.length > 0) {
-      const avgX = viaList.reduce((s, id) => s + positions[id].x, 0) / viaList.length;
-      const avgY = viaList.reduce((s, id) => s + positions[id].y, 0) / viaList.length;
-      const dist = Math.hypot(avgX - cx, avgY - cy);
-      if (dist >= 15) {
-        ffAngle = Math.atan2(avgY - cy, avgX - cx);
-        const offset = (i / Math.max(ffCount, 1)) * 0.3 - 0.15;
-        ffAngle += offset;
-      } else {
-        const sumCos = viaList.reduce((s, id) => s + Math.cos(Math.atan2(positions[id].y - cy, positions[id].x - cx)), 0);
-        const sumSin = viaList.reduce((s, id) => s + Math.sin(Math.atan2(positions[id].y - cy, positions[id].x - cx)), 0);
-        if (Math.hypot(sumCos, sumSin) >= 0.1) ffAngle = Math.atan2(sumSin, sumCos);
-        else ffAngle = (i / Math.max(ffCount, 1)) * Math.PI * 2 + Math.PI / 4;
-      }
-    } else {
-      ffAngle = (i / Math.max(ffCount, 1)) * Math.PI * 2 + Math.PI / 4;
-    }
-    positions[ff.id] = { x: cx + Math.cos(ffAngle) * ffRadius, y: cy + Math.sin(ffAngle) * ffRadius };
-  });
-
-  const lblMe = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-  lblMe.classList.add('graph-tier-label');
-  lblMe.setAttribute('x', 8); lblMe.setAttribute('y', 18);
-  lblMe.textContent = '🌐 PASS 모임 네트워크';
-  nodesG.appendChild(lblMe);
-
-  const edges = [];
-  friends.forEach(f => edges.push({ from: state.me.id, to: f.id, hop: 1, status: f.confirmed ? 'confirmed' : 'pending' }));
-  ffs.forEach(ff => getViaList(ff).forEach(vid => { if (positions[vid]) edges.push({ from: vid, to: ff.id, hop: 2, status: 'confirmed' }); }));
-  const seenLateral = new Set();
-  friends.forEach(f => {
-    (f.knows || []).forEach(otherId => {
-      const key = [f.id, otherId].sort().join('|');
-      if (seenLateral.has(key)) return;
-      seenLateral.add(key);
-      if (positions[otherId]) edges.push({ from: f.id, to: otherId, hop: 'lateral', status: 'confirmed' });
-    });
-  });
-
-  const trimToBox = (fx, fy, tx, ty) => {
-    const dx = tx - fx, dy = ty - fy;
-    if (dx === 0 && dy === 0) return [fx, fy];
-    const halfW = 25, topOff = 25, bottomOff = 51;
-    let bestT = Infinity;
-    if (dy < 0) { const t = -topOff / dy; if (t > 0 && t < bestT) bestT = t; }
-    else if (dy > 0) { const t = bottomOff / dy; if (t > 0 && t < bestT) bestT = t; }
-    if (dx > 0) { const t = halfW / dx; if (t > 0 && t < bestT) bestT = t; }
-    else if (dx < 0) { const t = -halfW / dx; if (t > 0 && t < bestT) bestT = t; }
-    if (!isFinite(bestT)) return [fx, fy];
-    return [fx + dx * bestT, fy + dy * bestT];
-  };
-
-  edges.forEach(e => {
-    const from = positions[e.from];
-    const to = positions[e.to];
-    if (!from || !to) return;
-    const [x1, y1] = trimToBox(from.x, from.y, to.x, to.y);
-    const [x2, y2] = trimToBox(to.x, to.y, from.x, from.y);
-    if (e.hop === 'lateral') {
-      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      const mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
-      const ox = mx - cx, oy = my - cy;
-      const olen = Math.hypot(ox, oy) || 1;
-      const curv = 30;
-      const cpX = mx + (ox / olen) * curv, cpY = my + (oy / olen) * curv;
-      path.setAttribute('d', `M ${x1} ${y1} Q ${cpX} ${cpY} ${x2} ${y2}`);
-      path.setAttribute('stroke', '#34D399');
-      path.setAttribute('stroke-width', '1.8');
-      path.setAttribute('stroke-dasharray', '6 4');
-      path.setAttribute('stroke-linecap', 'round');
-      path.setAttribute('fill', 'none');
-      edgesG.appendChild(path);
-      return;
-    }
-    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    line.setAttribute('x1', x1); line.setAttribute('y1', y1);
-    line.setAttribute('x2', x2); line.setAttribute('y2', y2);
-    if (e.hop === 1) {
-      line.setAttribute('stroke', e.status === 'confirmed' ? '#5BBA6F' : '#F59E0B');
-      line.setAttribute('stroke-width', e.status === 'confirmed' ? 2 : 1.5);
-      if (e.status !== 'confirmed') line.setAttribute('stroke-dasharray', '4 3');
-    } else {
-      line.setAttribute('stroke', '#BBF7D0');
-      line.setAttribute('stroke-width', '1.5');
-      line.setAttribute('stroke-dasharray', '3 3');
-    }
-    line.setAttribute('stroke-linecap', 'round');
-    edgesG.appendChild(line);
-  });
-
-  const getRelLabel = (p) => {
-    if (p.isSelf) return '본인';
-    if (p.hopLevel === 1) return '모임원';
-    if (p.hopLevel === 2) return '추천 (2-hop)';
-    return '';
-  };
-  const getAvatar = (p) => p.gender === 'female' ? '👩' : p.gender === 'male' ? '👨' : '👤';
-
-  Object.entries(positions).forEach(([id, pos]) => {
-    const person = getPerson(id);
-    if (!person) return;
-    const grp = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    grp.classList.add('graph-node-group');
-    if (person.isSelf) grp.classList.add('me-glow');
-    const w = 50, h = 50;
-    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-    rect.classList.add('graph-node-rect');
-    rect.setAttribute('x', pos.x - w/2); rect.setAttribute('y', pos.y - h/2);
-    rect.setAttribute('width', w); rect.setAttribute('height', h);
-    rect.setAttribute('rx', 10);
-    let fill, stroke, sw = 1.5;
-    if (person.isSelf) { fill = '#FFFFFF'; stroke = '#FFA000'; sw = 2.5; }
-    else if (person.hopLevel === 1) { fill = '#DCFCE7'; stroke = '#5BBA6F'; sw = 2; }
-    else { fill = '#F0FDF4'; stroke = '#BBF7D0'; rect.setAttribute('stroke-dasharray', '3 2'); }
-    if (!person.confirmed && !person.isSelf && person.hopLevel === 1) rect.setAttribute('stroke-dasharray', '3 2');
-    rect.setAttribute('fill', fill); rect.setAttribute('stroke', stroke); rect.setAttribute('stroke-width', sw);
-    grp.appendChild(rect);
-
-    const avatar = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    avatar.classList.add('graph-node-avatar');
-    avatar.setAttribute('x', pos.x); avatar.setAttribute('y', pos.y);
-    avatar.textContent = getAvatar(person);
-    grp.appendChild(avatar);
-
-    const nameT = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    nameT.classList.add('graph-node-label');
-    nameT.setAttribute('x', pos.x); nameT.setAttribute('y', pos.y + 37);
-    nameT.textContent = person.name;
-    grp.appendChild(nameT);
-
-    const relLabel = getRelLabel(person);
-    if (relLabel) {
-      const relT = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      relT.classList.add('graph-node-rel');
-      relT.setAttribute('x', pos.x); relT.setAttribute('y', pos.y + 48);
-      relT.textContent = relLabel;
-      grp.appendChild(relT);
-    }
-
-    let clickTimer = null;
-    grp.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (clickTimer) return;
-      clickTimer = setTimeout(() => {
-        clickTimer = null;
-        selectedNodeId = id;
-        showGraphActionPanel(id, e);
-      }, 250);
-    });
-    grp.addEventListener('dblclick', (e) => {
-      e.stopPropagation();
-      if (clickTimer) { clearTimeout(clickTimer); clickTimer = null; }
-      selectedNodeId = id;
-      switchNetView('tree');
-    });
-
-    nodesG.appendChild(grp);
-  });
-}
-
-function showGraphActionPanel(personId, evt) {
-  const person = getPerson(personId);
-  if (!person) return;
-  document.querySelectorAll('.action-panel').forEach(p => p.remove());
-
-  const panel = document.createElement('div');
-  panel.className = 'action-panel';
-  const buttons = [];
-  if (!person.isSelf) {
-    if (person.hopLevel === 2 && !person.confirmed) {
-      buttons.push({ label: '🤝 모임원으로 인증', className: 'promote', onClick: () => { promoteToFriend(person.id); closePanel(); } });
-    } else {
-      buttons.push({ label: person.confirmed ? '⏱ 대기로' : '✓ 인증', className: 'confirm', onClick: () => { toggleConfirm(person.id); closePanel(); } });
-    }
-    buttons.push({ label: '💬 메시지', className: 'promote', onClick: () => { closePanel(); openChatWith(person.id); } });
-  }
-  buttons.push({ label: '➕ 추가하기 탭', className: 'promote', onClick: () => switchNetView('tree') });
-  if (!person.isSelf) {
-    buttons.push({ label: '🗑 삭제', className: 'delete', onClick: () => { deletePerson(person.id); closePanel(); } });
-  }
-  buttons.forEach(b => {
-    const btn = document.createElement('button');
-    btn.className = `ap-btn ${b.className || ''}`;
-    btn.innerHTML = b.label;
-    btn.onclick = b.onClick;
-    panel.appendChild(btn);
-  });
-
-  const svgEl = document.getElementById('graphSvg');
-  const wrap = svgEl.closest('.graph-canvas-wrap');
-  if (!wrap) return;
-  const wrapRect = wrap.getBoundingClientRect();
-  const targetRect = evt.target.getBoundingClientRect();
-  const x = targetRect.left + targetRect.width / 2 - wrapRect.left;
-  const y = targetRect.bottom - wrapRect.top + 12;
-  panel.style.position = 'absolute';
-  panel.style.left = `${Math.max(8, x - 90)}px`;
-  panel.style.top = `${y}px`;
-  wrap.style.position = 'relative';
-  wrap.appendChild(panel);
-}
-
-function renderList() {
-  const container = document.getElementById('resultList');
-  const summaryEl = document.getElementById('verifySummary');
-  if (!container) return;
-  container.innerHTML = '';
-
-  const allPeople = [state.me, ...state.people];
-  const confirmedCount = allPeople.filter(p => p.confirmed || p.isSelf).length;
-  const pendingCount = allPeople.length - confirmedCount;
-  summaryEl.innerHTML = `
-    <div class="verify-stat-card">
-      <div class="verify-stat-value">${allPeople.length}</div>
-      <div class="verify-stat-label">전체</div>
-    </div>
-    <div class="verify-stat-card confirmed">
-      <div class="verify-stat-value confirmed">${confirmedCount}</div>
-      <div class="verify-stat-label">✓ 인증</div>
-    </div>
-    <div class="verify-stat-card pending">
-      <div class="verify-stat-value pending">${pendingCount}</div>
-      <div class="verify-stat-label">⏱ 미인증</div>
-    </div>
-  `;
-
-  const meDiv = document.createElement('div');
-  meDiv.className = 'list-tier';
-  meDiv.innerHTML = `<div class="list-tier-header"><span class="tier-badge tier-badge--me">🏠 나</span><span class="tier-count">1명</span></div>`;
-  meDiv.appendChild(makeListItem(state.me));
-  container.appendChild(meDiv);
-
-  const friends = state.people.filter(p => p.hopLevel === 1);
-  if (friends.length > 0) {
-    const fd = document.createElement('div');
-    fd.className = 'list-tier';
-    fd.innerHTML = `<div class="list-tier-header"><span class="tier-badge">👫 모임원 (1-hop)</span><span class="tier-count">${friends.length}명</span></div>`;
-    friends.forEach(p => fd.appendChild(makeListItem(p)));
-    container.appendChild(fd);
-  }
-  const ffs = state.people.filter(p => p.hopLevel === 2);
-  if (ffs.length > 0) {
-    const ffd = document.createElement('div');
-    ffd.className = 'list-tier';
-    ffd.innerHTML = `<div class="list-tier-header"><span class="tier-badge ff">🔗 모임원 추천 (2-hop)</span><span class="tier-count">${ffs.length}명</span></div>`;
-    ffs.forEach(p => ffd.appendChild(makeListItem(p)));
-    container.appendChild(ffd);
-  }
-}
-
-function makeListItem(p) {
-  const item = document.createElement('div');
-  let classes = ['list-item'];
-  if (p.isSelf) classes.push('self');
-  else if (p.hopLevel === 1) classes.push('friend');
-  else if (p.hopLevel === 2) classes.push('ff');
-  item.className = classes.join(' ');
-  item.onclick = () => { selectedNodeId = p.id; switchNetView('tree'); };
-
-  let meta = '';
-  if (p.isSelf) meta = '본인';
-  else if (p.hopLevel === 1) meta = '모임원';
-  else {
-    const vias = getViaList(p).map(id => getPerson(id)).filter(Boolean);
-    if (vias.length === 0) meta = '소개';
-    else if (vias.length === 1) meta = `소개: ${vias[0].name}`;
-    else meta = `소개: ${vias[0].name} 외 ${vias.length - 1}명`;
-  }
-
-  let quickBtn = '';
-  if (!p.confirmed && !p.isSelf) {
-    if (p.hopLevel === 2) {
-      quickBtn = `<button class="verify-quick-btn" onclick="event.stopPropagation(); quickPromote('${p.id}')">🤝 모임원으로</button>`;
-    } else {
-      quickBtn = `<button class="verify-quick-btn" onclick="event.stopPropagation(); quickConfirmList('${p.id}')">✓ 인증</button>`;
-    }
-  }
-
-  item.innerHTML = `
-    <div class="list-item-avatar">${escHtml(p.name.charAt(0))}</div>
-    <div class="list-item-info">
-      <div class="list-item-name">${escHtml(p.name)}${p.isSelf ? ' <span class="name-self">(나)</span>' : ''}</div>
-      <div class="list-item-meta">${meta}</div>
-    </div>
-    ${quickBtn}
-    <div class="list-item-status ${p.confirmed || p.isSelf ? 'confirmed' : 'pending'}">
-      ${p.confirmed || p.isSelf ? '✓' : '⏱'}
-    </div>
-  `;
-  return item;
-}
-
-function quickConfirmList(id) {
-  const p = getPerson(id);
-  if (!p) return;
-  p.confirmed = true;
-  renderAll();
-  showToast('✓', `${p.name} 인증됨`);
-}
-function quickPromote(id) { promoteToFriend(id); }
-
-// ============================================================
-// CHAT
-// ============================================================
-function renderChatList() {
-  const list = document.getElementById('chatList');
-  if (!list) return;
-  const search = (document.getElementById('chatSearchInput')?.value || '').toLowerCase().trim();
-
-  let chats = state.chats.slice().map(c => {
-    const lastMsg = c.messages[c.messages.length - 1];
-    return { ...c, lastTime: lastMsg ? lastMsg.time : 0, lastText: lastMsg ? lastMsg.text : '' };
-  }).sort((a, b) => b.lastTime - a.lastTime);
-
-  if (search) {
-    chats = chats.filter(c => {
-      const person = getPerson(c.personId);
-      return person && (person.name.toLowerCase().includes(search) || c.lastText.toLowerCase().includes(search));
-    });
-  }
-
-  if (chats.length === 0) {
-    list.innerHTML = `<div class="empty-state">
-      <div class="empty-state-icon">💬</div>
-      <div class="empty-state-title">대화 없음</div>
-      <div class="empty-state-sub">모임원과 대화를 시작해보세요</div>
-    </div>`;
-    return;
-  }
-
-  list.innerHTML = chats.map(c => {
-    const person = getPerson(c.personId);
-    if (!person) return '';
-    const isFf = person.hopLevel === 2;
-    const lastText = c.lastText.length > 40 ? c.lastText.substring(0, 40) + '...' : c.lastText;
-    const lastFrom = c.messages[c.messages.length - 1]?.from === 'me' ? '나: ' : '';
-    return `
-      <div class="chat-item ${c.unread > 0 ? 'unread' : ''}" onclick="openChatById('${c.id}')">
-        <div class="chat-avatar ${isFf ? 'ff' : ''}">
-          ${escHtml(person.name.charAt(0))}
-          ${isFf ? '<div class="chat-avatar-hop">2</div>' : ''}
-        </div>
-        <div class="chat-info">
-          <div class="chat-name-row">
-            <div class="chat-name">${escHtml(person.name)}</div>
-            <div>
-              <span class="chat-time">${timeAgo(c.lastTime)}</span>
-              ${c.unread > 0 ? `<span class="chat-unread-badge">${c.unread}</span>` : ''}
-            </div>
-          </div>
-          <div class="chat-preview">${lastFrom}${escHtml(lastText)}</div>
-        </div>
-      </div>
-    `;
-  }).join('');
-}
-
-async function openChatWith(personId) {
-  if (backendOn()) {
-    try {
-      const conv = await PassAPI.chat.open(personId);
-      const cid = conv && (conv.id || (conv.conversation && conv.conversation.id));
-      if (!cid) { showToast('⚠️', '대화방을 열지 못했습니다'); return; }
-      if (!state.chats.find(c => c.id === cid)) {
-        state.chats.push({ id: cid, personId, messages: [], unread: 0 });
-      }
-      openChatById(cid);
-    } catch (e) { showToast('⚠️', '대화방을 열지 못했습니다'); }
-    return;
-  }
-  let chat = state.chats.find(c => c.personId === personId);
-  if (!chat) {
-    chat = { id: 'c' + Date.now(), personId, messages: [], unread: 0 };
-    state.chats.push(chat);
-  }
-  openChatById(chat.id);
-}
-
-async function openChatById(chatId) {
-  state.currentChatId = chatId;
-  const chat = state.chats.find(c => c.id === chatId);
-  if (!chat) return;
-  const person = getPerson(chat.personId);
-  if (!person) return;
-  chat.unread = 0;
-
-  document.getElementById('chatDetailAvatar').textContent = person.name.charAt(0);
-  document.getElementById('chatDetailName').textContent = person.name;
-  document.getElementById('chatDetailSub').textContent = person.hopLevel === 1 ? '✓ 모임원 (1-hop)' : '🔗 모임원 추천 (2-hop)';
-
-  if (backendOn()) {
-    try {
-      const res = await PassAPI.chat.messages(chatId);
-      const arr = Array.isArray(res) ? res : (res.messages || res.items || []);
-      chat.messages = arr.map(m => ({
-        from: m.isMine ? 'me' : chat.personId,
-        text: m.text,
-        time: m.createdAt ? new Date(m.createdAt).getTime() : Date.now()
-      }));
-      PassAPI.chat.read(chatId).catch(() => {});
-    } catch (e) { showToast('⚠️', '메시지를 불러오지 못했습니다'); }
-  }
-
-  renderChatMessages();
-  document.getElementById('chatDetail').classList.add('visible');
-  setTimeout(() => {
-    document.getElementById('chatInput').focus();
-    const msgEl = document.getElementById('chatMessages');
-    msgEl.scrollTop = msgEl.scrollHeight;
-  }, 300);
-  updateChatBadge();
-  renderChatList();
-}
-
-function closeChatDetail() {
-  document.getElementById('chatDetail').classList.remove('visible');
-  state.currentChatId = null;
-  renderChatList();
-}
-
-function renderChatMessages() {
-  const chat = state.chats.find(c => c.id === state.currentChatId);
-  if (!chat) return;
-  const container = document.getElementById('chatMessages');
-  container.innerHTML = chat.messages.map(m => {
-    const mine = m.from === 'me';
-    return `<div class="msg ${mine ? 'mine' : 'other'}">${escHtml(m.text)}</div>`;
-  }).join('');
-  container.scrollTop = container.scrollHeight;
-}
-
-async function sendChatMessage() {
-  const input = document.getElementById('chatInput');
-  const text = input.value.trim();
-  if (!text || !state.currentChatId) return;
-  const chat = state.chats.find(c => c.id === state.currentChatId);
-  if (!chat) return;
-  if (backendOn()) {
-    input.value = '';
-    try {
-      await PassAPI.chat.send(chat.id, text);
-      chat.messages.push({ from: 'me', text, time: Date.now() });
-      renderChatMessages();
-      renderChatList();
-    } catch (e) { showToast('⚠️', '메시지 전송에 실패했습니다'); }
-    return;
-  }
-  chat.messages.push({ from: 'me', text, time: Date.now() });
-  input.value = '';
-  renderChatMessages();
-  showToast('💬', '전송됨');
-  // 모의 자동 답장 (50% 확률)
-  if (Math.random() < 0.5) {
-    setTimeout(() => {
-      const responses = ['ㅎㅎ 알겠어!', '오 좋다', '응응', '괜찮은데?', '나도 그래 ㅋㅋ', '굿굿', '확인할게'];
-      chat.messages.push({ from: chat.personId, text: responses[Math.floor(Math.random() * responses.length)], time: Date.now() });
-      if (state.currentChatId === chat.id) renderChatMessages();
-      else { chat.unread = (chat.unread || 0) + 1; updateChatBadge(); renderChatList(); }
-    }, 1500 + Math.random() * 2000);
-  }
-}
-
-function updateChatBadge() {
-  const total = state.chats.reduce((s, c) => s + (c.unread || 0), 0);
-  const badge = document.getElementById('navChatBadge');
-  if (total > 0) {
-    badge.textContent = total > 9 ? '9+' : total;
-    badge.classList.remove('is-hidden');
-  } else {
-    badge.classList.add('is-hidden');
-  }
-}
-
-// ============================================================
-// TRUST
-// ============================================================
-function renderTrust() {
-  const pts = calcTrustPoints();
-  const stage = getTrustStage(pts);
-  const level = getTrustLevel();
-
-  document.getElementById('trustStageEmoji').textContent = stage.emoji;
-  document.getElementById('trustStageName').textContent = stage.name;
-  document.getElementById('trustStageNum').textContent = `Stage ${stage.index + 1} / ${TRUST_STAGES.length}`;
-  const progressPct = Math.min(100, stage.progress * 100);
-  document.getElementById('trustProgressBar').style.width = `${progressPct}%`;
-  if (stage.max === Infinity) {
-    document.getElementById('trustProgressText').innerHTML = `<strong>${pts}</strong> pts · 최고 단계 달성! 🎉`;
-  } else {
-    document.getElementById('trustProgressText').innerHTML = `<strong>${pts}</strong> / ${stage.max} pts (다음 단계까지 ${stage.max - pts})`;
-  }
-
-  // Level row
-  document.getElementById('levelRow').innerHTML = TRUST_LEVELS.map(l => `
-    <div class="level-pill ${l.lv === level.lv ? 'current' : ''}">
-      <div class="level-pill-num">Lv${l.lv}</div>
-      <div class="level-pill-name">${l.name}</div>
-    </div>
-  `).join('');
-  document.getElementById('levelDesc').textContent = `Lv${level.lv} · ${level.desc}`;
-
-  // Points
-  document.getElementById('pointsEarned').textContent = pts;
-  document.getElementById('pointsBalance').textContent = Math.floor(pts * 0.6); // 일부 "쓸 수 있는" 포인트
-  const breakdown = [
-    { label: '가입 보너스', val: 10 },
-    { label: `모임원 인증 (1-hop)`, val: state.people.filter(p => p.hopLevel === 1 && p.confirmed).length * 15 },
-    { label: `2-hop 인증`, val: state.people.filter(p => p.hopLevel === 2 && p.confirmed).length * 8 },
-    { label: `포스트`, val: state.posts.filter(p => p.authorId === 'me').length * 2 },
-    { label: `대기 관계`, val: state.people.filter(p => !p.confirmed).length }
-  ].filter(b => b.val > 0);
-  document.getElementById('pointsDetail').innerHTML = breakdown.map(b =>
-    `<div class="points-row-item"><span>${b.label}</span><strong>+${b.val} pt</strong></div>`
-  ).join('');
-
-  // Badges
-  document.getElementById('badgesGrid').innerHTML = BADGES.map(b => {
-    const earned = b.check(state);
-    return `
-      <div class="badge ${earned ? 'earned' : ''} ${earned && b.gold ? 'gold' : ''}">
-        <div class="badge-emoji">${earned ? b.emoji : '🔒'}</div>
-        <div class="badge-name">${b.name}</div>
-        <div class="badge-desc">${b.desc}</div>
-      </div>
-    `;
-  }).join('');
-}
-
-// ============================================================
-// PROFILE
-// ============================================================
-function renderProfile() {
-  document.getElementById('profileAvatar').textContent = state.me.name.charAt(0);
-  document.getElementById('profileName').textContent = state.me.name;
-  document.getElementById('pStatFriends').textContent = state.people.filter(p => p.hopLevel === 1 && p.confirmed).length;
-  document.getElementById('pStatPosts').textContent = state.posts.filter(p => p.authorId === 'me').length;
-  document.getElementById('pStatPoints').textContent = calcTrustPoints();
-}
-
-function openEditProfile() {
-  document.getElementById('editProfileName').value = state.me.name;
-  editGender = state.me.gender;
-  selectEditGender(state.me.gender);
-  document.getElementById('modalEditProfile').classList.add('visible');
-  document.getElementById('modalBackdrop').classList.add('visible');
-  setTimeout(() => document.getElementById('editProfileName').focus(), 350);
-}
-
-function selectEditGender(g) {
-  editGender = g;
-  document.getElementById('editGenderMale').classList.toggle('selected', g === 'male');
-  document.getElementById('editGenderFemale').classList.toggle('selected', g === 'female');
-}
-
-function confirmEditProfile() {
-  const name = document.getElementById('editProfileName').value.trim();
-  if (!name) { showToast('⚠️', '이름을 입력하세요'); return; }
-  state.me.name = name;
-  state.me.gender = editGender;
-  closeAllModals();
-  renderAll();
-  showToast('✓', '프로필 저장됨');
-}
-
-// ============================================================
-// Modal & Add/Edit People (from v1)
-// ============================================================
-function openAddRoot(type) {
-  pendingAction = { type };
-  document.getElementById('modalFsName').value = '';
-  pendingGender = 'male';
-  document.querySelectorAll('#modalAddPerson .gender-option').forEach(o => o.classList.remove('selected'));
-  document.querySelector('#modalAddPerson .gender-option.male').classList.add('selected');
-  document.getElementById('modalFsTitle').textContent = type === 'ff' ? '🔗 추천받은 사람 추가' : '👫 새 모임원 추가';
-  document.getElementById('modalAddPerson').classList.add('visible');
-  document.getElementById('modalBackdrop').classList.add('visible');
-  setTimeout(() => document.getElementById('modalFsName').focus(), 350);
-}
-
-function selectGender(g) {
-  pendingGender = g;
-  document.querySelectorAll('#modalAddPerson .gender-option').forEach(o => o.classList.remove('selected'));
-  document.querySelector(`#modalAddPerson .gender-option.${g}`).classList.add('selected');
-}
-
-function closeAllModals() {
-  document.querySelectorAll('.modal-fs').forEach(m => m.classList.remove('visible'));
-  document.getElementById('modalBackdrop').classList.remove('visible');
-  pendingAction = null;
-}
-
-function confirmFsAdd() {
-  const name = document.getElementById('modalFsName').value.trim();
-  if (!name) { showToast('⚠️', '이름을 입력'); return; }
-  if (!pendingAction) return;
-  const newId = 'p' + Date.now();
-  const newPerson = {
-    id: newId, name, gender: pendingGender,
-    hopLevel: pendingAction.type === 'ff' ? 2 : 1,
-    confirmed: false
-  };
-  if (pendingAction.type === 'ff') {
-    const firstFriend = state.people.find(p => p.hopLevel === 1);
-    if (firstFriend) newPerson.viaFriend = firstFriend.id;
-  }
-  state.people.push(newPerson);
-  closeAllModals();
-  renderAll();
-  showToast('➕', `${name} 추가됨`);
-}
-
-function toggleConfirm(id) {
-  const p = getPerson(id);
-  if (!p || p.isSelf) return;
-  p.confirmed = !p.confirmed;
-  selectedNodeId = null;
-  renderAll();
-  showToast(p.confirmed ? '✓' : '⏱', `${p.name} ${p.confirmed ? '인증됨' : '대기로'}`);
-}
-
-function promoteToFriend(id) {
-  const p = getPerson(id);
-  if (!p) return;
-  p.confirmed = true;
-  if (p.hopLevel === 2) {
-    p.hopLevel = 1;
-    delete p.viaFriend;
-    delete p.viaFriends;
-  }
-  selectedNodeId = null;
-  renderAll();
-  showToast('🤝', `${p.name} 모임원으로 인증됨!`);
-}
-
-function deletePerson(id) {
-  const p = getPerson(id);
-  if (!p || p.isSelf) return;
-  if (!confirm(`${p.name}님을 삭제할까요?`)) return;
-  state.people = state.people.filter(x => x.id !== id);
-  state.people.forEach(x => {
-    if (x.viaFriend === id) delete x.viaFriend;
-    if (Array.isArray(x.viaFriends)) x.viaFriends = x.viaFriends.filter(v => v !== id);
-  });
-  // Remove chat and posts
-  state.chats = state.chats.filter(c => c.personId !== id);
-  state.posts = state.posts.filter(p => p.authorId !== id);
-  selectedNodeId = null;
-  renderAll();
-  showToast('🗑', '삭제됨');
-}
-
-function resetAll() {
-  if (!confirm('초기화할까요?')) return;
-  state = {
-    currentMain: state.currentMain,
-    currentNet: state.currentNet,
-    feedFilter: 'all',
-    me: { ...initialMe },
-    people: JSON.parse(JSON.stringify(initialPeople)),
-    posts: JSON.parse(JSON.stringify(initialPosts)),
-    chats: JSON.parse(JSON.stringify(initialChats)),
-    currentChatId: null
-  };
-  selectedNodeId = null;
-  renderAll();
-  showToast('🔄', '초기화됨');
-}
-
-// ============================================================
-// Summary + Render All
-// ============================================================
-function updateSummary() {
-  const total = state.people.length + 1;
-  const confirmed = state.people.filter(p => p.confirmed).length + 1;
-  const ffCount = state.people.filter(p => p.hopLevel === 2).length;
-  document.getElementById('statTotal').textContent = total;
-  document.getElementById('statConfirmed').textContent = confirmed;
-  document.getElementById('statFf').textContent = ffCount;
-}
-
-function renderAll() {
-  updateSummary();
-  updateChatBadge();
-  if (state.currentMain === 'feed') renderFeed();
-  else if (state.currentMain === 'network') {
-    if (state.currentNet === 'graph') renderGraph();
-    else if (state.currentNet === 'tree') renderTree();
-    else renderList();
-  }
-  else if (state.currentMain === 'chat') renderChatList();
-  else if (state.currentMain === 'trust') renderTrust();
-  else if (state.currentMain === 'profile') renderProfile();
+function openManualInput() {
+  const phone = prompt('초대할 전화번호를 입력해 주세요 (예: 010-1234-5678)');
+  if (!phone) return;
+  showToast('초대 메시지를 전송했습니다 (' + phone + ')');
 }
 
 // ============================================================
 // Toast
 // ============================================================
-function showToast(emoji, text) {
-  document.getElementById('toastEmoji').textContent = emoji;
-  document.getElementById('toastText').textContent = text;
+function showToast(msg) {
   const t = document.getElementById('toast');
+  t.textContent = msg;
   t.classList.add('visible');
-  clearTimeout(window._toastT);
-  window._toastT = setTimeout(() => t.classList.remove('visible'), 2400);
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('visible'), 1800);
 }
 
 // ============================================================
-// Event listeners
+// 연락처 데이터 (백엔드 GET /api/contacts 시도 → 실패 시 데모 데이터)
 // ============================================================
-document.getElementById('treeCanvas').addEventListener('click', e => {
-  if (e.target === e.currentTarget ||
-      e.target.classList.contains('me-block') ||
-      e.target.classList.contains('friends-box') ||
-      e.target.classList.contains('ff-box') ||
-      e.target.classList.contains('friends-grid')) {
-    selectedNodeId = null;
-    document.querySelectorAll('.action-panel').forEach(p => p.remove());
-    renderTree();
+const DEMO_CONTACTS = {
+  chon: [
+    { name: 'morow',  phone: '010-6864-6650', avatar: 'https://i.pravatar.cc/120?img=11' },
+    { name: '민가영', phone: '010-7540-0733', avatar: 'https://i.pravatar.cc/120?img=14' },
+  ],
+  invite: [
+    { name: '#1-1 장은지 상담사',   phone: '010-7714-8809', c: 0 },
+    { name: '#1-10 허인숙 상담사님', phone: '010-3372-4016', c: 1 },
+    { name: '#1-2 이수인 상담사',   phone: '010-8897-5684', c: 2 },
+    { name: '#1-3 허성숙 상담사',   phone: '010-5141-6725', c: 3 },
+    { name: '#1-4 박지은 상담사',   phone: '010-2298-1142', c: 4 },
+    { name: '#1-5 김현주 상담사',   phone: '010-9925-3318', c: 5 },
+  ],
+};
+
+let state = { chon: [], invite: [], filterQ: '' };
+
+async function loadContacts() {
+  // 백엔드 호출 시도 (로그인된 경우만) — 응답은 ContactLink[] 배열
+  if (window.PassAPI && PassAPI.isLoggedIn && PassAPI.isLoggedIn()) {
+    try {
+      const links = await PassAPI.contacts.list();
+      if (Array.isArray(links) && links.length > 0) {
+        const matched   = links.filter(l => l.registered);
+        const unmatched = links.filter(l => !l.registered);
+        state.chon = matched.map(l => ({
+          name: l.target?.name || l.displayName || '(이름 없음)',
+          phone: '', // 폰 번호는 해시만 저장 (개인정보 보호)
+          avatar: l.target?.avatar || null,
+        }));
+        state.invite = unmatched.map((l, i) => ({
+          name: l.displayName || '(이름 없음)',
+          phone: '',
+          c: i % 6,
+        }));
+        render();
+        return;
+      }
+    } catch (e) { /* 데모 데이터로 fallback */ }
   }
-});
-
-document.getElementById('graphSvg').addEventListener('click', e => {
-  if (e.target.tagName === 'svg' || e.target.id === 'graphEdges' || e.target.id === 'graphNodes') {
-    closePanel();
-    selectedNodeId = null;
-  }
-});
-
-document.getElementById('modalFsName').addEventListener('keypress', e => {
-  if (e.key === 'Enter') confirmFsAdd();
-});
-
-document.getElementById('chatInput').addEventListener('keypress', e => {
-  if (e.key === 'Enter') sendChatMessage();
-});
-
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') {
-    if (document.getElementById('chatDetail').classList.contains('visible')) closeChatDetail();
-    else if (document.querySelector('.modal-fs.visible')) closeAllModals();
-    else closePanel();
-  }
-});
-
-// ============================================================
-// Session bootstrap — 로그인 페이지에서 넘어온 사용자 처리
-// ============================================================
-function getLoggedInUser() {
-  try {
-    const raw = sessionStorage.getItem('passUser');
-    if (!raw) return null;
-    return JSON.parse(raw);
-  } catch (e) { return null; }
+  // Fallback — 디자인 검증용 데모 데이터 (전화번호 포함)
+  state.chon = DEMO_CONTACTS.chon;
+  state.invite = DEMO_CONTACTS.invite;
+  render();
 }
 
-function applyLoggedInUser() {
-  const u = getLoggedInUser();
-  if (!u || !u.email) return;
-  // 이메일에서 닉네임 추출 (예: hong@gmail.com → hong)
-  const nick = u.email.split('@')[0];
-  // 기본 데모 이름이면 그대로 두고, 가입한 사용자면 본인 이름 갱신
-  if (u.isNew) {
-    state.me.name = nick;
+function matchQ(item, q) {
+  if (!q) return true;
+  const lower = q.toLowerCase().replace(/\s+/g, '');
+  return item.name.toLowerCase().includes(lower)
+      || item.phone.replace(/[^0-9]/g, '').includes(lower.replace(/[^0-9]/g, ''));
+}
+
+function render() {
+  const q = state.filterQ;
+  const chon   = state.chon.filter(c => matchQ(c, q));
+  const invite = state.invite.filter(c => matchQ(c, q));
+
+  document.getElementById('countChon').textContent   = chon.length;
+  document.getElementById('countInvite').textContent = invite.length;
+
+  const chonEl = document.getElementById('listChon');
+  if (chon.length === 0) {
+    chonEl.innerHTML = '<div class="empty-row">매칭된 연락처가 없습니다</div>';
+  } else {
+    chonEl.innerHTML = chon.map(item => `
+      <div class="contact-item" onclick="openContact('chon', '${escapeAttr(item.name)}')">
+        <div class="avatar ring-green">
+          ${item.avatar
+            ? `<img src="${item.avatar}" alt=""/>`
+            : `<span>${item.name.slice(0,1)}</span>`}
+        </div>
+        <div class="contact-info">
+          <div class="contact-name">${escapeHtml(item.name)}</div>
+          <div class="contact-phone">${escapeHtml(item.phone)}</div>
+        </div>
+        <button type="button" class="contact-arrow green" aria-label="열기">›</button>
+      </div>
+    `).join('');
   }
-  // 환영 토스트 (페이지 진입 시 한 번)
-  if (!sessionStorage.getItem('passWelcomed')) {
-    const msg = u.isNew ? '🎉 가입 환영! ' + u.email : '👋 ' + u.email;
-    setTimeout(() => showToast('✓', msg), 400);
-    try { sessionStorage.setItem('passWelcomed', '1'); } catch (e) {}
+
+  const inviteEl = document.getElementById('listInvite');
+  if (invite.length === 0) {
+    inviteEl.innerHTML = '<div class="empty-row">초대 가능한 연락처가 없습니다</div>';
+  } else {
+    inviteEl.innerHTML = invite.map(item => `
+      <div class="contact-item" onclick="openContact('invite', '${escapeAttr(item.name)}')">
+        <div class="avatar hash" data-c="${item.c ?? 0}">#</div>
+        <div class="contact-info">
+          <div class="contact-name">${escapeHtml(item.name)}</div>
+          <div class="contact-phone">${escapeHtml(item.phone)}</div>
+        </div>
+        <button type="button" class="contact-arrow orange" aria-label="초대">›</button>
+      </div>
+    `).join('');
   }
 }
 
-async function logoutPass() {
-  if (!confirm('로그아웃 하시겠습니까?\n\n간편 번호(2FA) 등록은 이 디바이스에 유지됩니다.\n다음 로그인 시 간편 번호 6자리로 빠르게 들어올 수 있습니다.')) return;
-  if (window.PassAPI && PassAPI.isLoggedIn()) {
-    try { await PassAPI.auth.logout(false); } catch (e) {}
+function openContact(kind, name) {
+  if (kind === 'chon') {
+    showToast(name + '님과 대화 시작');
+  } else {
+    showToast(name + '님에게 초대 전송');
   }
-  if (window.PassAPI) PassAPI.clearSession();
-  else {
-    try { sessionStorage.removeItem('passUser'); sessionStorage.removeItem('passWelcomed'); } catch (e) {}
-  }
-  window.location.href = '../auth/login.html';
 }
 
-// 세션 없이 직접 접근한 경우(데모)에는 자동 로그인 처리하지 않고 통과
-applyLoggedInUser();
-
-// Init
-renderAll();
-
-(function applyWelcomeName() {
-  try {
-    const u = JSON.parse(sessionStorage.getItem('passUser') || '{}');
-    const nick = u.name || (state.me && state.me.name) || (u.email ? u.email.split('@')[0] : '데모 사용자');
-    const wn = document.getElementById('welcomeName');
-    if (wn) wn.textContent = nick;
-  } catch (e) {}
-})();
-
-// 외부 페이지에서 ?section= 으로 진입 시 해당 섹션 자동 활성화
-(function applyInitialSection() {
-  try {
-    const params = new URLSearchParams(location.search);
-    const s = params.get('section');
-    if (s && ['feed','network','chat','trust','profile'].includes(s)) switchMain(s);
-  } catch (e) {}
-})();
-
-// 로그인 상태면 백엔드에서 실제 데이터 로드 (비로그인 시 데모 데이터 유지)
-if (backendOn()) {
-  loadFeed(state.feedFilter);
-  loadChats();
+function onSearch() {
+  state.filterQ = document.getElementById('searchInput').value.trim();
+  render();
 }
-</script>
 
-<!-- 관계도 도구 (가계도/모임/학급) — iframe 오버레이 -->
-<style>
-  .graph-tools-card {
-    background: var(--bg-content, #fff);
-    border-radius: var(--radius-md, 14px);
-    box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.06));
-    padding: 14px 16px; margin: 0 16px 12px;
-  }
-  .graph-tools-title {
-    font-size: 12px; font-weight: 800; color: var(--text-secondary, #64748B);
-    margin-bottom: 10px;
-  }
-  .graph-tools-row { display: flex; gap: 8px; }
-  .graph-tool-btn {
-    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
-    padding: 12px 6px; border: 1.5px solid var(--border-light, #F1F5F9);
-    border-radius: var(--radius-md, 14px); background: var(--bg-app, #FFFBF0);
-    font-size: 12px; font-weight: 800; color: var(--text-primary, #1F1F1F); cursor: pointer;
-  }
-  .graph-tool-btn span:first-child { font-size: 22px; }
-  .graph-tool-btn:active { background: var(--chon-yellow-soft, #FFF3D6); }
-  .graph-tool-overlay {
-    position: fixed; inset: 0; z-index: 3000; background: var(--bg-app, #fff);
-    display: none; flex-direction: column;
-  }
-  .graph-tool-overlay.visible { display: flex; }
-  .graph-tool-bar {
-    display: flex; align-items: center; gap: 12px;
-    padding: 12px 16px; border-bottom: 1px solid var(--border-light, #F1F5F9); background: #fff;
-  }
-  .graph-tool-close {
-    border: 0; background: var(--bg-app, #F1F5F9); border-radius: var(--radius-pill, 999px);
-    padding: 8px 14px; font-size: 13px; font-weight: 700; cursor: pointer;
-  }
-  .graph-tool-name { font-size: 14px; font-weight: 800; }
-  .graph-tool-frame { flex: 1; width: 100%; border: 0; }
-</style>
-<div class="graph-tool-overlay" id="graphToolOverlay">
-  <div class="graph-tool-bar">
-    <button class="graph-tool-close" onclick="closeGraphTool()">✕ 닫기</button>
-    <span class="graph-tool-name" id="graphToolName"></span>
-  </div>
-  <iframe class="graph-tool-frame" id="graphToolFrame" title="관계도 도구"></iframe>
-</div>
-<script>
-function openGraphTool(kind) {
-  var map = {
-    family: { file: '../views/family-tree.html', name: '🌳 가계도' },
-    group:  { file: '../views/friends.html',     name: '🌐 모임' },
-    class:  { file: '../views/class-id.html',    name: '🏫 학급' }
-  };
-  var t = map[kind];
-  if (!t) return;
-  document.getElementById('graphToolName').textContent = t.name;
-  document.getElementById('graphToolFrame').src = t.file;
-  document.getElementById('graphToolOverlay').classList.add('visible');
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
-function closeGraphTool() {
-  document.getElementById('graphToolOverlay').classList.remove('visible');
-  document.getElementById('graphToolFrame').src = 'about:blank';
+function escapeAttr(s) {
+  return escapeHtml(s).replace(/`/g, '&#96;');
 }
+
+loadContacts();
 </script>
 </body>
 </html>

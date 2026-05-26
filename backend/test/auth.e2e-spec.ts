@@ -7,6 +7,7 @@ describe('🔐 Auth (E2E)', () => {
   let httpServer: any;
   const phone = '010-9876-5432';
   const email = 'tester@chon.ai';
+  const password = 'chon1234';
 
   beforeAll(async () => {
     app = await getTestApp();
@@ -18,7 +19,7 @@ describe('🔐 Auth (E2E)', () => {
     it('register 목적 OTP를 요청한다', async () => {
       const res = await request(httpServer)
         .post('/api/auth/otp/request')
-        .send({ channel: 'sms', target: phone, purpose: 'register' });
+        .send({ channel: 'email', target: email, purpose: 'register' });
       expect(res.status).toBe(200);
       expect(res.body.ok).toBe(true);
       expect(res.body.demoCode).toBe('123456');
@@ -27,21 +28,34 @@ describe('🔐 Auth (E2E)', () => {
     it('잘못된 코드로 가입 시 실패한다', async () => {
       const res = await request(httpServer)
         .post('/api/auth/signup')
-        .send({ email, phone, otp: '000000', name: 'Tester' });
+        .send({ email, phone, password, otp: '000000', name: 'Tester' });
       expect(res.status).toBe(400);
     });
 
-    it('정상 OTP로 가입한다', async () => {
+    it('약한 비밀번호로 가입 시 400', async () => {
+      // OTP 다시 요청
+      await request(httpServer)
+        .post('/api/auth/otp/request')
+        .send({ channel: 'email', target: email, purpose: 'register' });
+      await new Promise(r => setTimeout(r, 100));
+
+      const res = await request(httpServer)
+        .post('/api/auth/signup')
+        .send({ email, phone, password: 'onlyletters', otp: '123456', name: 'Tester' });
+      expect(res.status).toBe(400);
+    });
+
+    it('정상 가입 — 이메일+전화+비밀번호+OTP', async () => {
       // OTP 다시 요청 (이전 코드 attempts 증가했을 수 있음)
       await request(httpServer)
         .post('/api/auth/otp/request')
-        .send({ channel: 'sms', target: phone, purpose: 'register' })
+        .send({ channel: 'email', target: email, purpose: 'register' })
         .expect(200);
       await new Promise(r => setTimeout(r, 100));
 
       const res = await request(httpServer)
         .post('/api/auth/signup')
-        .send({ email, phone, otp: '123456', name: 'Tester' });
+        .send({ email, phone, password, otp: '123456', name: 'Tester' });
       expect(res.status).toBe(201);
       expect(res.body.ok).toBe(true);
       expect(res.body.email).toBe(email);
@@ -51,35 +65,36 @@ describe('🔐 Auth (E2E)', () => {
       // 새 OTP
       await request(httpServer)
         .post('/api/auth/otp/request')
-        .send({ channel: 'sms', target: phone, purpose: 'register' });
+        .send({ channel: 'email', target: email, purpose: 'register' });
       await new Promise(r => setTimeout(r, 100));
 
       const res = await request(httpServer)
         .post('/api/auth/signup')
-        .send({ email, phone, otp: '123456' });
+        .send({ email, phone, password, otp: '123456' });
       expect(res.status).toBe(409);
     });
   });
 
-  describe('이메일 OTP 로그인', () => {
+  describe('비밀번호 로그인', () => {
     let accessToken: string;
     let refreshToken: string;
 
-    it('OTP 발급 후 로그인 성공', async () => {
-      await request(httpServer)
-        .post('/api/auth/otp/request')
-        .send({ channel: 'email', target: email, purpose: 'login' })
-        .expect(200);
-      await new Promise(r => setTimeout(r, 100));
-
+    it('정상 비밀번호로 로그인 성공', async () => {
       const res = await request(httpServer)
-        .post('/api/auth/login/email-otp')
-        .send({ email, code: '123456', deviceId: 'test-device-1' });
+        .post('/api/auth/login/password')
+        .send({ email, password, deviceId: 'test-device-1' });
       expect(res.status).toBe(200);
       expect(res.body.accessToken).toBeDefined();
       expect(res.body.refreshToken).toBeDefined();
       accessToken = res.body.accessToken;
       refreshToken = res.body.refreshToken;
+    });
+
+    it('잘못된 비밀번호 → 401', async () => {
+      const res = await request(httpServer)
+        .post('/api/auth/login/password')
+        .send({ email, password: 'wrongpass1', deviceId: 'test-device-1' });
+      expect(res.status).toBe(401);
     });
 
     it('JWT로 /me 접근 가능', async () => {
@@ -101,7 +116,6 @@ describe('🔐 Auth (E2E)', () => {
         .send({ refreshToken, deviceId: 'test-device-1' });
       expect(res.status).toBe(200);
       expect(res.body.accessToken).toBeDefined();
-      // 새 토큰이 발급되어야 함 (회전)
       expect(res.body.refreshToken).not.toBe(refreshToken);
     });
   });
@@ -110,14 +124,10 @@ describe('🔐 Auth (E2E)', () => {
     let accessToken: string;
 
     beforeAll(async () => {
-      // 신선한 로그인
-      await request(httpServer)
-        .post('/api/auth/otp/request')
-        .send({ channel: 'email', target: email });
-      await new Promise(r => setTimeout(r, 100));
+      // 비밀번호 로그인으로 신선한 토큰 발급
       const res = await request(httpServer)
-        .post('/api/auth/login/email-otp')
-        .send({ email, code: '123456', deviceId: 'pin-device' });
+        .post('/api/auth/login/password')
+        .send({ email, password, deviceId: 'pin-device' });
       accessToken = res.body.accessToken;
     });
 

@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#FFA000">
 <title>PASS — 메인</title>
+<script src="../lib/auth-guard.js" data-require="login"></script>
 <script src="../lib/pass-api.js"></script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/static/pretendard.min.css" rel="stylesheet">
@@ -596,6 +597,225 @@
     border-radius: var(--radius-pill);
   }
   .activity-tag.pending { color: var(--chon-orange-dark); background: var(--chon-yellow-soft); }
+
+  /* ============================================
+     ID Guide Card (pageRel — CHON DID 트로피)
+     ============================================ */
+  .id-guide-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: linear-gradient(135deg, #FFB960 0%, #FFA000 60%, #E87F0A 100%);
+    border-radius: var(--radius-lg);
+    padding: 22px 22px 24px;
+    cursor: pointer;
+    color: white;
+    box-shadow: 0 8px 24px rgba(247, 147, 30, 0.28);
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.12s;
+  }
+  .id-guide-card::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -50px;
+    width: 180px; height: 180px;
+    background: radial-gradient(circle, rgba(255,255,255,0.18) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .id-guide-card:active { transform: scale(0.99); }
+  .id-guide-icon {
+    font-size: 56px;
+    line-height: 1;
+    flex-shrink: 0;
+    filter: drop-shadow(0 6px 12px rgba(0,0,0,0.18));
+    position: relative;
+    z-index: 1;
+  }
+  .id-guide-info { flex: 1; min-width: 0; position: relative; z-index: 1; }
+  .id-guide-eyebrow {
+    font-size: 12px;
+    font-weight: 700;
+    opacity: 0.95;
+    margin-bottom: 4px;
+  }
+  .id-guide-title {
+    font-size: 22px;
+    font-weight: 900;
+    line-height: 1.2;
+    letter-spacing: -0.5px;
+    margin-bottom: 8px;
+  }
+  .id-guide-desc {
+    font-size: 12px;
+    line-height: 1.55;
+    opacity: 0.94;
+    font-weight: 500;
+    margin-bottom: 12px;
+  }
+  .id-guide-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: white;
+    color: var(--chon-orange-dark);
+    padding: 7px 14px;
+    border-radius: var(--radius-pill);
+    font-size: 12px;
+    font-weight: 800;
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* 발급 절차 — 번호 매김 리스트 */
+  .id-steps-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .id-step-row {
+    background: white;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .id-step-num {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--chon-yellow-soft);
+    color: var(--chon-orange-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    font-weight: 900;
+    flex-shrink: 0;
+  }
+  .id-step-text { flex: 1; }
+  .id-step-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+  }
+  .id-step-desc {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+  }
+
+  /* ============================================
+     Message Card — 나에게 온 메시지
+     ============================================ */
+  .msg-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .msg-card {
+    background: white;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    padding: 14px 16px 12px;
+    transition: box-shadow 0.15s;
+  }
+  .msg-card:hover { box-shadow: var(--shadow-md); }
+  .msg-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .msg-avatar {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: var(--friend-green);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 15px;
+    flex-shrink: 0;
+  }
+  .msg-avatar.purple { background: #7C3AED; }
+  .msg-avatar.orange { background: var(--chon-orange); }
+  .msg-avatar.blue   { background: #3B82F6; }
+  .msg-meta { flex: 1; min-width: 0; padding-top: 2px; }
+  .msg-name-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .msg-name {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text-primary);
+  }
+  .msg-badge {
+    background: var(--friend-green-light);
+    color: var(--friend-green-dark);
+    font-size: 10px;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: var(--radius-pill);
+  }
+  .msg-time {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    font-weight: 600;
+    margin-top: 2px;
+  }
+  .msg-menu {
+    background: transparent;
+    border: none;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: 900;
+    padding: 4px 6px;
+    border-radius: 6px;
+    font-family: inherit;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .msg-menu:hover { background: var(--bg-empty); color: var(--text-primary); }
+  .msg-body {
+    font-size: 14px;
+    color: var(--text-primary);
+    line-height: 1.5;
+    margin: 4px 2px 12px;
+    font-weight: 500;
+  }
+  .msg-actions {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-light);
+  }
+  .msg-action {
+    background: transparent;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 4px 0;
+    transition: color 0.12s;
+  }
+  .msg-action:hover { color: var(--chon-orange-dark); }
+  .msg-action-icon { font-size: 16px; line-height: 1; }
+  .msg-action.right { margin-left: auto; color: var(--chon-orange-dark); }
 
   /* ============================================
      Empty placeholder (for other tabs)
@@ -1419,9 +1639,6 @@
       </div>
     </button>
     <div class="header-actions">
-      <button class="icon-btn" data-page="my" onclick="switchPage('my')" aria-label="마이">
-        👤
-      </button>
       <button class="icon-btn" onclick="openNotifSheet()" aria-label="알림">
         🔔
         <span class="icon-btn-dot"></span>
@@ -1444,41 +1661,93 @@
         </div>
       </div>
 
-      <!-- Hero -->
-      <div class="hero-card" onclick="openAuthSheet()">
-        <div class="hero-eyebrow">나를 확인하는</div>
-        <div class="hero-title">CHON DID<br/>트로피</div>
-        <div class="hero-cta">발급받기 →</div>
-        <div class="hero-illust">📱</div>
+      <!-- Hero — CHON DID 트로피 (Self ID 발급/조회) -->
+      <div class="hero-card" id="heroCard" onclick="openSelfId()">
+        <div class="hero-eyebrow" id="heroEyebrow">나를 확인하는</div>
+        <div class="hero-title" id="heroTitle">CHON DID<br/>트로피</div>
+        <div class="hero-cta" id="heroCta">발급받기 →</div>
+        <div class="hero-illust" id="heroIllust">📱</div>
       </div>
 
-      <!-- 상호 인증 -->
-      <div class="feature-card" onclick="switchPage('auth'); showToast('🪪 상호 인증 화면')">
-        <div class="feature-info">
-          <div class="feature-title">상호 인증</div>
-          <div class="feature-desc">가족·지인의 신원을<br/>안전하게 확인하기</div>
-        </div>
-        <div class="feature-illust">🪪</div>
-      </div>
+      <div class="section-title">나에게 온 메시지</div>
+      <div class="msg-list" id="msgList">
+        <article class="msg-card">
+          <div class="msg-header">
+            <div class="msg-avatar">이</div>
+            <div class="msg-meta">
+              <div class="msg-name-row">
+                <span class="msg-name">이상호</span>
+                <span class="msg-badge">모임원</span>
+              </div>
+              <div class="msg-time">1시간 전</div>
+            </div>
+            <button type="button" class="msg-menu" aria-label="더보기">⋯</button>
+          </div>
+          <div class="msg-body">주말에 등산 같이 가실 분?</div>
+          <div class="msg-actions">
+            <button type="button" class="msg-action" onclick="toggleLike(this)">
+              <span class="msg-action-icon">♡</span><span>0</span>
+            </button>
+            <button type="button" class="msg-action" onclick="showToast('💬 댓글')">
+              <span class="msg-action-icon">💬</span><span>0</span>
+            </button>
+            <button type="button" class="msg-action right" onclick="showToast('이상호님에게 메시지 보내기')">
+              <span class="msg-action-icon">✉</span><span>메시지</span>
+            </button>
+          </div>
+        </article>
 
-      <div class="section-title">즉시 인증</div>
-      <div class="quick-grid">
-        <button class="quick-btn" onclick="showToast('📞 통화 인증')">
-          <div class="quick-icon bell">📞</div>
-          <div class="quick-label">통화</div>
-        </button>
-        <button class="quick-btn" onclick="showToast('👥 주소록 인증')">
-          <div class="quick-icon contact">👥</div>
-          <div class="quick-label">주소록</div>
-        </button>
-        <button class="quick-btn" onclick="showToast('👤 본인 확인')">
-          <div class="quick-icon user">👤</div>
-          <div class="quick-label">본인</div>
-        </button>
-        <button class="quick-btn" onclick="showToast('📄 증명서')">
-          <div class="quick-icon doc">📄</div>
-          <div class="quick-label">증명서</div>
-        </button>
+        <article class="msg-card">
+          <div class="msg-header">
+            <div class="msg-avatar">박</div>
+            <div class="msg-meta">
+              <div class="msg-name-row">
+                <span class="msg-name">박지영</span>
+                <span class="msg-badge">모임원</span>
+              </div>
+              <div class="msg-time">1시간 전</div>
+            </div>
+            <button type="button" class="msg-menu" aria-label="더보기">⋯</button>
+          </div>
+          <div class="msg-body">새로 배운 라떼아트 🥛</div>
+          <div class="msg-actions">
+            <button type="button" class="msg-action" onclick="toggleLike(this)">
+              <span class="msg-action-icon">♡</span><span>0</span>
+            </button>
+            <button type="button" class="msg-action" onclick="showToast('💬 댓글')">
+              <span class="msg-action-icon">💬</span><span>0</span>
+            </button>
+            <button type="button" class="msg-action right" onclick="showToast('박지영님에게 메시지 보내기')">
+              <span class="msg-action-icon">✉</span><span>메시지</span>
+            </button>
+          </div>
+        </article>
+
+        <article class="msg-card">
+          <div class="msg-header">
+            <div class="msg-avatar">김</div>
+            <div class="msg-meta">
+              <div class="msg-name-row">
+                <span class="msg-name">김민수</span>
+                <span class="msg-badge">모임원</span>
+              </div>
+              <div class="msg-time">1시간 전</div>
+            </div>
+            <button type="button" class="msg-menu" aria-label="더보기">⋯</button>
+          </div>
+          <div class="msg-body">오늘 한강에서 자전거 타고 왔어요 🚴</div>
+          <div class="msg-actions">
+            <button type="button" class="msg-action" onclick="toggleLike(this)">
+              <span class="msg-action-icon">♡</span><span>0</span>
+            </button>
+            <button type="button" class="msg-action" onclick="showToast('💬 댓글')">
+              <span class="msg-action-icon">💬</span><span>0</span>
+            </button>
+            <button type="button" class="msg-action right" onclick="showToast('김민수님에게 메시지 보내기')">
+              <span class="msg-action-icon">✉</span><span>메시지</span>
+            </button>
+          </div>
+        </article>
       </div>
 
     </section>
@@ -1524,67 +1793,48 @@
       </div>
     </section>
 
-    <!-- ============ RELATIONS (3 모드) ============ -->
+    <!-- ============ ID / 증명서 ============ -->
     <section class="page" id="pageRel">
-      <div class="section-title section-title--mt-8">관계 네트워크</div>
-      <p class="mode-intro">
-        용도에 맞는 모드를 선택하세요. 각 모드는 고유의 시각화와<br/>
-        인증 흐름을 제공합니다.
-      </p>
+      <div class="section-title section-title--mt-8">CHON DID 트로피</div>
 
-      <!-- 🌳 가계도 -->
-      <div class="mode-card family" onclick="openMode('family')">
-        <div class="mode-icon-wrap">🌳</div>
-        <div class="mode-info">
-          <div class="mode-title">가계도</div>
-          <div class="mode-desc">부계 중심 + 세대별 박스 포함 디자인<br/>출생 순서 좌→우 정렬</div>
-          <div class="mode-stats">
-            <span><strong>12</strong>명 등록</span>
-            <span><strong>8</strong>명 인증</span>
-            <span>4 세대</span>
+      <!-- 안내 카드 — 발급 상태에 따라 내용 다름 -->
+      <div class="id-guide-card" id="idGuideCard" onclick="openSelfId()">
+        <div class="id-guide-icon" id="idGuideIcon">📱</div>
+        <div class="id-guide-info">
+          <div class="id-guide-eyebrow" id="idGuideEyebrow">나를 확인하는</div>
+          <div class="id-guide-title" id="idGuideTitle">CHON DID 트로피</div>
+          <div class="id-guide-desc" id="idGuideDesc">
+            신분증 정보로 위·변조 불가능한<br/>
+            본인 ID를 발급받으세요.
           </div>
+          <div class="id-guide-cta" id="idGuideCta">발급받기 →</div>
         </div>
-        <button class="mode-cta family" onclick="event.stopPropagation(); openMode('family')">입력하기 ›</button>
       </div>
 
-      <!-- 🌐 모임 -->
-      <div class="mode-card friend" onclick="openMode('friend')">
-        <div class="mode-icon-wrap">🌐</div>
-        <div class="mode-info">
-          <div class="mode-title">모임</div>
-          <div class="mode-desc">1-hop 모임원 + 2-hop 추천<br/>신뢰 네트워크 그래프</div>
-          <div class="mode-stats">
-            <span><strong>5</strong>명 등록</span>
-            <span><strong>3</strong>명 인증</span>
-            <span><strong>2</strong>명 2-hop</span>
+      <!-- 발급 절차 안내 -->
+      <div class="section-title section-title--mt-22">발급 절차</div>
+      <div class="id-steps-list">
+        <div class="id-step-row">
+          <div class="id-step-num">1</div>
+          <div class="id-step-text">
+            <div class="id-step-title">방법 선택</div>
+            <div class="id-step-desc">신분증 촬영 또는 직접입력 선택</div>
           </div>
         </div>
-        <button class="mode-cta friend" onclick="event.stopPropagation(); openMode('friend')">입력하기 ›</button>
-      </div>
-
-      <!-- 🏫 학급증 -->
-      <div class="mode-card classid" onclick="openMode('classid')">
-        <div class="mode-icon-wrap">🏫</div>
-        <div class="mode-info">
-          <div class="mode-title">학급증</div>
-          <div class="mode-desc">선생님 · 학부모 · 학생 역할 기반<br/>출석번호로 학급 관리</div>
-          <div class="mode-stats">
-            <span><strong>1</strong>명 선생</span>
-            <span><strong>4</strong>명 학생</span>
-            <span><strong>2</strong>명 학부모</span>
+        <div class="id-step-row">
+          <div class="id-step-num">2</div>
+          <div class="id-step-text">
+            <div class="id-step-title">정보 입력</div>
+            <div class="id-step-desc">이름·생년월일·성별 확인</div>
           </div>
         </div>
-        <button class="mode-cta classid" onclick="event.stopPropagation(); openMode('classid')">입력하기 ›</button>
-      </div>
-
-      <div class="section-title section-title--mt-22">통합 보기</div>
-      <div class="activity-item" onclick="goRelTool()">
-        <div class="activity-icon blue">🗂</div>
-        <div class="activity-info">
-          <div class="activity-title">전체 통합 페이지 (PASS v2)</div>
-          <div class="activity-meta">피드·모임·채팅·Trust 한 화면</div>
+        <div class="id-step-row">
+          <div class="id-step-num">3</div>
+          <div class="id-step-text">
+            <div class="id-step-title">발급 완료</div>
+            <div class="id-step-desc">CHON DID 트로피로 상호 인증 시작</div>
+          </div>
         </div>
-        <div class="chev chev--sm">›</div>
       </div>
     </section>
 
@@ -1726,19 +1976,19 @@
     </button>
     <button class="nav-btn" onclick="window.location.href='./feed.html'">
       <div class="nav-btn-icon">📰</div>
-      <div class="nav-btn-label">Feed</div>
+      <div class="nav-btn-label">연락처</div>
     </button>
     <button class="nav-btn center" data-page="rel" onclick="switchPage('rel')">
       <div class="nav-circle">🆔</div>
-      <div class="nav-btn-label">트로피</div>
+      <div class="nav-btn-label">증명서</div>
     </button>
     <button class="nav-btn" data-page="auth" onclick="switchPage('auth')">
       <div class="nav-btn-icon">🤝</div>
       <div class="nav-btn-label">인증</div>
     </button>
-    <button class="nav-btn" onclick="window.location.href='./feed.html?section=chat'">
-      <div class="nav-btn-icon">💬</div>
-      <div class="nav-btn-label">채팅</div>
+    <button type="button" class="nav-btn" onclick="switchPage('my')">
+      <div class="nav-btn-icon">👤</div>
+      <div class="nav-btn-label">마이페이지</div>
     </button>
   </nav>
 </div>
@@ -1925,7 +2175,7 @@
 // Session bootstrap (백엔드 연동)
 // ============================================================
 function loadSession() {
-  try { return JSON.parse(sessionStorage.getItem('passUser')) || null; } catch (e) { return null; }
+  try { return JSON.parse(localStorage.getItem('passUser')) || null; } catch (e) { return null; }
 }
 
 // ============================================================
@@ -2068,7 +2318,7 @@ async function applyUser() {
   if (!hasToken && !session) {
     // 비로그인 상태라도 sessionStorage에 데모 편집한 프로필이 있으면 복원
     let demoUser = null;
-    try { demoUser = JSON.parse(sessionStorage.getItem('passUser') || 'null'); } catch (e) {}
+    try { demoUser = JSON.parse(localStorage.getItem('passUser') || 'null'); } catch (e) {}
     const demoName = (demoUser && demoUser.name) || '데모 사용자';
     const demoAvatar = (demoUser && demoUser.avatar) || '데';
     const demoPhoto = (demoUser && demoUser.photo) || null;
@@ -2088,7 +2338,7 @@ async function applyUser() {
       const me = await PassAPI.users.me();
       user = { email: me.email, name: me.name || me.email.split('@')[0], avatar: me.avatar };
       // 세션도 갱신
-      try { sessionStorage.setItem('passUser', JSON.stringify({ ...session, ...user })); } catch (e) {}
+      try { localStorage.setItem('passUser', JSON.stringify({ ...session, ...user })); } catch (e) {}
     } catch (e) {
       if (e.status === 401) {
         PassAPI.clearSession();
@@ -2107,10 +2357,10 @@ async function applyUser() {
     if (wn) wn.textContent = nick;
     const ph = document.getElementById('profilePhone');
     if (ph) ph.textContent = user.phone ? maskPhone(user.phone) : user.email;
-    if (!sessionStorage.getItem('passWelcomed')) {
+    if (!localStorage.getItem('passWelcomed')) {
       const isNew = session?.isNew;
       setTimeout(() => showToast((isNew ? '🎉 환영합니다 ' : '👋 ') + user.email), 400);
-      try { sessionStorage.setItem('passWelcomed', '1'); } catch (e) {}
+      try { localStorage.setItem('passWelcomed', '1'); } catch (e) {}
     }
   }
 }
@@ -2125,6 +2375,70 @@ function switchPage(page) {
   document.getElementById(map[page]).classList.add('active');
   document.querySelector('.content').scrollTo({ top: 0, behavior: 'smooth' });
 }
+
+// ============================================================
+// CHON DID 트로피 (Self ID) — 미발급이면 발급 화면으로, 발급됐으면 ID 보여주기
+// ============================================================
+function hasSelfId() {
+  try { return localStorage.getItem('selfIdCreated') === '1'; } catch (e) { return false; }
+}
+
+function refreshHeroCard() {
+  const card = document.getElementById('heroCard');
+  if (!card) return;
+  const eyebrow = document.getElementById('heroEyebrow');
+  const title   = document.getElementById('heroTitle');
+  const cta     = document.getElementById('heroCta');
+  const illust  = document.getElementById('heroIllust');
+
+  let displayName = '';
+  try { displayName = (JSON.parse(localStorage.getItem('passUser') || '{}').name) || ''; } catch (e) {}
+  const issued = hasSelfId();
+
+  if (issued) {
+    eyebrow.textContent = displayName ? (displayName + '님의') : '나의';
+    title.innerHTML = 'CHON DID<br/>트로피';
+    cta.textContent = 'ID 보기 →';
+    illust.textContent = '🪪';
+  } else {
+    eyebrow.textContent = '나를 확인하는';
+    title.innerHTML = 'CHON DID<br/>트로피';
+    cta.textContent = '발급받기 →';
+    illust.textContent = '📱';
+  }
+
+  // pageRel 안내 카드도 같은 로직
+  const gIcon    = document.getElementById('idGuideIcon');
+  const gEyebrow = document.getElementById('idGuideEyebrow');
+  const gDesc    = document.getElementById('idGuideDesc');
+  const gCta     = document.getElementById('idGuideCta');
+  if (gIcon && gCta) {
+    if (issued) {
+      gIcon.textContent    = '🪪';
+      gEyebrow.textContent = displayName ? (displayName + '님의') : '나의';
+      gDesc.innerHTML      = '발급 완료 — 발급된 트로피 카드를<br/>확인하고 상호 인증을 시작하세요.';
+      gCta.textContent     = 'ID 보기 →';
+    } else {
+      gIcon.textContent    = '📱';
+      gEyebrow.textContent = '나를 확인하는';
+      gDesc.innerHTML      = '신분증 정보로 위·변조 불가능한<br/>본인 ID를 발급받으세요.';
+      gCta.textContent     = '발급받기 →';
+    }
+  }
+}
+
+function openSelfId() {
+  if (hasSelfId()) {
+    // 이미 발급됨 — Self ID 화면(보기 모드)로 이동
+    window.location.href = '../auth/self-id.html?mode=view';
+  } else {
+    // 미발급 — 발급 프로세스 시작
+    window.location.href = '../auth/self-id.html';
+  }
+}
+
+// 페이지 로드 시 hero 카드 상태 동기화
+refreshHeroCard();
 
 // ============================================================
 // Auth modal sheet
@@ -2160,7 +2474,7 @@ let supportAttachments = []; // {name, size, file}
 function openSupportSheet() {
   // 사용자 이름/이메일 prefill
   try {
-    const u = JSON.parse(sessionStorage.getItem('passUser') || '{}');
+    const u = JSON.parse(localStorage.getItem('passUser') || '{}');
     document.getElementById('supportName').value = u.name || '';
     document.getElementById('supportEmail').value = u.email || '';
   } catch (e) {}
@@ -2378,8 +2692,8 @@ async function saveProfile() {
 
   // 세션 스토리지 갱신
   try {
-    const cur = JSON.parse(sessionStorage.getItem('passUser') || '{}');
-    sessionStorage.setItem('passUser', JSON.stringify({ ...cur, name, avatar, photo: photo || null }));
+    const cur = JSON.parse(localStorage.getItem('passUser') || '{}');
+    localStorage.setItem('passUser', JSON.stringify({ ...cur, name, avatar, photo: photo || null }));
   } catch (e) {}
 
   // 백엔드 연동
@@ -2439,9 +2753,22 @@ async function logoutPass() {
   // 세션만 종료 — 디바이스 신뢰는 유지 (PIN 로그인 가능하도록)
   if (window.PassAPI) PassAPI.clearSession();
   else {
-    try { sessionStorage.removeItem('passUser'); sessionStorage.removeItem('passWelcomed'); } catch (e) {}
+    try { localStorage.removeItem('passUser'); localStorage.removeItem('passWelcomed'); } catch (e) {}
   }
   window.location.href = '../auth/login.html';
+}
+
+// ============================================================
+// Message card actions (나에게 온 메시지)
+// ============================================================
+function toggleLike(btn) {
+  const span = btn.querySelector('span:last-child');
+  const icon = btn.querySelector('.msg-action-icon');
+  const liked = btn.classList.toggle('is-liked');
+  const n = Number(span.textContent) || 0;
+  span.textContent = liked ? n + 1 : Math.max(0, n - 1);
+  icon.textContent = liked ? '♥' : '♡';
+  btn.style.color = liked ? '#DC2626' : '';
 }
 
 // ============================================================

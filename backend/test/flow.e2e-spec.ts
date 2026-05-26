@@ -22,20 +22,18 @@ describe('🌐 통합 플로우 (E2E)', () => {
     app = await getTestApp();
     httpServer = app.getHttpServer();
 
-    // 2명 가입 + 로그인
+    // 2명 가입 + 비밀번호 로그인
+    const password = 'chon1234';
     for (const u of [userA, userB]) {
       await request(httpServer).post('/api/auth/otp/request')
-        .send({ channel: 'sms', target: u.phone, purpose: 'register' }).expect(200);
+        .send({ channel: 'email', target: u.email, purpose: 'register' }).expect(200);
       await new Promise(r => setTimeout(r, 60));
       const signup = await request(httpServer).post('/api/auth/signup')
-        .send({ email: u.email, phone: u.phone, otp: '123456', name: u.email.split('@')[0] });
+        .send({ email: u.email, phone: u.phone, password, otp: '123456', name: u.email.split('@')[0] });
       expect(signup.status).toBe(201);
 
-      await request(httpServer).post('/api/auth/otp/request')
-        .send({ channel: 'email', target: u.email }).expect(200);
-      await new Promise(r => setTimeout(r, 60));
-      const login = await request(httpServer).post('/api/auth/login/email-otp')
-        .send({ email: u.email, code: '123456', deviceId: `dev-${u.email}` });
+      const login = await request(httpServer).post('/api/auth/login/password')
+        .send({ email: u.email, password, deviceId: `dev-${u.email}` });
       expect(login.status).toBe(200);
       if (u === userA) { tokenA = login.body.accessToken; idA = login.body.user.id; }
       else { tokenB = login.body.accessToken; idB = login.body.user.id; }
@@ -217,16 +215,14 @@ describe('🌐 통합 플로우 (E2E)', () => {
     it('타인 대화방 접근 차단', async () => {
       // userC 생성 후 convId에 접근 시도
       const userC = { email: 'carol@chon.ai', phone: '010-3333-0000' };
+      const passwordC = 'chon1234';
       await request(httpServer).post('/api/auth/otp/request')
-        .send({ channel: 'sms', target: userC.phone, purpose: 'register' });
+        .send({ channel: 'email', target: userC.email, purpose: 'register' });
       await new Promise(r => setTimeout(r, 60));
       await request(httpServer).post('/api/auth/signup')
-        .send({ email: userC.email, phone: userC.phone, otp: '123456' });
-      await request(httpServer).post('/api/auth/otp/request')
-        .send({ channel: 'email', target: userC.email });
-      await new Promise(r => setTimeout(r, 60));
-      const login = await request(httpServer).post('/api/auth/login/email-otp')
-        .send({ email: userC.email, code: '123456', deviceId: 'devC' });
+        .send({ email: userC.email, phone: userC.phone, password: passwordC, otp: '123456' });
+      const login = await request(httpServer).post('/api/auth/login/password')
+        .send({ email: userC.email, password: passwordC, deviceId: 'devC' });
       const tokenC = login.body.accessToken;
 
       const res = await request(httpServer)

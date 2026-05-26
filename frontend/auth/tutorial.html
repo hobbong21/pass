@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#FFFBF0">
+<title>PASS — 시작하기</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/static/pretendard.min.css" rel="stylesheet">
+<style>
+  :root {
+    --chon-orange: #F7931E;
+    --chon-orange-dark: #E87F0A;
+    --chon-yellow: #FFC300;
+    --bg-app: #FFF6E0;
+    --text-primary: #1F1F1F;
+    --text-secondary: #5B5B5B;
+    --text-tertiary: #9CA3AF;
+
+    --card-green: #2E7D4F;
+    --card-green-dim: rgba(255,255,255,0.18);
+
+    --card-orange: #F39C12;
+    --card-orange-dim: rgba(255,255,255,0.18);
+
+    --card-red: #E53935;
+    --card-red-dim: rgba(255,255,255,0.18);
+
+    --radius-card: 24px;
+    --radius-pill: 999px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg-app);
+    color: var(--text-primary);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .app {
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+    background: var(--bg-app);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+  @media (min-width: 768px) {
+    body { padding: 32px 0; background: #F5F7FB; }
+    .app {
+      border-radius: 28px;
+      overflow: hidden;
+      min-height: calc(100dvh - 64px);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.12);
+    }
+  }
+
+  /* Top bar */
+  .topbar {
+    padding: calc(18px + var(--safe-top)) 22px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .back-btn {
+    width: 36px; height: 36px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 0;
+    font-size: 24px;
+    line-height: 1;
+  }
+  .back-btn svg { width: 22px; height: 22px; }
+  .skip-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--chon-orange-dark);
+    padding: 6px 4px;
+  }
+  .skip-btn:active { opacity: 0.7; }
+
+  /* Slides */
+  .slides {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+  .slide {
+    position: absolute;
+    inset: 0;
+    padding: 24px 26px 0;
+    display: none;
+    flex-direction: column;
+    animation: fadeIn 0.28s ease;
+  }
+  .slide.active { display: flex; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Slide 1 — Logo hero */
+  .logo-hero {
+    margin-top: 12px;
+    height: 280px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .logo-ring {
+    width: 220px; height: 220px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 50%,
+                  #FFFFFF 0%,
+                  #FFF6E0 55%,
+                  rgba(255,246,224,0) 78%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .logo-mark {
+    width: 132px; height: 132px;
+    border-radius: 28px;
+    background: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 12px 28px rgba(247,147,30,0.18);
+  }
+  .logo-mark svg { width: 78px; height: 78px; display: block; }
+  .logo-badge {
+    position: absolute;
+    right: 30px;
+    bottom: 22px;
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  }
+  .logo-badge-inner {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: #2E7D4F;
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .logo-badge-inner svg { width: 22px; height: 22px; }
+
+  /* Slide title & description */
+  .slide-title {
+    margin-top: 28px;
+    font-size: 30px;
+    font-weight: 900;
+    letter-spacing: -0.8px;
+    line-height: 1.25;
+    color: var(--text-primary);
+    white-space: pre-line;
+  }
+  .slide-desc {
+    margin-top: 16px;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.65;
+    color: var(--text-secondary);
+    letter-spacing: -0.2px;
+  }
+
+  /* Call card (slides 2/3/4) */
+  .call-card {
+    border-radius: var(--radius-card);
+    padding: 24px 22px 22px;
+    color: #FFFFFF;
+    text-align: center;
+    box-shadow: 0 14px 30px rgba(0,0,0,0.10);
+  }
+  .call-card.green  { background: var(--card-green); }
+  .call-card.orange { background: var(--card-orange); }
+  .call-card.red    { background: var(--card-red); }
+
+  .call-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--card-green-dim);
+    color: #FFFFFF;
+    padding: 7px 16px;
+    border-radius: var(--radius-pill);
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .call-card.orange .call-tag { background: var(--card-orange-dim); }
+  .call-card.red    .call-tag { background: var(--card-red-dim); }
+  .call-tag svg { width: 14px; height: 14px; }
+
+  .call-avatar {
+    width: 110px; height: 110px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.22);
+    margin: 18px auto 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .call-avatar svg { width: 60px; height: 60px; color: #FFFFFF; }
+
+  .call-name {
+    font-size: 26px;
+    font-weight: 900;
+    letter-spacing: -0.3px;
+    margin-top: 2px;
+  }
+  .call-phone {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: 0.4px;
+    margin-top: 2px;
+  }
+  .call-sub {
+    margin-top: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    opacity: 0.94;
+  }
+
+  .call-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #FFFFFF;
+    color: var(--card-green);
+    padding: 8px 16px;
+    border-radius: var(--radius-pill);
+    font-size: 14px;
+    font-weight: 800;
+    margin-top: 14px;
+  }
+  .call-card.orange .call-badge { color: var(--card-orange); }
+  .call-card.red    .call-badge { color: var(--card-red); }
+  .call-badge svg { width: 16px; height: 16px; }
+  .badge-dot-warn {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--card-green);
+    color: #FFFFFF;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 900;
+  }
+  .call-card.orange .badge-dot-warn { background: var(--card-orange); }
+  .call-card.red    .badge-dot-warn { background: var(--card-red); }
+
+  .call-footer {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 14px;
+    color: #FFFFFF;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .call-footer-circle {
+    width: 16px; height: 16px;
+    border: 2px solid #FFFFFF;
+    border-radius: 50%;
+  }
+
+  /* Slide 4 — avatar with strike */
+  .call-avatar.warn { position: relative; }
+  .call-avatar-strike {
+    position: absolute;
+    width: 86px; height: 4px;
+    background: #FFFFFF;
+    border-radius: 2px;
+    transform: rotate(-30deg);
+    top: 52px;
+    box-shadow: 0 0 0 3px rgba(229,57,53,0.6);
+  }
+
+  /* Bottom — dots + button */
+  .bottom-area {
+    padding: 18px 22px calc(28px + var(--safe-bottom));
+    flex-shrink: 0;
+  }
+  .dots {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+  .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: rgba(247,147,30,0.25);
+    transition: width 0.25s, background 0.25s;
+  }
+  .dot.active {
+    width: 24px;
+    border-radius: var(--radius-pill);
+    background: var(--chon-orange);
+  }
+  .cta-btn {
+    width: 100%;
+    padding: 18px;
+    background: var(--chon-orange);
+    color: #FFFFFF;
+    border: none;
+    border-radius: var(--radius-pill);
+    font-family: inherit;
+    font-size: 17px;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: 0 8px 18px rgba(247,147,30,0.28);
+    transition: transform 0.12s, background 0.15s;
+  }
+  .cta-btn:active { transform: scale(0.98); background: var(--chon-orange-dark); }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header class="topbar">
+    <button class="back-btn" id="backBtn" aria-label="이전">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+    </button>
+    <button class="skip-btn" id="skipBtn" onclick="finish()">건너뛰기</button>
+  </header>
+
+  <div class="slides">
+
+    <!-- ============ Slide 1 — Identity ============ -->
+    <section class="slide active" data-slide="1">
+      <div class="logo-hero">
+        <div class="logo-ring">
+          <div class="logo-mark">
+            <!-- Multi-color geometric CHON mark -->
+            <svg viewBox="0 0 100 100" fill="none">
+              <!-- Top-left blue triangle -->
+              <path d="M50 12 L50 50 L20 32 Z" fill="#0A3D8C"/>
+              <!-- Top-right yellow triangle -->
+              <path d="M50 12 L80 32 L50 50 Z" fill="#FFC107"/>
+              <!-- Right red triangle -->
+              <path d="M80 32 L80 70 L50 50 Z" fill="#E53935"/>
+              <!-- Bottom-right orange triangle -->
+              <path d="M50 50 L80 70 L50 88 Z" fill="#F39C12"/>
+              <!-- Bottom-left -->
+              <path d="M50 50 L50 88 L20 70 Z" fill="#F0F0F0" opacity="0.0"/>
+              <!-- Left dark fold -->
+              <path d="M20 32 L50 50 L20 70 Z" fill="#0A3D8C" opacity="0.85"/>
+            </svg>
+          </div>
+        </div>
+        <div class="logo-badge">
+          <div class="logo-badge-inner">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2 L20 6 V12 C20 17 16 21 12 22 C8 21 4 17 4 12 V6 Z"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <h1 class="slide-title">위조할 수 없는
+본인 인증</h1>
+      <p class="slide-desc">휴대폰이 "이건 진짜 나입니다"라고 직접 증명해요. 가족이 인증되면 통화할 때 바로 알 수 있어요.</p>
+    </section>
+
+    <!-- ============ Slide 2 — Green / Safe ============ -->
+    <section class="slide" data-slide="2">
+      <div class="call-card green">
+        <span class="call-tag">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.91.34 1.8.66 2.65a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.43-1.43a2 2 0 0 1 2.11-.45c.85.32 1.74.54 2.65.66A2 2 0 0 1 22 16.92z"></path></svg>
+          걸려온 전화
+        </span>
+        <div class="call-avatar">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5zm0 2c-3.33 0-10 1.67-10 5v3h20v-3c0-3.33-6.67-5-10-5z"/></svg>
+        </div>
+        <div class="call-name">박지영</div>
+        <div class="call-sub">딸 · 가족 인증됨</div>
+        <span class="call-badge">
+          <span class="badge-dot-warn">✓</span>
+          CHON 인증 가족
+        </span>
+        <div class="call-footer">
+          <span class="call-footer-circle"></span>
+          CHON 안심콜로 보호됨
+        </div>
+      </div>
+      <h2 class="slide-title" style="margin-top:32px;">초록색 – 안전한 가족</h2>
+      <p class="slide-desc">CHON으로 인증된 가족이나 본인 확인된 사용자가 전화하면 초록색이 보입니다. 안심하고 받으세요.</p>
+    </section>
+
+    <!-- ============ Slide 3 — Orange / Unknown ============ -->
+    <section class="slide" data-slide="3">
+      <div class="call-card orange">
+        <span class="call-tag">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.91.34 1.8.66 2.65a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.43-1.43a2 2 0 0 1 2.11-.45c.85.32 1.74.54 2.65.66A2 2 0 0 1 22 16.92z"></path></svg>
+          걸려온 전화
+        </span>
+        <div class="call-avatar">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5zm0 2c-3.33 0-10 1.67-10 5v3h20v-3c0-3.33-6.67-5-10-5z"/></svg>
+        </div>
+        <div class="call-phone">010-XXXX-XXXX</div>
+        <div class="call-sub">처음 보는 번호</div>
+        <span class="call-badge">
+          <span class="badge-dot-warn">?</span>
+          모르는 번호
+        </span>
+        <div class="call-footer">
+          <span class="call-footer-circle"></span>
+          CHON 안심콜로 보호됨
+        </div>
+      </div>
+      <h2 class="slide-title" style="margin-top:32px;">노란색 – 모르는 번호</h2>
+      <p class="slide-desc">주소록에 없고 CHON 인증도 되지 않은 번호예요. 받기 전에 한 번 더 생각해 보세요.</p>
+    </section>
+
+    <!-- ============ Slide 4 — Red / Danger ============ -->
+    <section class="slide" data-slide="4">
+      <div class="call-card red">
+        <span class="call-tag">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.91.34 1.8.66 2.65a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.43-1.43a2 2 0 0 1 2.11-.45c.85.32 1.74.54 2.65.66A2 2 0 0 1 22 16.92z"></path></svg>
+          걸려온 전화
+        </span>
+        <div class="call-avatar warn">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5zm0 2c-3.33 0-10 1.67-10 5v3h20v-3c0-3.33-6.67-5-10-5z"/></svg>
+          <span class="call-avatar-strike"></span>
+        </div>
+        <div class="call-name">사칭 의심</div>
+        <span class="call-badge">
+          <span class="badge-dot-warn">!</span>
+          보이스피싱 의심
+        </span>
+        <div class="call-footer">
+          <span class="call-footer-circle"></span>
+          CHON 안심콜로 보호됨
+        </div>
+      </div>
+      <h2 class="slide-title" style="margin-top:32px;">빨간색 – 위험</h2>
+      <p class="slide-desc">보이스피싱 패턴이나 SIM 교체가 감지되면 빨간색이 표시됩니다. 절대 받지 마시고, 가족이나 경찰에 알려주세요.</p>
+    </section>
+
+  </div>
+
+  <div class="bottom-area">
+    <div class="dots">
+      <span class="dot active" data-dot="1"></span>
+      <span class="dot" data-dot="2"></span>
+      <span class="dot" data-dot="3"></span>
+      <span class="dot" data-dot="4"></span>
+    </div>
+    <button class="cta-btn" id="ctaBtn" onclick="next()">다음</button>
+  </div>
+</div>
+
+<script>
+  const TUTORIAL_KEY = 'pass_tutorial_seen';
+  const TOTAL = 4;
+  let current = 1;
+
+  const slides   = document.querySelectorAll('.slide');
+  const dots     = document.querySelectorAll('.dot');
+  const ctaBtn   = document.getElementById('ctaBtn');
+  const skipBtn  = document.getElementById('skipBtn');
+  const backBtn  = document.getElementById('backBtn');
+
+  function render() {
+    slides.forEach(s => s.classList.toggle('active', Number(s.dataset.slide) === current));
+    dots.forEach(d => d.classList.toggle('active', Number(d.dataset.dot) === current));
+    ctaBtn.textContent = current === TOTAL ? '시작하기' : '다음';
+    skipBtn.style.visibility = current === TOTAL ? 'hidden' : 'visible';
+  }
+
+  function next() {
+    if (current < TOTAL) {
+      current += 1;
+      render();
+    } else {
+      finish();
+    }
+  }
+
+  function prev() {
+    if (current > 1) {
+      current -= 1;
+      render();
+    }
+  }
+
+  function finish() {
+    try { localStorage.setItem(TUTORIAL_KEY, 'true'); } catch (e) {}
+    location.href = './login.html';
+  }
+
+  backBtn.addEventListener('click', prev);
+
+  // 키보드: ← → 도 지원
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'Enter') next();
+    if (e.key === 'ArrowLeft') prev();
+  });
+
+  // 이미 본 사용자가 직접 URL을 친 경우엔 그대로 보여주고,
+  // 첫 진입 체크는 login.html 쪽에서 함.
+  render();
+</script>
+</body>
+</html>

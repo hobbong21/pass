@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PASS — 개발/테스트 런처</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/static/pretendard.min.css" rel="stylesheet">
+<style>
+  :root {
+    --orange: #F7931E;
+    --orange-dark: #E87F0A;
+    --bg: #FFFBF0;
+    --text: #1F1F1F;
+    --text-sub: #6B7280;
+    --border: #E5E7EB;
+    --code-bg: #1F2937;
+    --code-fg: #F3F4F6;
+    --green: #10B981;
+    --red: #DC2626;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 24px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 32px 24px 80px;
+  }
+  h1 {
+    font-size: 24px;
+    font-weight: 900;
+    margin: 0 0 4px;
+    letter-spacing: -0.5px;
+  }
+  .subtitle {
+    color: var(--text-sub);
+    font-size: 14px;
+    margin-bottom: 24px;
+  }
+  .subtitle code {
+    background: #FEF3C7;
+    color: var(--orange-dark);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 13px;
+  }
+
+  section {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  section h2 {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text-sub);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin: 0 0 14px;
+  }
+
+  /* Quick actions */
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .btn {
+    background: white;
+    border: 1.5px solid var(--border);
+    color: var(--text);
+    padding: 9px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+  .btn:hover { border-color: var(--orange); }
+  .btn:active { transform: scale(0.97); }
+  .btn.primary {
+    background: var(--orange);
+    border-color: var(--orange);
+    color: white;
+  }
+  .btn.primary:hover { background: var(--orange-dark); border-color: var(--orange-dark); }
+  .btn.danger {
+    border-color: #FCA5A5;
+    color: var(--red);
+  }
+  .btn.danger:hover { background: #FEF2F2; }
+
+  /* Page grid */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 10px;
+  }
+  .card {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 14px 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: white;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+  .card:hover {
+    border-color: var(--orange);
+    box-shadow: 0 4px 12px rgba(247, 147, 30, 0.12);
+    transform: translateY(-1px);
+  }
+  .card-title {
+    font-size: 14px;
+    font-weight: 800;
+    margin-bottom: 2px;
+  }
+  .card-path {
+    font-size: 11px;
+    color: var(--text-sub);
+    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  }
+  .card-tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 2px 7px;
+    border-radius: 999px;
+    margin-top: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  .tag-public  { background: #ECFDF5; color: var(--green); }
+  .tag-private { background: #FEF3C7; color: var(--orange-dark); }
+  .tag-flow    { background: #EDE9FE; color: #7C3AED; }
+
+  /* Storage state panel */
+  .state-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 6px;
+    font-size: 12px;
+    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  }
+  .state-row {
+    display: flex;
+    align-items: center;
+    padding: 8px 10px;
+    background: var(--bg);
+    border-radius: 6px;
+    gap: 10px;
+  }
+  .state-key {
+    font-weight: 700;
+    color: var(--orange-dark);
+    flex-shrink: 0;
+    min-width: 160px;
+  }
+  .state-value {
+    flex: 1;
+    color: var(--text);
+    word-break: break-all;
+    font-size: 11px;
+    opacity: 0.85;
+  }
+  .state-value.empty { color: var(--text-sub); font-style: italic; }
+  .state-row .btn { font-size: 11px; padding: 4px 8px; flex-shrink: 0; }
+
+  .footnote {
+    font-size: 12px;
+    color: var(--text-sub);
+    margin-top: 24px;
+    line-height: 1.6;
+  }
+  .footnote code {
+    background: var(--code-bg);
+    color: var(--code-fg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+  }
+</style>
+</head>
+<body>
+
+<h1>🛠️ PASS 개발/테스트 런처</h1>
+<div class="subtitle">
+  각 페이지를 단독으로 테스트할 수 있습니다. URL에 <code>?dev=1</code> 자동 추가 — 인증 가드를 건너뛰고 데모 세션이 주입됩니다.
+</div>
+
+<!-- Quick actions -->
+<section>
+  <h2>⚡ Quick Actions</h2>
+  <div class="actions">
+    <button class="btn primary" onclick="enableDevMode()">데모 세션 주입 (dev 모드 ON)</button>
+    <button class="btn" onclick="disableDevMode()">dev 모드 OFF</button>
+    <button class="btn danger" onclick="clearAll()">localStorage 전체 초기화</button>
+    <button class="btn" onclick="refresh()">상태 새로고침</button>
+  </div>
+</section>
+
+<!-- Auth pages -->
+<section>
+  <h2>🔐 Auth 페이지</h2>
+  <div class="grid" id="grid-auth"></div>
+</section>
+
+<!-- Main pages -->
+<section>
+  <h2>🏠 메인 페이지 (인증 필요)</h2>
+  <div class="grid" id="grid-main"></div>
+</section>
+
+<!-- Views pages -->
+<section>
+  <h2>📊 View 페이지 (인증 필요)</h2>
+  <div class="grid" id="grid-views"></div>
+</section>
+
+<!-- localStorage state -->
+<section>
+  <h2>💾 localStorage 상태</h2>
+  <div class="state-grid" id="state-grid"></div>
+</section>
+
+<div class="footnote">
+  · <code>?dev=1</code> 파라미터로 진입하면 가드를 건너뛰고 데모 사용자(<code>demo@chon.ai</code>)로 자동 로그인됩니다.<br>
+  · 백엔드 호출(로그인/회원가입)은 실제 동작하므로, 백엔드 서버가 떠 있어야 합니다 (<code>http://localhost:3000/api</code>).<br>
+  · 운영 진입은 <code>auth/login.html</code> (dev 파라미터 없이) — 평소처럼 가드가 동작합니다.<br>
+  · dev 모드 켜진 상태에서 평소 로그인 흐름 테스트하려면 <strong>dev 모드 OFF</strong> 클릭 후 페이지 새로고침.
+</div>
+
+<script>
+const PAGES = {
+  auth: [
+    { path: 'auth/tutorial.html',  title: '튜토리얼',      desc: '4페이지 인증 소개',     tag: 'public', flow: '첫 진입' },
+    { path: 'auth/login.html',     title: '로그인',         desc: '이메일+비번 + PIN',     tag: 'public', flow: '메인 진입로' },
+    { path: 'auth/self-id.html',   title: 'Self ID 만들기', desc: '신규 가입 후 본인 ID',  tag: 'flow',   flow: '신규 가입' },
+  ],
+  main: [
+    { path: 'main/home.html',      title: '홈',           desc: '메인 대시보드',          tag: 'private' },
+    { path: 'main/feed.html',      title: '피드',         desc: '포스트 피드',            tag: 'private' },
+  ],
+  views: [
+    { path: 'views/family-tree.html', title: '가계도',     desc: '박스 디자인 + 관계도',  tag: 'private' },
+    { path: 'views/friends.html',     title: '모임',       desc: '모임원 추천',           tag: 'private' },
+    { path: 'views/class-id.html',    title: '학급증',     desc: '3-way 토글',           tag: 'private' },
+  ],
+};
+
+const KEY_LABELS = {
+  'passUser': '현재 로그인 사용자',
+  'pass_tokens': '액세스/리프레시 토큰',
+  'pass_device_trust': '디바이스 신뢰 (PIN 등)',
+  'pass_device_id': '디바이스 식별자',
+  'pass_tutorial_seen': '튜토리얼 본 적 있음',
+  'selfIdCreated': 'Self ID 생성 완료',
+  'passWelcomed': '환영 메시지 표시함',
+  'pass_dev_mode': '개발 모드 ON',
+};
+
+function renderCards() {
+  for (const [section, items] of Object.entries(PAGES)) {
+    const grid = document.getElementById('grid-' + section);
+    grid.innerHTML = items.map(p => `
+      <a class="card" href="./${p.path}?dev=1">
+        <div class="card-title">${p.title}</div>
+        <div class="card-path">${p.path}</div>
+        <div class="card-tag tag-${p.tag}">${p.tag === 'public' ? '공개' : p.tag === 'flow' ? '흐름' : '인증필요'}</div>
+      </a>
+    `).join('');
+  }
+}
+
+function renderState() {
+  const grid = document.getElementById('state-grid');
+  const keys = Object.keys(KEY_LABELS);
+  grid.innerHTML = keys.map(key => {
+    const value = localStorage.getItem(key);
+    const display = value === null
+      ? '<span class="empty">(없음)</span>'
+      : (value.length > 80 ? value.slice(0, 80) + '…' : value);
+    return `
+      <div class="state-row">
+        <span class="state-key">${key}</span>
+        <span class="state-value">${display}</span>
+        ${value !== null ? `<button class="btn danger" onclick="removeKey('${key}')">삭제</button>` : ''}
+      </div>
+    `;
+  }).join('');
+}
+
+function enableDevMode() {
+  localStorage.setItem('pass_dev_mode', '1');
+  localStorage.setItem('pass_tutorial_seen', 'true');
+  if (!localStorage.getItem('passUser')) {
+    localStorage.setItem('passUser', JSON.stringify({
+      email: 'demo@chon.ai',
+      name: '홍길순',
+      isNew: false,
+      loginAt: Date.now(),
+    }));
+  }
+  renderState();
+  alert('✓ 데모 세션이 주입되었습니다. 이제 어떤 페이지든 직접 열 수 있어요.');
+}
+
+function disableDevMode() {
+  localStorage.removeItem('pass_dev_mode');
+  renderState();
+  alert('dev 모드 OFF — 다음부터 보호 페이지 접근 시 로그인 페이지로 이동합니다.');
+}
+
+function clearAll() {
+  if (!confirm('localStorage의 PASS 관련 모든 키를 삭제할까요? (이 페이지의 동작에 영향)')) return;
+  const keys = ['passUser', 'pass_tokens', 'pass_device_trust', 'pass_device_id',
+                'pass_tutorial_seen', 'selfIdCreated', 'passWelcomed', 'pass_dev_mode'];
+  keys.forEach(k => localStorage.removeItem(k));
+  renderState();
+  alert('✓ 초기화 완료');
+}
+
+function removeKey(key) {
+  localStorage.removeItem(key);
+  renderState();
+}
+
+function refresh() {
+  renderState();
+}
+
+renderCards();
+renderState();
+</script>
+</body>
+</html>

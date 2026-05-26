@@ -5,6 +5,24 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#FFA000">
 <title>PASS — 로그인</title>
+<!-- 첫 진입(설치 후 처음) 시 튜토리얼로 리다이렉트.
+     ?dev=1 또는 dev 모드면 건너뜀. paint 전에 동기 실행해 깜빡임 방지. -->
+<script>
+  (function () {
+    try {
+      const params = new URLSearchParams(location.search);
+      const devMode = params.get('dev') === '1' || localStorage.getItem('pass_dev_mode') === '1';
+      if (devMode) {
+        localStorage.setItem('pass_dev_mode', '1');
+        localStorage.setItem('pass_tutorial_seen', 'true');
+        return;
+      }
+      if (!localStorage.getItem('pass_tutorial_seen')) {
+        location.replace('./tutorial.html');
+      }
+    } catch (e) { /* localStorage 차단 환경: 그대로 진행 */ }
+  })();
+</script>
 <!-- Backend API client -->
 <script src="../lib/pass-api.js"></script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
@@ -650,23 +668,21 @@
     display: flex;
     gap: 18px;
     justify-content: center;
-    margin: 40px 0 24px;
+    margin: 16px 0 24px;
   }
   .pin-dot {
-    width: 16px; height: 16px;
+    width: 12px; height: 12px;
     border-radius: 50%;
-    border: 2px solid #E5E7EB;
-    background: white;
+    border: none;
+    background: #C9CDD3;
     transition: all 0.15s;
   }
   .pin-dot.filled {
-    background: var(--chon-orange);
-    border-color: var(--chon-orange);
+    background: var(--text-primary);
     transform: scale(1.1);
   }
   .pin-dot.error {
     background: var(--error);
-    border-color: var(--error);
     animation: shake 0.4s;
   }
   @keyframes shake {
@@ -713,6 +729,72 @@
   }
   .keypad-btn.fn[data-key="back"] { font-size: 22px; }
   .keypad-btn:disabled { opacity: 0; cursor: default; }
+
+  /* ============================================
+     Pin Screen Layout — 첨부 디자인 (centered minimalist)
+     ============================================ */
+  .screen.pin-screen .screen-body {
+    display: flex;
+    flex-direction: column;
+    padding: 24px 24px 0;
+  }
+  .pin-screen-title {
+    font-size: 22px;
+    font-weight: 800;
+    text-align: center;
+    color: var(--text-primary);
+    letter-spacing: -0.3px;
+    margin: 28px 0 0;
+  }
+  .pin-screen-spacer-top { flex: 1; min-height: 24px; }
+  .pin-screen-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .pin-screen-desc {
+    font-size: 15px;
+    color: var(--text-primary);
+    font-weight: 600;
+    text-align: center;
+    margin: 0 0 6px;
+  }
+  .pin-screen-desc.error { color: var(--error); }
+  .pin-screen-sub {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    font-weight: 500;
+    margin: 0;
+  }
+  .pin-screen-spacer-bottom { flex: 1.2; min-height: 28px; }
+  .pin-screen-footer {
+    padding: 8px 4px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+  }
+  .pin-screen-cancel {
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-size: 15px;
+    font-weight: 600;
+    padding: 8px 4px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .pin-screen-cancel:active { opacity: 0.6; }
+  .pin-screen-fallback {
+    background: transparent;
+    border: none;
+    color: var(--chon-orange-dark);
+    font-size: 14px;
+    font-weight: 700;
+    padding: 8px 4px;
+    cursor: pointer;
+    font-family: inherit;
+    margin-left: auto;
+  }
 
   /* ============================================
      Auth method choice (signup 완료 후)
@@ -902,34 +984,7 @@
     font-family: inherit;
   }
 
-  /* Login tab switcher (이메일 / 간편번호) */
-  .login-tab-row {
-    display: flex;
-    gap: 4px;
-    background: #F3F4F6;
-    border-radius: 999px;
-    padding: 4px;
-    margin-bottom: 24px;
-  }
-  .login-tab {
-    flex: 1;
-    padding: 9px;
-    text-align: center;
-    border-radius: 999px;
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--text-secondary);
-    cursor: pointer;
-    transition: all 0.18s;
-    background: transparent;
-    border: none;
-    font-family: inherit;
-  }
-  .login-tab.active {
-    background: white;
-    color: var(--chon-orange-dark);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-  }
+  /* 로그인 모드 컨테이너 — 현재는 이메일 인증 단일 모드 */
   .login-mode { display: none; }
   .login-mode.active { display: block; }
 
@@ -1024,115 +1079,48 @@
     <div class="screen-body">
       <h1 class="screen-title">로그인 정보를<br/>입력해주세요</h1>
 
-      <div class="login-tab-row">
-        <button class="login-tab active" data-mode="email" onclick="switchLoginMode('email')">이메일 인증</button>
-        <button class="login-tab" data-mode="pin" onclick="switchLoginMode('pin')">간편 번호</button>
-      </div>
-
-      <!-- 이메일 OTP 로그인 (Passwordless) -->
+      <!-- 이메일 + 비밀번호 로그인 -->
       <div class="login-mode active" id="modeEmail">
         <div class="form-group">
           <label class="form-label">이메일</label>
-          <input type="email" class="line-input" id="loginEmail"
+          <input type="email" class="line-input" id="loginEmail" value="demo@chon.ai"
                  placeholder="가입한 이메일을 입력해 주세요" autocomplete="email"/>
-          <div class="form-error" id="loginError">등록되지 않은 이메일입니다</div>
         </div>
-        <p class="helper-text-sub">
-          비밀번호 없이 이메일로 인증 코드를 받아 로그인합니다.
-        </p>
+        <div class="form-group">
+          <label class="form-label">비밀번호</label>
+          <input type="password" class="line-input" id="loginPassword" value="chon1234"
+                 placeholder="비밀번호를 입력해 주세요" autocomplete="current-password"/>
+          <div class="form-error" id="loginError">이메일 또는 비밀번호가 일치하지 않습니다</div>
+        </div>
         <div class="form-help">
-          <a onclick="goScreen('screenForgot')">간편 번호를 잊으셨나요?</a>
-        </div>
-      </div>
-
-      <!-- 간편 번호 로그인 (2FA) -->
-      <div class="login-mode" id="modePin">
-        <!-- 신뢰 디바이스: PIN 입력 UI -->
-        <div id="pinTrustedView" class="is-hidden">
-          <div class="device-trust-banner">
-            <div class="device-trust-icon">✓</div>
-            <div class="device-trust-text">
-              <div class="device-trust-label">이 디바이스에 기억된 계정</div>
-              <div class="device-trust-value" id="trustedEmailDisplay">—</div>
-            </div>
-            <button class="device-trust-action" onclick="confirmClearDevice()">등록 해제</button>
-          </div>
-          <p class="center-hint-md">
-            6자리 간편 번호로 로그인
-          </p>
-          <div class="pin-dots" id="loginPinDots">
-            <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
-            <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
-          </div>
-          <div class="pin-hint" id="loginPinHint">2FA · 이 디바이스에서만 유효</div>
-          <div class="keypad" id="loginKeypad"></div>
-          <p class="center-hint-sm">
-            <a class="text-link" onclick="goScreen('screenForgot')">간편 번호를 잊으셨나요?</a>
-            &nbsp;·&nbsp;
-            <a class="text-link" onclick="switchLoginMode('email')">다른 계정</a>
-          </p>
-        </div>
-
-        <!-- 미등록 디바이스: 안내 -->
-        <div id="pinUntrustedView">
-          <div class="pin-untrusted-card">
-            <div class="pin-untrusted-icon">🔒</div>
-            <div class="pin-untrusted-title">이 디바이스는 등록되지 않았어요</div>
-            <div class="pin-untrusted-desc">
-              최초 1회 <strong>이메일 인증으로 로그인</strong>하면<br/>
-              이 디바이스에서 간편 번호(2FA)만으로<br/>
-              빠르게 로그인할 수 있습니다.
-            </div>
-            <button class="pin-untrusted-btn" onclick="switchLoginMode('email')">이메일로 인증하기 →</button>
-          </div>
+          <a onclick="goScreen('screenForgot')">비밀번호를 잊으셨나요?</a>
         </div>
       </div>
 
       <div class="flex-spacer min-h-20"></div>
     </div>
     <div class="screen-footer">
-      <button class="primary-btn" id="loginBtn" onclick="doLogin()">인증 코드 받기</button>
+      <button class="primary-btn" id="loginBtn" onclick="doLogin()">로그인</button>
       <p class="footer-prompt">
         계정이 없으신가요?<a onclick="goScreen('screenTerms')">회원가입</a>
       </p>
     </div>
   </section>
 
-  <!-- ============ FORGOT PASSWORD (이메일/SMS 선택) ============ -->
+  <!-- ============ FORGOT PASSWORD (이메일 인증) ============ -->
   <section class="screen" id="screenForgot">
     <div class="top-bar">
       <button class="back-btn" onclick="goScreen('screenLogin')">←</button>
     </div>
     <div class="screen-body">
-      <h1 class="screen-title">인증 받을 정보를<br/>입력해 주세요</h1>
+      <h1 class="screen-title">인증 받을 이메일을<br/>입력해 주세요</h1>
+      <p class="screen-sub">가입 시 등록한 이메일로 인증 코드를 보내드립니다.</p>
 
-      <div class="radio-group">
-        <div class="radio-row">
-          <input type="radio" name="verify" id="rdoEmail" class="radio-input" checked onchange="onForgotMethodChange()"/>
-          <label for="rdoEmail" class="radio-label">
-            <span class="radio-circle"></span>
-            <span>이메일 인증</span>
-          </label>
-          <div class="radio-extra">
-            <div class="input-row">
-              <input type="email" class="line-input" id="forgotEmail" placeholder="이메일 입력"/>
-              <button class="inline-btn" onclick="requestCode('email')">인증요청</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="radio-row">
-          <input type="radio" name="verify" id="rdoSms" class="radio-input" onchange="onForgotMethodChange()"/>
-          <label for="rdoSms" class="radio-label">
-            <span class="radio-circle"></span>
-            <span>SMS 인증</span>
-          </label>
-          <div class="radio-extra">
-            <div class="input-row">
-              <input type="tel" class="line-input" id="forgotPhone" placeholder="010-1234-5678"/>
-              <button class="inline-btn" onclick="requestCode('sms')">인증요청</button>
-            </div>
-          </div>
+      <div class="form-group">
+        <label class="form-label">이메일</label>
+        <div class="input-row">
+          <input type="email" class="line-input" id="forgotEmail" placeholder="가입한 이메일을 입력해 주세요"/>
+          <button type="button" class="inline-btn" onclick="requestCode('email')">인증요청</button>
         </div>
       </div>
     </div>
@@ -1264,32 +1252,46 @@
 
       <div class="form-group">
         <label class="form-label">이메일 <span class="required-mark">*</span></label>
-        <input type="email" class="line-input" id="signupEmail"
-               placeholder="이메일을 입력해 주세요" oninput="checkSignupForm()"/>
+        <div class="input-row">
+          <input type="email" class="line-input" id="signupEmail"
+                 placeholder="이메일을 입력해 주세요" oninput="checkSignupForm()"/>
+          <button class="inline-btn" id="signupEmailBtn" disabled onclick="requestSignupEmailOtp()">인증요청</button>
+        </div>
         <div class="form-error" id="signupEmailError">올바른 이메일 형식이 아닙니다</div>
       </div>
 
-      <div class="form-group">
-        <label class="form-label">휴대폰 번호 <span class="required-mark">*</span></label>
-        <div class="input-row">
-          <input type="tel" class="line-input" id="signupPhone"
-                 placeholder="010-1234-5678" oninput="checkSignupForm()"/>
-          <button class="inline-btn" id="signupPhoneBtn" disabled onclick="requestSignupPhoneOtp()">인증요청</button>
-        </div>
-        <div class="form-error" id="signupPhoneError">이미 가입된 휴대폰 번호입니다</div>
-      </div>
-
       <div class="form-group is-hidden" id="signupOtpGroup">
-        <label class="form-label">인증 번호 <span class="required-mark">*</span></label>
+        <label class="form-label">이메일 인증 번호 <span class="required-mark">*</span></label>
         <div class="input-row">
           <input type="tel" class="line-input" id="signupOtp" maxlength="6"
-                 placeholder="6자리 인증 번호" oninput="checkSignupForm()"/>
+                 placeholder="이메일로 받은 6자리 번호" oninput="checkSignupForm()"/>
           <span class="otp-timer otp-timer--m4" id="signupOtpTimer">03:00</span>
         </div>
         <div class="form-error" id="signupOtpError">인증 번호가 일치하지 않습니다</div>
         <p class="demo-hint">
           데모 인증 코드: <strong class="text-orange">123456</strong>
         </p>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">휴대폰 번호 <span class="required-mark">*</span></label>
+        <input type="tel" class="line-input" id="signupPhone"
+               placeholder="010-1234-5678" oninput="checkSignupForm()"/>
+        <div class="form-error" id="signupPhoneError">올바른 휴대폰 번호 형식이 아닙니다</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">비밀번호 <span class="required-mark">*</span></label>
+        <input type="password" class="line-input" id="signupPassword"
+               placeholder="영문+숫자 포함 8자 이상" autocomplete="new-password" oninput="checkSignupForm()"/>
+        <div class="form-error" id="signupPasswordError">영문과 숫자를 포함해 8자 이상 입력해 주세요</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">비밀번호 확인 <span class="required-mark">*</span></label>
+        <input type="password" class="line-input" id="signupPasswordConfirm"
+               placeholder="비밀번호를 한 번 더 입력해 주세요" autocomplete="new-password" oninput="checkSignupForm()"/>
+        <div class="form-error" id="signupPasswordConfirmError">비밀번호가 일치하지 않습니다</div>
       </div>
     </div>
     <div class="screen-footer">
@@ -1328,42 +1330,81 @@
   </section>
 
   <!-- ============ PIN SETUP ============ -->
-  <section class="screen" id="screenPinSetup">
-    <div class="top-bar">
-      <button class="back-btn" onclick="goScreen('screenAuthChoice')">←</button>
-    </div>
+  <section class="screen pin-screen" id="screenPinSetup">
     <div class="screen-body">
-      <h1 class="screen-title">간편 번호를<br/>입력해 주세요</h1>
-      <p class="screen-sub">6자리 숫자로 빠르게 로그인할 수 있습니다.</p>
+      <h1 class="pin-screen-title">간편번호 설정</h1>
 
-      <div class="pin-dots" id="setupPinDots">
-        <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
-        <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+      <div class="pin-screen-spacer-top"></div>
+
+      <div class="pin-screen-center">
+        <p class="pin-screen-desc" id="setupPinHint">앱 이용 시 입력할 간편 번호 입니다.</p>
+        <p class="pin-screen-sub">숫자 6자리</p>
+        <div class="pin-dots" id="setupPinDots">
+          <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+          <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+        </div>
       </div>
-      <div class="pin-hint" id="setupPinHint">생일·전화번호 등 추측 가능한 번호는 피하세요</div>
 
-      <div class="flex-spacer min-h-8"></div>
+      <div class="pin-screen-spacer-bottom"></div>
+
       <div class="keypad" id="setupKeypad"></div>
+
+      <div class="pin-screen-footer">
+        <button type="button" class="pin-screen-cancel" onclick="cancelPinSetup()">취소</button>
+      </div>
     </div>
   </section>
 
   <!-- ============ PIN CONFIRM ============ -->
-  <section class="screen" id="screenPinConfirm">
-    <div class="top-bar">
-      <button class="back-btn" onclick="restartPinSetup()">←</button>
-    </div>
+  <section class="screen pin-screen" id="screenPinConfirm">
     <div class="screen-body">
-      <h1 class="screen-title">한 번 더<br/>입력해 주세요</h1>
-      <p class="screen-sub">간편 번호 확인을 위해 다시 입력합니다.</p>
+      <h1 class="pin-screen-title">간편번호 확인</h1>
 
-      <div class="pin-dots" id="confirmPinDots">
-        <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
-        <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+      <div class="pin-screen-spacer-top"></div>
+
+      <div class="pin-screen-center">
+        <p class="pin-screen-desc" id="confirmPinHint">방금 입력한 6자리 번호를 다시 입력하세요.</p>
+        <p class="pin-screen-sub">숫자 6자리</p>
+        <div class="pin-dots" id="confirmPinDots">
+          <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+          <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+        </div>
       </div>
-      <div class="pin-hint" id="confirmPinHint">방금 입력한 6자리 번호를 입력하세요</div>
 
-      <div class="flex-spacer min-h-8"></div>
+      <div class="pin-screen-spacer-bottom"></div>
+
       <div class="keypad" id="confirmKeypad"></div>
+
+      <div class="pin-screen-footer">
+        <button type="button" class="pin-screen-cancel" onclick="restartPinSetup()">다시 입력</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PIN LOGIN (이미 신뢰된 디바이스 · 세션 유효) ============ -->
+  <section class="screen pin-screen" id="screenPinLogin">
+    <div class="screen-body">
+      <h1 class="pin-screen-title">간편번호 입력</h1>
+
+      <div class="pin-screen-spacer-top"></div>
+
+      <div class="pin-screen-center">
+        <p class="pin-screen-desc" id="loginPinHint">앱 이용 시 입력할 간편 번호 입니다.</p>
+        <p class="pin-screen-sub" id="loginPinAccount">숫자 6자리</p>
+        <div class="pin-dots" id="loginPinDots">
+          <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+          <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+        </div>
+      </div>
+
+      <div class="pin-screen-spacer-bottom"></div>
+
+      <div class="keypad" id="loginKeypad"></div>
+
+      <div class="pin-screen-footer">
+        <button type="button" class="pin-screen-cancel" onclick="confirmClearDevice()">취소</button>
+        <button type="button" class="pin-screen-fallback" onclick="useEmailLoginInstead()">이메일로 로그인</button>
+      </div>
     </div>
   </section>
 
@@ -1406,6 +1447,8 @@ let state = {
 //   이후 PIN(2FA)만으로도 로그인 가능
 // ============================================================
 const DEVICE_KEY = 'pass_device_trust';
+// PIN-only 로그인 유효 기간 — 마지막 사용 후 이 기간이 지나면 이메일 인증부터 다시
+const SESSION_WINDOW_MS = 30 * 24 * 60 * 60 * 1000; // 30일
 
 function loadDeviceTrust() {
   try {
@@ -1433,30 +1476,42 @@ function registerDeviceForEmail(email) {
 function bindPinToDevice(pin) {
   const t = loadDeviceTrust();
   if (!t || !t.email) return;
-  saveDeviceTrust({ ...t, pin });
+  saveDeviceTrust({ ...t, pin, lastUsedAt: Date.now() });
+}
+function bumpLastUsedAt() {
+  // 성공적인 로그인(이메일 OTP 또는 PIN)마다 갱신 — sliding window
+  const t = loadDeviceTrust();
+  if (!t) return;
+  saveDeviceTrust({ ...t, lastUsedAt: Date.now() });
+}
+
+// 신뢰된 디바이스 + PIN 보유 + 세션 유효한지 검사
+function canUsePinLogin() {
+  const t = state.deviceTrust;
+  if (!t || !t.email || !t.pin) return false;
+  // lastUsedAt 없으면 등록 시점 기준
+  const anchor = t.lastUsedAt || t.updatedAt || t.registeredAt || 0;
+  return (Date.now() - anchor) < SESSION_WINDOW_MS;
 }
 
 function refreshPinTabUI() {
-  const t = state.deviceTrust;
-  const hasPin = !!(t && t.pin);
-  const trustedView = document.getElementById('pinTrustedView');
-  const untrustedView = document.getElementById('pinUntrustedView');
-  if (!trustedView || !untrustedView) return;
-  if (hasPin) {
-    document.getElementById('trustedEmailDisplay').textContent = t.email;
-    trustedView.classList.remove('is-hidden');
-    untrustedView.classList.add('is-hidden');
-  } else {
-    trustedView.classList.add('is-hidden');
-    untrustedView.classList.remove('is-hidden');
-  }
+  // 구 PIN 탭 UI는 삭제됨 — 호환을 위해 no-op
 }
 
 function confirmClearDevice() {
   if (!confirm('이 디바이스의 간편 번호 등록을 해제할까요?\n다음 로그인 시 이메일 인증이 필요합니다.')) return;
   clearDeviceTrust();
   showToast('🔒 디바이스 등록 해제됨');
-  switchLoginMode('email');
+  state.pinLogin = '';
+  resetPinDots('loginPinDots');
+  goScreen('screenLogin');
+}
+
+// 사용자가 PIN 로그인 화면에서 "이메일로 로그인"을 선택
+function useEmailLoginInstead() {
+  state.pinLogin = '';
+  resetPinDots('loginPinDots');
+  goScreen('screenLogin');
 }
 
 // 페이지 진입 시 디바이스 신뢰 로드
@@ -1483,16 +1538,23 @@ function goScreen(id) {
 }
 
 // ============================================================
-// Splash → Login (디바이스 신뢰 상태에 따라 디폴트 탭 결정)
+// Splash → Login 분기
+//   · 신뢰 디바이스 + PIN 보유 + 세션 유효 → screenPinLogin (PIN-only)
+//   · 그 외(새 기기·세션 만료·PIN 미설정)         → screenLogin (이메일 OTP)
 // ============================================================
 setTimeout(() => {
-  if (state.current === 'screenSplash') {
+  if (state.current !== 'screenSplash') return;
+  if (canUsePinLogin()) {
+    goScreen('screenPinLogin');
+    state.pinLogin = '';
+    resetPinDots('loginPinDots');
+  } else {
     goScreen('screenLogin');
-    // 디바이스에 PIN이 등록되어 있으면 PIN 탭 디폴트
+    // 세션이 만료된 신뢰 디바이스라면 안내
     const t = state.deviceTrust;
-    if (t && t.pin) switchLoginMode('pin');
-    else switchLoginMode('email');
-    refreshPinTabUI();
+    if (t && t.pin) {
+      showToast('🔒 세션이 만료되었습니다. 이메일 인증을 다시 진행해 주세요');
+    }
   }
 }, 1800);
 
@@ -1501,29 +1563,53 @@ setTimeout(() => {
 // ============================================================
 async function doLogin() {
   const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
   const err = document.getElementById('loginError');
   const emailInput = document.getElementById('loginEmail');
+  const pwInput = document.getElementById('loginPassword');
   const btn = document.getElementById('loginBtn');
 
   if (!email || !/\S+@\S+\.\S+/.test(email)) {
     err.textContent = '올바른 이메일 형식이 아닙니다';
     err.classList.add('show'); emailInput.classList.add('error'); return;
   }
+  if (!password || password.length < 8) {
+    err.textContent = '비밀번호는 8자 이상입니다';
+    err.classList.add('show'); pwInput.classList.add('error'); return;
+  }
 
   btn.disabled = true;
   const origText = btn.textContent;
-  btn.textContent = '인증 코드 전송 중...';
+  btn.textContent = '로그인 중...';
   try {
-    const res = await PassAPI.auth.requestOtp('email', email, 'login');
-    err.classList.remove('show'); emailInput.classList.remove('error');
-    state.emailLoginPending = email;
-    state.forgotTarget = email;
-    document.getElementById('verifyTarget').textContent = email + ' 로 전송된 6자리 코드를 입력해 주세요';
-    showToast(res.demoCode ? '📨 인증 코드 전송됨 (데모: ' + res.demoCode + ')' : '📨 인증 코드 전송됨');
-    setTimeout(() => goScreen('screenVerify'), 400);
+    const loginResp = await PassAPI.auth.loginPassword(email, password);
+    err.classList.remove('show');
+    emailInput.classList.remove('error'); pwInput.classList.remove('error');
+    PassAPI.saveSession(loginResp);
+    registerDeviceForEmail(email);
+
+    // PIN 확인 단계 — 디바이스에 PIN 없으면 설정, 있으면 통과
+    const trust = PassAPI.getDeviceTrust();
+    if (!trust?.pin) {
+      // PIN 설정 직진 (screenAuthChoice 단계 생략)
+      state.postLoginPinSetup = true;
+      state.currentSignupEmail = email;
+      state.pinSetup = '';
+      state.pinConfirm = '';
+      resetPinDots('setupPinDots');
+      resetPinDots('confirmPinDots');
+      document.getElementById('setupPinHint').textContent = '앱 이용 시 입력할 간편 번호 입니다.';
+      document.getElementById('setupPinHint').classList.remove('error');
+      showToast('✓ 로그인 성공 · 간편번호를 설정해 주세요');
+      setTimeout(() => goScreen('screenPinSetup'), 300);
+    } else {
+      // 이미 PIN 보유 → 세션 갱신 후 home으로 직행
+      bumpLastUsedAt();
+      showSuccessLogin(email);
+    }
   } catch (e) {
-    err.textContent = e.body?.message || (e.status === 404 ? '등록되지 않은 이메일입니다' : '서버 오류 — 잠시 후 다시 시도');
-    err.classList.add('show'); emailInput.classList.add('error');
+    err.textContent = e.body?.message || (e.status === 401 ? '이메일 또는 비밀번호가 일치하지 않습니다' : '서버 오류 — 잠시 후 다시 시도');
+    err.classList.add('show'); pwInput.classList.add('error');
   } finally {
     btn.disabled = false;
     btn.textContent = origText;
@@ -1534,31 +1620,27 @@ async function doLogin() {
 // Forgot password
 // ============================================================
 function onForgotMethodChange() {
-  state.forgotMethod = document.getElementById('rdoEmail').checked ? 'email' : 'sms';
+  // SMS OTP 제거 — 이메일 단일 흐름
+  state.forgotMethod = 'email';
   updateForgotBtnState();
 }
 
 function updateForgotBtnState() {
-  const val = state.forgotMethod === 'email'
-    ? document.getElementById('forgotEmail').value.trim()
-    : document.getElementById('forgotPhone').value.trim();
+  const val = document.getElementById('forgotEmail').value.trim();
   document.getElementById('forgotNextBtn').disabled = !val;
 }
 
-['forgotEmail', 'forgotPhone'].forEach(id => {
-  document.getElementById(id).addEventListener('input', updateForgotBtnState);
-});
+document.getElementById('forgotEmail').addEventListener('input', updateForgotBtnState);
 
-async function requestCode(method) {
-  const val = method === 'email'
-    ? document.getElementById('forgotEmail').value.trim()
-    : document.getElementById('forgotPhone').value.trim();
-  if (!val) { showToast('정보를 먼저 입력해 주세요'); return; }
+async function requestCode(_method) {
+  // SMS OTP 제거 — 이메일만 사용
+  const val = document.getElementById('forgotEmail').value.trim();
+  if (!val) { showToast('이메일을 먼저 입력해 주세요'); return; }
 
   try {
-    const res = await PassAPI.auth.requestOtp(method === 'email' ? 'email' : 'sms', val, 'reset_pin');
+    const res = await PassAPI.auth.requestOtp('email', val, 'reset_pin');
     state.forgotTarget = val;
-    state.forgotMethod = method;
+    state.forgotMethod = 'email';
     document.getElementById('verifyTarget').textContent = val + ' 로 전송된 6자리 코드를 입력해 주세요';
     showToast(res.demoCode ? '📨 코드 전송 (데모: ' + res.demoCode + ')' : '📨 인증번호 전송됨');
     setTimeout(() => goScreen('screenVerify'), 500);
@@ -1622,44 +1704,23 @@ async function verifyCode() {
   btn.textContent = '확인 중...';
 
   try {
-    if (state.emailLoginPending) {
-      // 이메일 OTP 로그인 — 백엔드 호출 (loginEmailOtp가 OTP 소비 + JWT 발급)
-      const email = state.emailLoginPending;
-      const loginResp = await PassAPI.auth.loginEmailOtp(email, code);
-      err.classList.remove('show');
-      stopOtpTimer();
-      state.emailLoginPending = null;
-      PassAPI.saveSession(loginResp);
-
-      // 이 디바이스에 PIN 있는지 확인 — 없으면 PIN 설정 권유
-      const trust = PassAPI.getDeviceTrust();
-      if (!trust?.pin) {
-        state.currentSignupEmail = email;
-        state.postLoginPinSetup = true;
-        showToast('✓ 이메일 인증 성공');
-        setTimeout(() => goScreen('screenAuthChoice'), 400);
-      } else {
-        showSuccessLogin(email);
-      }
-    } else {
-      // 간편 번호 재설정 플로우 — OTP만 검증 (login 목적 아님)
-      const target = state.forgotTarget;
-      const channel = state.forgotMethod === 'email' ? 'email' : 'sms';
-      await PassAPI.auth.verifyOtp(channel, target, code, 'reset_pin');
-      err.classList.remove('show');
-      stopOtpTimer();
-      showToast('✓ 인증 성공');
-      // 재설정 진행 — 새 PIN 설정 화면으로
-      state.currentSignupEmail = target;
-      state.resetMode = true;
-      setTimeout(() => {
-        state.pinSetup = '';
-        resetPinDots('setupPinDots');
-        document.getElementById('setupPinHint').textContent = '새 간편 번호 6자리를 입력하세요';
-        document.getElementById('setupPinHint').classList.remove('error');
-        goScreen('screenPinSetup');
-      }, 400);
-    }
+    // OTP는 PIN/비밀번호 재설정 흐름 전용 (일반 로그인엔 사용하지 않음)
+    const target = state.forgotTarget;
+    const channel = 'email'; // SMS OTP 제거 — 재설정도 이메일만
+    await PassAPI.auth.verifyOtp(channel, target, code, 'reset_pin');
+    err.classList.remove('show');
+    stopOtpTimer();
+    showToast('✓ 인증 성공');
+    // 재설정 진행 — 새 PIN 설정 화면으로
+    state.currentSignupEmail = target;
+    state.resetMode = true;
+    setTimeout(() => {
+      state.pinSetup = '';
+      resetPinDots('setupPinDots');
+      document.getElementById('setupPinHint').textContent = '새 간편 번호 6자리를 입력하세요';
+      document.getElementById('setupPinHint').classList.remove('error');
+      goScreen('screenPinSetup');
+    }, 400);
   } catch (e) {
     err.textContent = e.body?.message || '인증 코드가 일치하지 않습니다';
     err.classList.add('show');
@@ -1770,48 +1831,62 @@ function checkSignupForm() {
   const email = document.getElementById('signupEmail').value.trim();
   const phone = document.getElementById('signupPhone').value.trim();
   const otp = document.getElementById('signupOtp').value.trim();
+  const pw = document.getElementById('signupPassword').value;
+  const pw2 = document.getElementById('signupPasswordConfirm').value;
 
   const emailValid = /\S+@\S+\.\S+/.test(email);
   const phoneValid = /^010-\d{4}-\d{4}$/.test(phone);
+  const pwValid = pw.length >= 8 && /[A-Za-z]/.test(pw) && /[0-9]/.test(pw);
+  const pwMatch = pw && pw === pw2;
 
-  // 인증요청 버튼 활성화: 이메일·전화번호 형식 ok
-  const phoneBtn = document.getElementById('signupPhoneBtn');
-  if (phoneBtn) phoneBtn.disabled = !(emailValid && phoneValid);
+  // 이메일 인증요청 버튼 — 이메일 형식만 맞으면 활성화
+  const emailBtn = document.getElementById('signupEmailBtn');
+  if (emailBtn) emailBtn.disabled = !emailValid;
 
-  // 가입 완료 버튼: OTP 6자리 + 인증 요청됨
-  const valid = emailValid && phoneValid && state.signupOtpSent && otp.length === 6;
+  // 가입 완료 버튼: 이메일+OTP 인증 + 전화번호 형식 + 비밀번호 모두 통과
+  const valid = emailValid && phoneValid && state.signupOtpSent && otp.length === 6 && pwValid && pwMatch;
   document.getElementById('signupBtn').disabled = !valid;
 
-  // 인라인 에러 클리어
+  // 인라인 에러 표시
   const emailErr = document.getElementById('signupEmailError');
   if (email && !emailValid) emailErr.classList.add('show');
   else emailErr.classList.remove('show');
+
+  const phoneErr = document.getElementById('signupPhoneError');
+  if (phone && !phoneValid) phoneErr.classList.add('show');
+  else phoneErr.classList.remove('show');
+
+  const pwErr = document.getElementById('signupPasswordError');
+  if (pw && !pwValid) pwErr.classList.add('show');
+  else pwErr.classList.remove('show');
+
+  const pw2Err = document.getElementById('signupPasswordConfirmError');
+  if (pw2 && !pwMatch) pw2Err.classList.add('show');
+  else pw2Err.classList.remove('show');
 }
 
-async function requestSignupPhoneOtp() {
+async function requestSignupEmailOtp() {
   const email = document.getElementById('signupEmail').value.trim();
-  const phone = document.getElementById('signupPhone').value.trim();
-  const phoneErr = document.getElementById('signupPhoneError');
-  const btn = document.getElementById('signupPhoneBtn');
+  const emailErr = document.getElementById('signupEmailError');
+  const btn = document.getElementById('signupEmailBtn');
 
   btn.disabled = true;
   try {
-    // 백엔드에 register 목적 OTP 요청 (중복 검사도 서버에서)
-    const res = await PassAPI.auth.requestOtp('sms', phone, 'register');
-    phoneErr.classList.remove('show');
+    // 백엔드에 register 목적 이메일 OTP 요청
+    const res = await PassAPI.auth.requestOtp('email', email, 'register');
+    emailErr.classList.remove('show');
     state.signupOtpSent = true;
     state.currentSignupEmail = email;
-    state.currentSignupPhone = phone;
     document.getElementById('signupOtpGroup').classList.remove('is-hidden');
     document.getElementById('signupOtp').focus();
     startSignupOtpTimer();
     showToast(res.demoCode
-      ? '📱 ' + phone + ' 로 코드 전송 (데모: ' + res.demoCode + ')'
-      : '📱 ' + phone + ' 로 인증 코드 전송됨');
+      ? '📨 ' + email + ' 로 코드 전송 (데모: ' + res.demoCode + ')'
+      : '📨 ' + email + ' 로 인증 코드 전송됨');
     checkSignupForm();
   } catch (e) {
-    phoneErr.textContent = e.body?.message || '인증 요청 실패 — 잠시 후 다시 시도';
-    phoneErr.classList.add('show');
+    emailErr.textContent = e.body?.message || '인증 요청 실패 — 잠시 후 다시 시도';
+    emailErr.classList.add('show');
   } finally {
     btn.disabled = false;
   }
@@ -1848,6 +1923,7 @@ async function completeSignup() {
   const email = document.getElementById('signupEmail').value.trim();
   const phone = document.getElementById('signupPhone').value.trim();
   const otp = document.getElementById('signupOtp').value.trim();
+  const password = document.getElementById('signupPassword').value;
   const otpErr = document.getElementById('signupOtpError');
   const btn = document.getElementById('signupBtn');
 
@@ -1856,25 +1932,21 @@ async function completeSignup() {
   btn.textContent = '가입 중...';
 
   try {
-    // 1) 가입 (서버가 OTP도 검증)
-    const signupResp = await PassAPI.auth.signup(email, phone, otp);
+    // 1) 가입 — 서버가 휴대폰 OTP를 검증하고 비밀번호 해시 저장
+    await PassAPI.auth.signup(email, phone, password, otp);
     otpErr.classList.remove('show');
     document.getElementById('signupOtp').classList.remove('error');
     stopSignupOtpTimer();
 
-    // 2) 자동 로그인 위해 이메일 OTP 한 번 더 요청 + 로그인
-    //    실제 운영에서는 가입 응답에 토큰을 같이 주는 것도 가능하지만
-    //    여기서는 명시적으로 별도 호출
-    await PassAPI.auth.requestOtp('email', email, 'login');
-    // 데모 코드 또는 동일 코드 사용 (env OTP_DEMO_CODE)
+    // 2) 자동 로그인 — 방금 만든 비밀번호로
     try {
-      const loginResp = await PassAPI.auth.loginEmailOtp(email, otp);
+      const loginResp = await PassAPI.auth.loginPassword(email, password);
       PassAPI.saveSession(loginResp, { isNew: true });
+      registerDeviceForEmail(email);
     } catch (e) {
-      // 동일 OTP 재사용 불가하면 PIN 설정 화면에서 다시 처리
-      // 토큰 없이도 PIN 설정 진입 가능하도록 메일 정보만 저장
+      // 자동 로그인 실패해도 PIN 설정 진입 가능하도록 메타 정보만 저장
       try {
-        sessionStorage.setItem('passUser', JSON.stringify({
+        localStorage.setItem('passUser', JSON.stringify({
           email, name: email.split('@')[0], isNew: true, loginAt: Date.now(),
         }));
       } catch (_) {}
@@ -1898,62 +1970,49 @@ async function completeSignup() {
 }
 
 // ============================================================
-// Login mode switcher (이메일 / 간편번호 / 지문)
+// Login mode switcher — 호환을 위해 남겨두지만 현재 UI는 이메일 단일
 // ============================================================
 function switchLoginMode(mode) {
   state.loginMode = mode;
-  document.querySelectorAll('.login-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === mode));
-  document.querySelectorAll('.login-mode').forEach(m => m.classList.remove('active'));
-  const map = { email: 'modeEmail', pin: 'modePin' };
-  document.getElementById(map[mode]).classList.add('active');
-
-  const btn = document.getElementById('loginBtn');
-  if (mode === 'email') btn.textContent = '인증 코드 받기';
-  else btn.textContent = '간편 번호로 로그인';
-
-  // Reset PIN if leaving pin mode
-  if (mode !== 'pin') resetPinDots('loginPinDots');
   state.pinLogin = '';
 }
 
-// Override doLogin to handle 2 modes (email-OTP / PIN-2FA) — BACKEND 연동
-const originalDoLogin = doLogin;
-doLogin = async function() {
-  if (state.loginMode === 'email') {
-    return originalDoLogin();
-  }
-  // PIN 모드
-  const trust = state.deviceTrust || PassAPI.getDeviceTrust();
+// ============================================================
+// PIN-only Login (screenPinLogin) — 신뢰 디바이스 + 세션 유효 시
+// ============================================================
+async function doPinLogin() {
+  const trust = state.deviceTrust || (window.PassAPI && PassAPI.getDeviceTrust && PassAPI.getDeviceTrust());
   if (!trust || !trust.pin) {
-    switchLoginMode('email');
     showToast('먼저 이메일 인증으로 디바이스를 등록하세요');
+    goScreen('screenLogin');
     return;
   }
-  if (state.pinLogin.length !== 6) { showToast('6자리를 모두 입력하세요'); return; }
+  if (state.pinLogin.length !== 6) return;
 
   try {
     const loginResp = await PassAPI.auth.loginPin(state.pinLogin);
     PassAPI.saveSession(loginResp);
-    // 로컬 trust도 갱신
     PassAPI.setDeviceTrust({ email: loginResp.user.email, pin: trust.pin });
+    bumpLastUsedAt();
     showSuccessLogin(loginResp.user.email);
   } catch (e) {
     shakePin('loginPinDots');
-    document.getElementById('loginPinHint').textContent = e.body?.message || '간편 번호가 일치하지 않습니다';
-    document.getElementById('loginPinHint').classList.add('error');
+    const hint = document.getElementById('loginPinHint');
+    hint.textContent = e.body?.message || '간편번호가 일치하지 않습니다';
+    hint.classList.add('error');
     setTimeout(() => {
       state.pinLogin = '';
       resetPinDots('loginPinDots');
-      document.getElementById('loginPinHint').textContent = '2FA · 이 디바이스에서만 유효';
-      document.getElementById('loginPinHint').classList.remove('error');
+      hint.textContent = '앱 이용 시 입력할 간편 번호 입니다.';
+      hint.classList.remove('error');
     }, 900);
   }
-};
+}
 
 function showSuccessLogin(email) {
   // 세션에 로그인 정보 저장 (메인 앱에서 사용)
   try {
-    sessionStorage.setItem('passUser', JSON.stringify({
+    localStorage.setItem('passUser', JSON.stringify({
       email,
       loginAt: Date.now()
     }));
@@ -1965,8 +2024,8 @@ function showSuccessLogin(email) {
 function goMain() {
   // 신규 가입자는 Self ID 만들기로 라우팅, 기존 사용자는 홈으로
   try {
-    const user = JSON.parse(sessionStorage.getItem('passUser') || '{}');
-    const selfIdDone = sessionStorage.getItem('selfIdCreated') === '1';
+    const user = JSON.parse(localStorage.getItem('passUser') || '{}');
+    const selfIdDone = localStorage.getItem('selfIdCreated') === '1';
     if (user.isNew && !selfIdDone) {
       window.location.href = './self-id.html';
       return;
@@ -1993,12 +2052,17 @@ function skipAuthSetup() {
   // PIN 설정 건너뛰기 — 가입/로그인 후 바로 메인. 디바이스 등록만 유지(PIN 없음)
   const email = state.currentSignupEmail || 'demo@chon.ai';
   registerDeviceForEmail(email);
+
+  // 로그인 흐름이면 isNew=false, 가입 흐름이면 isNew=true
+  const isLoginFlow = state.postLoginPinSetup;
   state.postLoginPinSetup = false;
+  state.currentSignupEmail = '';
+
   try {
-    sessionStorage.setItem('passUser', JSON.stringify({
+    localStorage.setItem('passUser', JSON.stringify({
       email,
       loginAt: Date.now(),
-      isNew: !!state.currentSignupEmail
+      isNew: !isLoginFlow,
     }));
   } catch (e) {}
   showToast('👋 ' + email);
@@ -2010,6 +2074,24 @@ function restartPinSetup() {
   state.pinConfirm = '';
   resetPinDots('setupPinDots');
   goScreen('screenPinSetup');
+}
+
+// PIN 설정 화면(취소) — 흐름에 따라 다른 곳으로 복귀
+function cancelPinSetup() {
+  state.pinSetup = '';
+  state.pinConfirm = '';
+  resetPinDots('setupPinDots');
+  if (state.resetMode) {
+    // PIN 재설정 흐름이었다면 로그인 화면으로
+    state.resetMode = false;
+    goScreen('screenLogin');
+  } else if (state.postLoginPinSetup) {
+    // 이메일 로그인 직후 PIN 설정 권유 흐름 — 그냥 건너뛰고 메인
+    skipAuthSetup();
+  } else {
+    // 회원가입 직후 PIN 설정 흐름 — 선택 화면으로 복귀
+    goScreen('screenAuthChoice');
+  }
 }
 
 // ============================================================
@@ -2053,12 +2135,12 @@ function shakePin(dotsId) {
   setTimeout(() => dots.forEach(d => d.classList.remove('error')), 500);
 }
 
-// Login PIN
+// Login PIN — screenPinLogin에서 사용
 renderKeypad('loginKeypad', (k) => {
   if (k === 'back') state.pinLogin = state.pinLogin.slice(0, -1);
   else if (state.pinLogin.length < 6) state.pinLogin += k;
   updatePinDots('loginPinDots', state.pinLogin);
-  if (state.pinLogin.length === 6) setTimeout(doLogin, 200);
+  if (state.pinLogin.length === 6) setTimeout(doPinLogin, 200);
 });
 
 // Setup PIN
@@ -2123,14 +2205,14 @@ renderKeypad('confirmKeypad', async (k) => {
         // 로그인 후 PIN 설정 — 바로 메인으로
         state.postLoginPinSetup = false;
         try {
-          sessionStorage.setItem('passUser', JSON.stringify({ email, loginAt: Date.now(), devicePin: true }));
+          localStorage.setItem('passUser', JSON.stringify({ email, loginAt: Date.now(), devicePin: true }));
         } catch (e) {}
         showToast('✓ 디바이스 등록 완료');
         goMain();
       } else {
         // 가입 플로우 — 자동 로그인 + 바로 메인으로
         try {
-          sessionStorage.setItem('passUser', JSON.stringify({ email, loginAt: Date.now(), isNew: true, devicePin: true }));
+          localStorage.setItem('passUser', JSON.stringify({ email, loginAt: Date.now(), isNew: true, devicePin: true }));
         } catch (e) {}
         showToast('🎉 가입 완료 · ' + email);
         goMain();
@@ -2147,7 +2229,7 @@ renderKeypad('confirmKeypad', async (k) => {
 // Keyboard shortcuts for PIN screens
 document.addEventListener('keydown', e => {
   const pinScreens = ['screenPinSetup', 'screenPinConfirm'];
-  const isPinLogin = state.current === 'screenLogin' && state.loginMode === 'pin';
+  const isPinLogin = state.current === 'screenPinLogin';
   const isPinScreen = pinScreens.includes(state.current);
   if (!isPinLogin && !isPinScreen) return;
   if (/^[0-9]$/.test(e.key)) {
@@ -2182,15 +2264,12 @@ document.querySelectorAll('.line-input').forEach(inp => {
 });
 
 // Phone formatting
-['signupPhone', 'forgotPhone'].forEach(id => {
-  document.getElementById(id).addEventListener('input', e => {
-    let v = e.target.value.replace(/[^0-9]/g, '');
-    if (v.length > 3 && v.length <= 7) v = v.slice(0,3) + '-' + v.slice(3);
-    else if (v.length > 7) v = v.slice(0,3) + '-' + v.slice(3,7) + '-' + v.slice(7,11);
-    e.target.value = v;
-    if (id === 'signupPhone') checkSignupForm();
-    else updateForgotBtnState();
-  });
+document.getElementById('signupPhone').addEventListener('input', e => {
+  let v = e.target.value.replace(/[^0-9]/g, '');
+  if (v.length > 3 && v.length <= 7) v = v.slice(0,3) + '-' + v.slice(3);
+  else if (v.length > 7) v = v.slice(0,3) + '-' + v.slice(3,7) + '-' + v.slice(7,11);
+  e.target.value = v;
+  checkSignupForm();
 });
 
 // Enter key on login

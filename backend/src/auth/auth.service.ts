@@ -16,7 +16,7 @@ import {
   RequestOtpDto,
   VerifyOtpDto,
   SignupDto,
-  LoginEmailOtpDto,
+  LoginPasswordDto,
   SetupPinDto,
   LoginPinDto,
 } from './dto/auth.dto';
@@ -36,10 +36,10 @@ export class AuthService {
   // ============================================================
   async requestOtp(dto: RequestOtpDto, ip?: string) {
     const target = dto.channel === 'sms' ? normalizePhone(dto.target) : dto.target.toLowerCase();
-    const purpose = dto.purpose || 'login';
+    const purpose = dto.purpose || 'register';
 
-    // login/reset_pin은 가입된 사용자만 허용
-    if (purpose !== 'register') {
+    // reset_pin은 가입된 사용자만 허용 (register는 미가입 상태로 발급)
+    if (purpose === 'reset_pin') {
       const user = await this.findUserByTarget(dto.channel, target);
       if (!user) throw new NotFoundException('등록되지 않은 사용자입니다');
     }
@@ -123,7 +123,8 @@ export class AuthService {
   }
 
   // ============================================================
-  // 가입 — 이메일 + 전화번호 + 휴대폰 OTP
+  // 가입 — 이메일 + 전화번호 + 비밀번호 + 이메일 OTP (가입 시 1회)
+  //   휴대폰 번호는 정보로만 저장 (OTP 검증 없음)
   // ============================================================
   async signup(dto: SignupDto, ip?: string) {
     const email = dto.email.toLowerCase();
@@ -139,16 +140,24 @@ export class AuthService {
       );
     }
 
-    // 휴대폰 OTP 검증 (register 목적)
+    // 이메일 OTP 검증 (register 목적) — 가입 시 1회
     await this.verifyOtp({
-      channel: 'sms', target: dto.phone, code: dto.otp, purpose: 'register',
+      channel: 'email', target: dto.email, code: dto.otp, purpose: 'register',
     });
+
+    if (this.isWeakPassword(dto.password)) {
+      throw new BadRequestException('비밀번호가 너무 약합니다 (숫자/문자 조합 8자 이상)');
+    }
+
+    const rounds = Number(this.cfg.get('PIN_BCRYPT_ROUNDS') ?? 12);
+    const passwordHash = await bcrypt.hash(dto.password, rounds);
 
     const user = await this.prisma.user.create({
       data: {
         email,
         phone,
-        phoneVerified: true,
+        phoneVerified: false, // 휴대폰은 정보 수집만, 검증 안 함
+        passwordHash,
         name: dto.name ?? email.split('@')[0],
       },
     });
@@ -158,19 +167,40 @@ export class AuthService {
   }
 
   // ============================================================
-  // 이메일 OTP 로그인 (1FA)
+  // 비밀번호 로그인 (1FA) — 회원가입 후 일반 로그인
   // ============================================================
-  async loginEmailOtp(dto: LoginEmailOtpDto, ip?: string) {
+  async loginPassword(dto: LoginPasswordDto, ip?: string) {
     const email = dto.email.toLowerCase();
     const user = await this.prisma.user.findUnique({ where: { email } });
-    if (!user) throw new NotFoundException('등록되지 않은 이메일');
+    if (!user) throw new UnauthorizedException('이메일 또는 비밀번호가 일치하지 않습니다');
     if (user.status !== 'active') throw new ForbiddenException('계정 비활성');
 
-    await this.verifyOtp({ channel: 'email', target: email, code: dto.code, purpose: 'login' });
+    if (user.passwordLockedUntil && user.passwordLockedUntil > new Date()) {
+      throw new ForbiddenException('비밀번호 잠금 상태 — 잠시 후 다시 시도해 주세요');
+    }
+    if (!user.passwordHash) {
+      throw new UnauthorizedException('이 계정은 비밀번호가 설정되어 있지 않습니다');
+    }
 
+    const match = await bcrypt.compare(dto.password, user.passwordHash);
+    if (!match) {
+      const newTries = user.passwordFailedTries + 1;
+      const data: any = { passwordFailedTries: newTries };
+      // 5회 실패 시 10분 잠금
+      if (newTries >= 5) {
+        data.passwordLockedUntil = new Date(Date.now() + 10 * 60 * 1000);
+        data.passwordFailedTries = 0;
+      }
+      await this.prisma.user.update({ where: { id: user.id }, data });
+      throw new UnauthorizedException(
+        newTries >= 5 ? '비밀번호 5회 실패 — 10분 잠금' : '이메일 또는 비밀번호가 일치하지 않습니다',
+      );
+    }
+
+    // 성공 — 카운터 리셋 + lastLoginAt
     await this.prisma.user.update({
       where: { id: user.id },
-      data: { lastLoginAt: new Date() },
+      data: { passwordFailedTries: 0, passwordLockedUntil: null, lastLoginAt: new Date() },
     });
 
     const tokens = await this.issueTokens(user.id, user.email, dto.deviceId);
@@ -355,6 +385,14 @@ export class AuthService {
     if (/^(.)\1{5}$/.test(pin)) return true; // 111111
     if (pin === '123456' || pin === '654321') return true;
     if (pin === '000000') return true;
+    return false;
+  }
+
+  // 최소 정책: 8자 이상 + 문자/숫자 모두 포함 (단순 검증)
+  private isWeakPassword(pw: string): boolean {
+    if (pw.length < 8) return true;
+    if (!/[A-Za-z]/.test(pw)) return true;
+    if (!/[0-9]/.test(pw)) return true;
     return false;
   }
 

@@ -11,37 +11,41 @@ function sha256(s: string) {
 async function main() {
   console.log('🌱 시드 데이터 생성 중...');
 
+  // 데모 계정용 비밀번호: chon1234
+  const demoPasswordHash = await bcrypt.hash('chon1234', 12);
+
   // ---------- 데모 사용자 ----------
   const demo = await prisma.user.upsert({
     where: { email: 'demo@chon.ai' },
-    update: {},
+    update: { passwordHash: demoPasswordHash },
     create: {
       email: 'demo@chon.ai',
       phone: '+821012345678',
       phoneVerified: true,
+      passwordHash: demoPasswordHash,
       name: '홍길순',
     },
   });
 
   const friend1 = await prisma.user.upsert({
     where: { email: 'kim@chon.ai' },
-    update: {},
-    create: { email: 'kim@chon.ai', phone: '+821011111111', phoneVerified: true, name: '김민수' },
+    update: { passwordHash: demoPasswordHash },
+    create: { email: 'kim@chon.ai', phone: '+821011111111', phoneVerified: true, passwordHash: demoPasswordHash, name: '김민수' },
   });
   const friend2 = await prisma.user.upsert({
     where: { email: 'park@chon.ai' },
-    update: {},
-    create: { email: 'park@chon.ai', phone: '+821022222222', phoneVerified: true, name: '박지영' },
+    update: { passwordHash: demoPasswordHash },
+    create: { email: 'park@chon.ai', phone: '+821022222222', phoneVerified: true, passwordHash: demoPasswordHash, name: '박지영' },
   });
   const friend3 = await prisma.user.upsert({
     where: { email: 'lee@chon.ai' },
-    update: {},
-    create: { email: 'lee@chon.ai', phone: '+821033333333', phoneVerified: true, name: '이상호' },
+    update: { passwordHash: demoPasswordHash },
+    create: { email: 'lee@chon.ai', phone: '+821033333333', phoneVerified: true, passwordHash: demoPasswordHash, name: '이상호' },
   });
   const fof = await prisma.user.upsert({
     where: { email: 'choi@chon.ai' },
-    update: {},
-    create: { email: 'choi@chon.ai', phone: '+821044444444', phoneVerified: true, name: '최서연' },
+    update: { passwordHash: demoPasswordHash },
+    create: { email: 'choi@chon.ai', phone: '+821044444444', phoneVerified: true, passwordHash: demoPasswordHash, name: '최서연' },
   });
 
   console.log(`✅ 사용자 5명 생성`);
