@@ -403,7 +403,7 @@ CHON 관계 시각화 도구의 4가지 토폴로지:
 |------|------|
 | `frontend/views/family-tree.html` | 가계도 — 3-way 토글, 그래프 액션 패널, 인증현황 카드 |
 | `frontend/views/class-id.html` | 학급증 — 3-way 토글, 그래프 액션 패널, 인증현황 카드 |
-| `frontend/main/feed.html` | 통합 페이지 (iframe 기반) |
+| `frontend/main/contact.html` | 통합 페이지 (iframe 기반) |
 | `frontend/views/graph-tool.html` | 4 토폴로지 시각화 (Admin 포함) |
 
 ### 시스템 문서 (v7)

@@ -10,7 +10,7 @@
 ```
 frontend/auth/login.html ─┐
 frontend/main/home.html  ─┼─▶ frontend/lib/pass-api.js ─▶ NestJS 백엔드 ─▶ SQLite(dev.db)
-frontend/main/feed.html  ─┘     (API 클라이언트)                  :3000/api
+frontend/main/contact.html  ─┘     (API 클라이언트)                  :3000/api
 ```
 
 `pass-api.js`가 인증·사용자·관계·포스트·채팅 전 API를 감싸며, HTML 화면들이 이를 통해
@@ -63,7 +63,7 @@ node integration-check.cjs
 
 1. **로그인** — 이메일 `demo@chon.ai` 입력 → OTP 요청 → 코드 `123456` 입력 → 로그인
 2. `frontend/main/home.html`(메인 허브)로 이동된다
-3. 메인에서 **SNS(`frontend/main/feed.html`)** 진입
+3. 메인에서 **SNS(`frontend/main/contact.html`)** 진입
 4. **피드 탭** — 시드된 포스트 4개가 보인다. 글 작성 / 좋아요 / 필터 전환을 하면
    백엔드에 반영된다 (새로고침해도 유지)
 5. **채팅 탭** — 시드된 대화방 1개가 보인다. 열어서 메시지를 보내면 백엔드에 저장된다
@@ -100,13 +100,13 @@ node integration-check.cjs
 
 - `frontend/auth/login.html` — 가입 / 이메일 OTP 로그인 / PIN
 - `frontend/main/home.html` — 토큰 확인 · 본인 정보 조회
-- `frontend/main/feed.html` — **피드**(목록·작성·좋아요·댓글 수) + **채팅**(대화방·메시지·전송)
+- `frontend/main/contact.html` — **피드**(목록·작성·좋아요·댓글 수) + **채팅**(대화방·메시지·전송)
 - `frontend/lib/pass-api.js` — 인증·사용자·관계·포스트·채팅 전 계층 (백엔드와 계약 검증 완료)
 - 백엔드 6개 모듈 (Auth · Users · Contacts · Relations · Posts · Chat)
 
 ### 아직 데모 데이터로 동작 (연동 보류)
 
-- `frontend/main/feed.html`의 **관계 네트워크 뷰**(가계도 / 그래프 / 리스트), Trust Garden, 뱃지
+- `frontend/main/contact.html`의 **관계 네트워크 뷰**(가계도 / 그래프 / 리스트), Trust Garden, 뱃지
 - 독립 시각화 도구 `frontend/views/family-tree.html` · `frontend/views/class-id.html` · `frontend/views/friends.html`
 
 > 이 도구들은 "CHON 미가입 가족·구성원"을 노드로 추가하는데, 백엔드 `relations`는
@@ -118,8 +118,8 @@ node integration-check.cjs
 ## 알려진 제약 / 참고
 
 - **실시간 채팅(WebSocket)**: 백엔드 게이트웨이와 `pass-api.js`의 `connectChat()`은 동작하지만
-  `frontend/main/feed.html`에는 REST 방식만 연결돼 있다. 상대 메시지는 대화방 재진입 시 갱신된다.
-- 비로그인 상태로 `frontend/main/feed.html`을 직접 열면 기존 데모 데이터로 동작한다.
+  `frontend/main/contact.html`에는 REST 방식만 연결돼 있다. 상대 메시지는 대화방 재진입 시 갱신된다.
+- 비로그인 상태로 `frontend/main/contact.html`을 직접 열면 기존 데모 데이터로 동작한다.
 - `package.json`의 NestJS 패키지 버전이 코어(v10)와 어긋나 있어(websockets/socket.io v11)
   v10으로 정렬했다 — 이 수정이 없으면 `npm install`이 실패한다.
 
