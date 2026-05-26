@@ -46,6 +46,7 @@
     color: var(--text-primary);
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
   }
   .app {
     width: 100%;
@@ -82,20 +83,8 @@
     align-items: center;
     justify-content: space-between;
   }
-  .brand {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .brand-button {
-    background: transparent;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    font-family: inherit;
-    color: inherit;
-    text-align: left;
-  }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand-button { background: transparent; border: none; padding: 0; cursor: pointer; font-family: inherit; color: inherit; text-align: left; }
   .brand-button:active { transform: scale(0.97); }
   .brand-mark {
     width: 36px; height: 36px;
@@ -103,8 +92,7 @@
     background: linear-gradient(135deg, var(--chon-orange), #5BBA6F);
     color: white;
     display: flex; align-items: center; justify-content: center;
-    font-weight: 900;
-    font-size: 16px;
+    font-weight: 900; font-size: 16px;
     box-shadow: var(--shadow-sm);
   }
   .brand-name { font-size: 20px; font-weight: 900; letter-spacing: -0.5px; }
@@ -117,30 +105,24 @@
     background: white;
     border: 1px solid var(--border-light);
     display: flex; align-items: center; justify-content: center;
-    cursor: pointer;
-    font-size: 18px;
+    cursor: pointer; font-size: 18px;
     position: relative;
   }
   .icon-btn-dot {
-    position: absolute;
-    top: 8px; right: 10px;
+    position: absolute; top: 8px; right: 10px;
     width: 8px; height: 8px;
     background: #DC2626;
     border-radius: 50%;
     border: 2px solid white;
   }
 
-  /* 인증 포인트 뱃지 */
   .point-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
+    display: inline-flex; align-items: center; gap: 6px;
     background: white;
     border: 1px solid var(--chon-orange-light);
     border-radius: var(--radius-pill);
     padding: 8px 14px;
-    font-size: 13px;
-    font-weight: 800;
+    font-size: 13px; font-weight: 800;
     color: var(--chon-orange-dark);
     cursor: pointer;
   }
@@ -149,43 +131,101 @@
     border-radius: 50%;
     background: var(--chon-yellow);
     display: inline-flex; align-items: center; justify-content: center;
-    font-size: 9px;
-    color: white;
-    font-weight: 900;
+    font-size: 9px; color: white; font-weight: 900;
   }
 
   .welcome-bar {
     background: linear-gradient(90deg, var(--chon-yellow-soft), white);
     border-bottom: 1px solid var(--border-light);
     padding: 10px 20px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 13px;
-    font-weight: 700;
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; font-weight: 700;
   }
   .welcome-emoji { font-size: 16px; }
   .welcome-msg strong { color: var(--chon-orange-dark); font-weight: 900; }
 
   /* ============================================
-     Main Content
+     슬라이드 컨테이너 — 2개 화면 가로 배치
      ============================================ */
-  .content {
+  .slides-wrap {
     flex: 1;
+    overflow: hidden;
+    padding-bottom: calc(var(--nav-h) + var(--safe-bottom));
+    position: relative;
+  }
+  .slides-track {
+    display: flex;
+    width: 200%;
+    height: 100%;
+    transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+    touch-action: pan-y; /* 세로 스크롤은 살리되 가로 스와이프 우리가 처리 */
+  }
+  .slides-track.dragging { transition: none; }
+  .slide {
+    width: 50%;
+    height: 100%;
     overflow-y: auto;
-    padding: 18px 16px calc(var(--nav-h) + var(--safe-bottom) + 24px);
+    padding: 20px 16px 24px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* 하단 dot 인디케이터 */
+  .pager {
+    position: fixed;
+    bottom: calc(var(--nav-h) + var(--safe-bottom) + 14px);
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    z-index: 25;
+  }
+  .pager-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: rgba(247, 147, 30, 0.25);
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: width 0.2s, background 0.2s;
+  }
+  .pager-dot.active {
+    width: 24px;
+    border-radius: var(--radius-pill);
+    background: var(--chon-orange);
   }
 
   /* ============================================
-     CHON ID Card — 가운데 큰 카드
+     Slide 1 — CHON ID 카드
      ============================================ */
-  .id-card-area {
+  .slide-1-inner {
+    flex: 1;
     display: flex;
+    flex-direction: column;
+    align-items: center;
     justify-content: center;
-    margin-bottom: 22px;
+    padding: 24px 0;
   }
+  .slide-title-row {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 18px;
+  }
+  .slide-title-main {
+    font-size: 24px;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    color: var(--text-primary);
+  }
+  .slide-title-sub {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 6px;
+    font-weight: 500;
+  }
+
   .id-card {
-    width: 250px;
+    width: 260px;
     background: linear-gradient(165deg, #FFD580 0%, #FFA000 60%, #E87F0A 100%);
     border-radius: 24px;
     padding: 24px 22px 20px;
@@ -194,6 +234,7 @@
     box-shadow: var(--shadow-card);
     position: relative;
     overflow: hidden;
+    cursor: pointer;
   }
   .id-card::before {
     content: '';
@@ -212,109 +253,85 @@
     margin-bottom: 14px;
   }
   .id-card-photo {
-    width: 100px; height: 124px;
+    width: 110px; height: 134px;
     background: white;
     border-radius: 12px;
     margin: 0 auto 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 56px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 64px;
     color: var(--chon-orange-dark);
     overflow: hidden;
     box-shadow: 0 4px 12px rgba(0,0,0,0.12);
   }
-  .id-card-name {
-    font-size: 22px;
-    font-weight: 900;
-    letter-spacing: -0.3px;
-  }
-  .id-card-roman {
-    font-size: 12px;
-    opacity: 0.92;
-    margin-top: 2px;
-    font-weight: 600;
-  }
+  .id-card-name { font-size: 24px; font-weight: 900; }
+  .id-card-roman { font-size: 12px; opacity: 0.92; margin-top: 2px; font-weight: 600; }
   .id-card-qr {
-    width: 96px; height: 96px;
+    width: 110px; height: 110px;
     background: white;
     border-radius: 8px;
-    margin: 14px auto 12px;
+    margin: 16px auto 12px;
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     grid-template-rows: repeat(7, 1fr);
     padding: 6px;
     gap: 1px;
   }
-  .id-card-qr span {
-    background: #1F1F1F;
-    border-radius: 1px;
-  }
+  .id-card-qr span { background: #1F1F1F; border-radius: 1px; }
   .id-card-qr span.off { background: transparent; }
-  .id-card-footer {
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 0.5px;
-    opacity: 0.95;
-  }
+  .id-card-footer { font-size: 11px; font-weight: 800; letter-spacing: 0.5px; opacity: 0.95; }
 
-  /* 발급 안 됨 안내 카드 */
+  /* 발급 안 됨 */
   .id-empty-card {
     width: 100%;
     background: linear-gradient(135deg, #FFB960 0%, #FFA000 60%, #E87F0A 100%);
     border-radius: 24px;
-    padding: 28px 24px;
+    padding: 32px 28px;
     color: white;
     text-align: center;
     box-shadow: var(--shadow-card);
     cursor: pointer;
-    transition: transform 0.12s;
   }
-  .id-empty-card:active { transform: scale(0.99); }
-  .id-empty-emoji { font-size: 56px; margin-bottom: 10px; line-height: 1; }
-  .id-empty-title { font-size: 22px; font-weight: 900; margin-bottom: 6px; }
-  .id-empty-sub { font-size: 13px; opacity: 0.94; margin-bottom: 16px; font-weight: 500; line-height: 1.5; }
+  .id-empty-emoji { font-size: 64px; margin-bottom: 14px; line-height: 1; }
+  .id-empty-title { font-size: 24px; font-weight: 900; margin-bottom: 8px; }
+  .id-empty-sub { font-size: 14px; opacity: 0.94; margin-bottom: 20px; font-weight: 500; line-height: 1.5; }
   .id-empty-cta {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
+    display: inline-flex; align-items: center; gap: 6px;
     background: white;
     color: var(--chon-orange-dark);
-    padding: 10px 22px;
+    padding: 11px 24px;
     border-radius: var(--radius-pill);
-    font-size: 13px;
-    font-weight: 900;
+    font-size: 14px; font-weight: 900;
     box-shadow: var(--shadow-sm);
   }
 
   /* ============================================
-     모임 선택 카드
+     Slide 2 — 인증 모임 picker
      ============================================ */
   .moim-card {
     background: white;
     border-radius: 24px;
-    padding: 26px 22px 24px;
-    margin-bottom: 14px;
+    padding: 32px 24px 28px;
+    margin: auto 0;
     box-shadow: var(--shadow-sm);
     border: 1px solid var(--border-light);
   }
   .moim-plus {
-    width: 44px; height: 44px;
-    margin: 0 auto 12px;
+    width: 56px; height: 56px;
+    margin: 0 auto 16px;
     border-radius: 50%;
-    background: var(--bg-app);
+    background: var(--chon-yellow-soft);
     color: var(--chon-orange-dark);
     display: flex; align-items: center; justify-content: center;
-    font-size: 24px;
+    font-size: 30px;
     font-weight: 800;
   }
   .moim-title {
     text-align: center;
-    font-size: 17px;
+    font-size: 19px;
     font-weight: 800;
     line-height: 1.35;
     color: var(--text-primary);
-    margin-bottom: 18px;
+    margin-bottom: 22px;
     letter-spacing: -0.3px;
   }
   .moim-list {
@@ -324,38 +341,21 @@
   }
   .moim-btn {
     width: 100%;
-    height: 48px;
+    height: 52px;
     background: white;
     border: 1.5px solid var(--line);
     border-radius: var(--radius-pill);
     font-family: inherit;
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 700;
     color: var(--text-primary);
     cursor: pointer;
     transition: border-color 0.15s, background 0.12s, transform 0.12s;
   }
-  .moim-btn:hover {
-    border-color: var(--chon-orange);
-    background: var(--chon-yellow-soft);
-  }
+  .moim-btn:hover { border-color: var(--chon-orange); background: var(--chon-yellow-soft); }
   .moim-btn:active { transform: scale(0.98); }
-  .moim-btn.disabled {
-    color: var(--text-tertiary);
-    cursor: not-allowed;
-    opacity: 0.6;
-  }
+  .moim-btn.disabled { color: var(--text-tertiary); cursor: not-allowed; opacity: 0.6; }
   .moim-btn.disabled:hover { border-color: var(--line); background: white; }
-
-  /* ============================================
-     Section title
-     ============================================ */
-  .section-title {
-    font-size: 13px;
-    font-weight: 800;
-    color: var(--text-secondary);
-    margin: 4px 4px 10px;
-  }
 
   /* ============================================
      Bottom Nav (통일)
@@ -377,15 +377,11 @@
     box-shadow: 0 -6px 24px rgba(0,0,0,0.05);
   }
   .nav-btn {
-    background: none;
-    border: none;
+    background: none; border: none;
     padding: 8px 4px 4px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 3px;
-    cursor: pointer;
-    font-family: inherit;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 3px;
+    cursor: pointer; font-family: inherit;
     color: var(--text-tertiary);
     border-radius: 12px;
   }
@@ -406,11 +402,135 @@
   .nav-btn.center .nav-btn-label { color: var(--chon-orange-dark); margin-top: 4px; }
 
   /* ============================================
+     안내 오버레이 (첫 진입 시)
+     ============================================ */
+  .onboard-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.62);
+    z-index: 100;
+    display: none;
+    align-items: stretch;
+    flex-direction: column;
+    color: white;
+    font-family: inherit;
+    padding: calc(20px + var(--safe-top)) 24px calc(24px + var(--safe-bottom));
+    pointer-events: auto;
+  }
+  .onboard-overlay.visible { display: flex; }
+  .onboard-close {
+    position: absolute;
+    top: calc(16px + var(--safe-top));
+    right: 20px;
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .onboard-helper-top {
+    margin-top: 36px;
+    text-align: left;
+    font-size: 13px;
+    line-height: 1.55;
+    font-weight: 500;
+  }
+  .onboard-helper-top .accent { color: var(--chon-yellow); font-weight: 800; }
+  .onboard-helper-top .arrow {
+    display: inline-block;
+    font-size: 18px;
+    margin: 0 4px;
+    transform: scaleX(-1);
+  }
+  .onboard-target {
+    margin: 28px auto 0;
+    width: 270px;
+    aspect-ratio: 270/420;
+    border: 2.5px dashed rgba(255, 255, 255, 0.85);
+    border-radius: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    text-align: center;
+  }
+  .onboard-hand {
+    font-size: 56px;
+    line-height: 1;
+    margin-bottom: 14px;
+    display: flex; align-items: center; gap: 6px;
+    animation: swipe 1.6s ease-in-out infinite;
+  }
+  .onboard-hand .arr {
+    font-size: 28px;
+    font-weight: 900;
+    opacity: 0.92;
+  }
+  @keyframes swipe {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-14px); }
+    75% { transform: translateX(14px); }
+  }
+  .onboard-target-text {
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.5;
+  }
+  .onboard-target-text .accent { color: var(--chon-yellow); font-weight: 900; }
+  .onboard-pager {
+    margin-top: 22px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 700;
+    opacity: 0.95;
+  }
+  .onboard-helper-bottom {
+    margin-top: 12px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 500;
+    opacity: 0.95;
+  }
+  .onboard-helper-bottom .accent { color: var(--chon-yellow); font-weight: 800; }
+  .onboard-bottom {
+    margin-top: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 14px;
+  }
+  .onboard-dismiss {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+  }
+  .onboard-dismiss:active { opacity: 0.7; }
+  .onboard-tap-hint {
+    color: rgba(255,255,255,0.65);
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  /* ============================================
      Toast
      ============================================ */
   .toast {
     position: fixed;
-    bottom: calc(var(--nav-h) + var(--safe-bottom) + 20px);
+    bottom: calc(var(--nav-h) + var(--safe-bottom) + 60px);
     left: 50%;
     transform: translateX(-50%) translateY(20px);
     background: #1F1F1F;
@@ -457,23 +577,35 @@
     <span class="welcome-msg"><strong id="welcomeName">사용자</strong>님의 증명서</span>
   </div>
 
-  <main class="content">
-    <!-- CHON ID 영역 -->
-    <div class="id-card-area" id="idCardArea"></div>
+  <!-- 스와이프 가능한 두 화면 -->
+  <div class="slides-wrap">
+    <div class="slides-track" id="slidesTrack">
+      <!-- ===== Slide 1: CHON ID 카드 ===== -->
+      <section class="slide">
+        <div class="slide-1-inner" id="idCardArea"></div>
+      </section>
 
-    <!-- 추가할 모임 선택 -->
-    <div class="section-title">CHON 인증 모임</div>
-    <div class="moim-card">
-      <div class="moim-plus">+</div>
-      <div class="moim-title">추가할 모임을<br/>선택해주세요</div>
-      <div class="moim-list">
-        <button type="button" class="moim-btn" onclick="openMoim('family')">가족증</button>
-        <button type="button" class="moim-btn" onclick="openMoim('class')">학급증</button>
-        <button type="button" class="moim-btn disabled" onclick="showToast('동창증 — 준비 중입니다')">동창증</button>
-        <button type="button" class="moim-btn" onclick="openMoim('friend')">동호회</button>
-      </div>
+      <!-- ===== Slide 2: 인증 모임 picker ===== -->
+      <section class="slide">
+        <div class="moim-card">
+          <div class="moim-plus">+</div>
+          <div class="moim-title">추가할 모임을<br/>선택해주세요</div>
+          <div class="moim-list">
+            <button type="button" class="moim-btn" onclick="openMoim('family')">가족증</button>
+            <button type="button" class="moim-btn" onclick="openMoim('class')">학급증</button>
+            <button type="button" class="moim-btn disabled" onclick="showToast('동창증 — 준비 중입니다')">동창증</button>
+            <button type="button" class="moim-btn" onclick="openMoim('friend')">동호회</button>
+          </div>
+        </div>
+      </section>
     </div>
-  </main>
+  </div>
+
+  <!-- 페이지 인디케이터 -->
+  <div class="pager" aria-label="화면 페이지">
+    <button type="button" class="pager-dot active" data-page="0" onclick="goSlide(0)" aria-label="CHON ID"></button>
+    <button type="button" class="pager-dot"        data-page="1" onclick="goSlide(1)" aria-label="인증 모임"></button>
+  </div>
 
   <nav class="bottom-nav">
     <button type="button" class="nav-btn" onclick="location.href='./home.html'">
@@ -499,12 +631,40 @@
   </nav>
 </div>
 
+<!-- ============================================
+     첫 진입 안내 오버레이
+     ============================================ -->
+<div class="onboard-overlay" id="onboardOverlay" onclick="dismissOnce(event)">
+  <button type="button" class="onboard-close" onclick="dismissOnce(event)">✕ 닫기</button>
+
+  <div class="onboard-helper-top">
+    <span class="accent">CHON ID</span> 카드와 <span class="accent">인증 모임</span>을<br/>
+    좌·우 밀기로 전환할 수 있어요. <span class="arrow">↩</span>
+  </div>
+
+  <div class="onboard-target">
+    <div class="onboard-hand"><span class="arr">←</span>👆<span class="arr">→</span></div>
+    <div class="onboard-target-text"><span class="accent">좌·우 밀기</span>로<br/>화면을 전환할 수 있어요</div>
+  </div>
+
+  <div class="onboard-pager">1 / 2</div>
+  <div class="onboard-helper-bottom">하단 <span class="accent">점</span>을 눌러서도 이동할 수 있어요</div>
+
+  <div class="onboard-bottom">
+    <button type="button" class="onboard-dismiss" onclick="dismissForever(event)">✕ 다시보지않기</button>
+    <span class="onboard-tap-hint">화면 아무 곳이나 탭하면 닫혀요</span>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
 // =========================================================
 // State
 // =========================================================
+let currentSlide = 0;
+const totalSlides = 2;
+
 function hasSelfId() {
   try { return localStorage.getItem('selfIdCreated') === '1'; } catch (e) { return false; }
 }
@@ -522,17 +682,15 @@ function romanize(name) {
   return [...(name||'')].map(c => map[c] || c).join(' ').trim() || (name || '');
 }
 
-// QR 코드 — 7x7 가짜 패턴 (이름 시드 기반)
 function qrPattern(seed) {
   let h = 0;
   for (let i = 0; i < (seed || 'x').length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
   const cells = [];
   for (let i = 0; i < 49; i++) {
-    // 코너 finder pattern (사각형)
     const x = i % 7, y = Math.floor(i / 7);
     const isFinder =
       (x < 2 && y < 2) || (x > 4 && y < 2) || (x < 2 && y > 4) ||
-      (x === 0 || x === 6 || y === 0 || y === 6) && (x < 2 || x > 4 || y < 2 || y > 4);
+      ((x === 0 || x === 6 || y === 0 || y === 6) && (x < 2 || x > 4 || y < 2 || y > 4));
     h = (h * 1664525 + 1013904223) >>> 0;
     const on = isFinder || (h & 1);
     cells.push(`<span${on ? '' : ' class="off"'}></span>`);
@@ -549,7 +707,11 @@ function renderIdCard() {
     const name = id.name || '홍길순';
     const roman = romanize(name);
     area.innerHTML = `
-      <div class="id-card" onclick="location.href='../auth/self-id.html?mode=view'" style="cursor:pointer">
+      <div class="slide-title-row">
+        <div class="slide-title-main">CHON ID</div>
+        <div class="slide-title-sub">위·변조 불가 · 칩 기반 보호</div>
+      </div>
+      <div class="id-card" onclick="location.href='../auth/self-id.html?mode=view'">
         <div class="id-card-title">CHON ID</div>
         <div class="id-card-photo">${id.gender === 'female' ? '👩' : '👨'}</div>
         <div class="id-card-name">${escapeHtml(name)}</div>
@@ -560,6 +722,10 @@ function renderIdCard() {
     `;
   } else {
     area.innerHTML = `
+      <div class="slide-title-row">
+        <div class="slide-title-main">아직 ID가 없어요</div>
+        <div class="slide-title-sub">CHON DID 트로피를 발급받아 시작하세요</div>
+      </div>
       <div class="id-empty-card" onclick="location.href='../auth/self-id.html'">
         <div class="id-empty-emoji">📱</div>
         <div class="id-empty-title">CHON DID 트로피</div>
@@ -580,7 +746,98 @@ function openMoim(kind) {
 }
 
 // =========================================================
-// Toast
+// 슬라이드 전환 (terms.html 패턴)
+// =========================================================
+const track = document.getElementById('slidesTrack');
+
+function goSlide(i) {
+  currentSlide = Math.max(0, Math.min(totalSlides - 1, i));
+  track.style.transform = `translateX(${-currentSlide * 50}%)`;
+  document.querySelectorAll('.pager-dot').forEach((d, idx) => {
+    d.classList.toggle('active', idx === currentSlide);
+  });
+}
+
+// 터치 스와이프
+let touchStartX = 0;
+let touchStartY = 0;
+let touchDeltaX = 0;
+let touching = false;
+
+track.addEventListener('touchstart', (e) => {
+  if (e.touches.length !== 1) return;
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+  touchDeltaX = 0;
+  touching = true;
+  track.classList.add('dragging');
+}, { passive: true });
+
+track.addEventListener('touchmove', (e) => {
+  if (!touching) return;
+  const dx = e.touches[0].clientX - touchStartX;
+  const dy = e.touches[0].clientY - touchStartY;
+  // 세로 스크롤 의도 감지 — 가로 스와이프 캔슬
+  if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 12) {
+    touching = false;
+    track.classList.remove('dragging');
+    track.style.transform = `translateX(${-currentSlide * 50}%)`;
+    return;
+  }
+  touchDeltaX = dx;
+  const slideWidth = track.parentElement.clientWidth;
+  const pct = (-currentSlide * 50) + (dx / slideWidth * 50);
+  // 가장자리에서 저항 효과
+  const clamped = Math.max(-50, Math.min(0, pct));
+  track.style.transform = `translateX(${clamped}%)`;
+}, { passive: true });
+
+track.addEventListener('touchend', () => {
+  if (!touching) return;
+  touching = false;
+  track.classList.remove('dragging');
+  const threshold = track.parentElement.clientWidth * 0.18;
+  if (touchDeltaX < -threshold && currentSlide < totalSlides - 1) {
+    goSlide(currentSlide + 1);
+  } else if (touchDeltaX > threshold && currentSlide > 0) {
+    goSlide(currentSlide - 1);
+  } else {
+    goSlide(currentSlide); // 원위치
+  }
+});
+
+// 키보드 ← →
+document.addEventListener('keydown', (e) => {
+  if (document.getElementById('onboardOverlay').classList.contains('visible')) return;
+  if (e.key === 'ArrowRight') goSlide(currentSlide + 1);
+  if (e.key === 'ArrowLeft')  goSlide(currentSlide - 1);
+});
+
+// =========================================================
+// 안내 오버레이
+// =========================================================
+const ONBOARD_KEY = 'pass_cert_onboard_seen';
+
+function showOnboardIfNeeded() {
+  try {
+    if (localStorage.getItem(ONBOARD_KEY) === '1') return;
+    document.getElementById('onboardOverlay').classList.add('visible');
+  } catch (e) {}
+}
+
+function dismissOnce(e) {
+  if (e) e.stopPropagation();
+  document.getElementById('onboardOverlay').classList.remove('visible');
+}
+
+function dismissForever(e) {
+  if (e) e.stopPropagation();
+  try { localStorage.setItem(ONBOARD_KEY, '1'); } catch (e2) {}
+  document.getElementById('onboardOverlay').classList.remove('visible');
+}
+
+// =========================================================
+// Toast / utils
 // =========================================================
 function showToast(msg) {
   const t = document.getElementById('toast');
@@ -602,6 +859,7 @@ function escapeHtml(s) {
   const wn = document.getElementById('welcomeName');
   if (wn && u?.name) wn.textContent = u.name;
   renderIdCard();
+  showOnboardIfNeeded();
 })();
 </script>
 </body>
