@@ -1978,7 +1978,7 @@
       <div class="nav-btn-icon">📰</div>
       <div class="nav-btn-label">연락처</div>
     </button>
-    <button class="nav-btn center" data-page="rel" onclick="switchPage('rel')">
+    <button class="nav-btn center" onclick="location.href='./cert.html'">
       <div class="nav-circle">🆔</div>
       <div class="nav-btn-label">증명서</div>
     </button>
@@ -2793,12 +2793,17 @@ document.addEventListener('keydown', e => {
 applyUser();
 updateTrust();
 
-// 외부 페이지에서 ?page=auth|rel|my 또는 ?notif=1 로 진입 시 처리
+// 외부 페이지에서 ?page=auth|my 또는 ?notif=1 로 진입 시 처리
+// 증명서(?page=rel)는 별도 페이지로 분리되어 cert.html 로 리다이렉트
 (function applyInitialPage() {
   try {
     const params = new URLSearchParams(location.search);
     const p = params.get('page');
-    if (p && ['home', 'auth', 'rel', 'my'].includes(p)) switchPage(p);
+    if (p === 'rel') {
+      location.replace('./cert.html');
+      return;
+    }
+    if (p && ['home', 'auth', 'my'].includes(p)) switchPage(p);
     if (params.get('notif') === '1') setTimeout(openNotifSheet, 100);
   } catch (e) {}
 })();

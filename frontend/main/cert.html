@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#FFA000">
+<title>PASS — 증명서</title>
+<script src="../lib/auth-guard.js" data-require="login"></script>
+<script src="../lib/pass-api.js"></script>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/static/pretendard.min.css" rel="stylesheet">
+<style>
+  :root {
+    --chon-orange: #F7931E;
+    --chon-orange-dark: #E87F0A;
+    --chon-orange-light: #FFC78A;
+    --chon-yellow: #FFC300;
+    --chon-yellow-soft: #FFF3D6;
+    --bg-app: #FFFBF0;
+    --bg-card: #FFFFFF;
+    --text-primary: #1F1F1F;
+    --text-secondary: #5B5B5B;
+    --text-tertiary: #9CA3AF;
+    --border-light: #F1F5F9;
+    --line: #E5E7EB;
+
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+    --shadow-md: 0 6px 18px rgba(0,0,0,0.08);
+    --shadow-card: 0 12px 32px rgba(247, 147, 30, 0.22);
+
+    --radius-md: 14px;
+    --radius-lg: 20px;
+    --radius-pill: 999px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --nav-h: 76px;
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg-app);
+    color: var(--text-primary);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  .app {
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+    background: var(--bg-app);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    box-shadow: 0 0 40px rgba(0,0,0,0.06);
+  }
+  @media (min-width: 768px) {
+    body { padding: 32px 0; background: #F5F7FB; }
+    .app {
+      border-radius: 28px;
+      overflow: hidden;
+      min-height: calc(100dvh - 64px);
+      box-shadow: var(--shadow-md);
+    }
+  }
+
+  /* ============================================
+     Header (통일)
+     ============================================ */
+  .app-header {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    background: var(--bg-app);
+    padding: calc(14px + var(--safe-top)) 20px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .brand-button {
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-family: inherit;
+    color: inherit;
+    text-align: left;
+  }
+  .brand-button:active { transform: scale(0.97); }
+  .brand-mark {
+    width: 36px; height: 36px;
+    border-radius: 11px;
+    background: linear-gradient(135deg, var(--chon-orange), #5BBA6F);
+    color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 900;
+    font-size: 16px;
+    box-shadow: var(--shadow-sm);
+  }
+  .brand-name { font-size: 20px; font-weight: 900; letter-spacing: -0.5px; }
+  .brand-sub { font-size: 11px; color: var(--text-secondary); font-weight: 700; margin-top: -2px; }
+  .brand-text { line-height: 1.1; }
+  .header-actions { display: flex; align-items: center; gap: 8px; }
+  .icon-btn {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: white;
+    border: 1px solid var(--border-light);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 18px;
+    position: relative;
+  }
+  .icon-btn-dot {
+    position: absolute;
+    top: 8px; right: 10px;
+    width: 8px; height: 8px;
+    background: #DC2626;
+    border-radius: 50%;
+    border: 2px solid white;
+  }
+
+  /* 인증 포인트 뱃지 */
+  .point-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: white;
+    border: 1px solid var(--chon-orange-light);
+    border-radius: var(--radius-pill);
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--chon-orange-dark);
+    cursor: pointer;
+  }
+  .point-pill .dot {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--chon-yellow);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 9px;
+    color: white;
+    font-weight: 900;
+  }
+
+  .welcome-bar {
+    background: linear-gradient(90deg, var(--chon-yellow-soft), white);
+    border-bottom: 1px solid var(--border-light);
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .welcome-emoji { font-size: 16px; }
+  .welcome-msg strong { color: var(--chon-orange-dark); font-weight: 900; }
+
+  /* ============================================
+     Main Content
+     ============================================ */
+  .content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 18px 16px calc(var(--nav-h) + var(--safe-bottom) + 24px);
+  }
+
+  /* ============================================
+     CHON ID Card — 가운데 큰 카드
+     ============================================ */
+  .id-card-area {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 22px;
+  }
+  .id-card {
+    width: 250px;
+    background: linear-gradient(165deg, #FFD580 0%, #FFA000 60%, #E87F0A 100%);
+    border-radius: 24px;
+    padding: 24px 22px 20px;
+    color: white;
+    text-align: center;
+    box-shadow: var(--shadow-card);
+    position: relative;
+    overflow: hidden;
+  }
+  .id-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 80% 20%, rgba(255,255,255,0.15) 0%, transparent 45%),
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40'><path d='M20 0 L40 12 L40 28 L20 40 L0 28 L0 12 Z' fill='none' stroke='%23ffffff' stroke-opacity='0.07'/></svg>");
+    pointer-events: none;
+  }
+  .id-card > * { position: relative; }
+  .id-card-title {
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: -0.4px;
+    margin-bottom: 14px;
+  }
+  .id-card-photo {
+    width: 100px; height: 124px;
+    background: white;
+    border-radius: 12px;
+    margin: 0 auto 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 56px;
+    color: var(--chon-orange-dark);
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  }
+  .id-card-name {
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: -0.3px;
+  }
+  .id-card-roman {
+    font-size: 12px;
+    opacity: 0.92;
+    margin-top: 2px;
+    font-weight: 600;
+  }
+  .id-card-qr {
+    width: 96px; height: 96px;
+    background: white;
+    border-radius: 8px;
+    margin: 14px auto 12px;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-template-rows: repeat(7, 1fr);
+    padding: 6px;
+    gap: 1px;
+  }
+  .id-card-qr span {
+    background: #1F1F1F;
+    border-radius: 1px;
+  }
+  .id-card-qr span.off { background: transparent; }
+  .id-card-footer {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    opacity: 0.95;
+  }
+
+  /* 발급 안 됨 안내 카드 */
+  .id-empty-card {
+    width: 100%;
+    background: linear-gradient(135deg, #FFB960 0%, #FFA000 60%, #E87F0A 100%);
+    border-radius: 24px;
+    padding: 28px 24px;
+    color: white;
+    text-align: center;
+    box-shadow: var(--shadow-card);
+    cursor: pointer;
+    transition: transform 0.12s;
+  }
+  .id-empty-card:active { transform: scale(0.99); }
+  .id-empty-emoji { font-size: 56px; margin-bottom: 10px; line-height: 1; }
+  .id-empty-title { font-size: 22px; font-weight: 900; margin-bottom: 6px; }
+  .id-empty-sub { font-size: 13px; opacity: 0.94; margin-bottom: 16px; font-weight: 500; line-height: 1.5; }
+  .id-empty-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: white;
+    color: var(--chon-orange-dark);
+    padding: 10px 22px;
+    border-radius: var(--radius-pill);
+    font-size: 13px;
+    font-weight: 900;
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* ============================================
+     모임 선택 카드
+     ============================================ */
+  .moim-card {
+    background: white;
+    border-radius: 24px;
+    padding: 26px 22px 24px;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-light);
+  }
+  .moim-plus {
+    width: 44px; height: 44px;
+    margin: 0 auto 12px;
+    border-radius: 50%;
+    background: var(--bg-app);
+    color: var(--chon-orange-dark);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+    font-weight: 800;
+  }
+  .moim-title {
+    text-align: center;
+    font-size: 17px;
+    font-weight: 800;
+    line-height: 1.35;
+    color: var(--text-primary);
+    margin-bottom: 18px;
+    letter-spacing: -0.3px;
+  }
+  .moim-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .moim-btn {
+    width: 100%;
+    height: 48px;
+    background: white;
+    border: 1.5px solid var(--line);
+    border-radius: var(--radius-pill);
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.12s, transform 0.12s;
+  }
+  .moim-btn:hover {
+    border-color: var(--chon-orange);
+    background: var(--chon-yellow-soft);
+  }
+  .moim-btn:active { transform: scale(0.98); }
+  .moim-btn.disabled {
+    color: var(--text-tertiary);
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+  .moim-btn.disabled:hover { border-color: var(--line); background: white; }
+
+  /* ============================================
+     Section title
+     ============================================ */
+  .section-title {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--text-secondary);
+    margin: 4px 4px 10px;
+  }
+
+  /* ============================================
+     Bottom Nav (통일)
+     ============================================ */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
+    background: white;
+    border-top: 1px solid var(--border-light);
+    padding: 8px 8px calc(8px + var(--safe-bottom));
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    align-items: end;
+    z-index: 40;
+    box-shadow: 0 -6px 24px rgba(0,0,0,0.05);
+  }
+  .nav-btn {
+    background: none;
+    border: none;
+    padding: 8px 4px 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--text-tertiary);
+    border-radius: 12px;
+  }
+  .nav-btn-icon { font-size: 22px; line-height: 1; }
+  .nav-btn-label { font-size: 10px; font-weight: 800; }
+  .nav-btn.active { color: var(--chon-orange-dark); }
+  .nav-btn.center { position: relative; padding-top: 0; }
+  .nav-btn.center .nav-circle {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--chon-yellow), var(--chon-orange));
+    color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+    box-shadow: 0 6px 16px rgba(247,147,30,0.4), 0 0 0 4px white;
+    margin-top: -20px;
+  }
+  .nav-btn.center .nav-btn-label { color: var(--chon-orange-dark); margin-top: 4px; }
+
+  /* ============================================
+     Toast
+     ============================================ */
+  .toast {
+    position: fixed;
+    bottom: calc(var(--nav-h) + var(--safe-bottom) + 20px);
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #1F1F1F;
+    color: white;
+    padding: 12px 22px;
+    border-radius: var(--radius-pill);
+    font-size: 13px;
+    font-weight: 700;
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 200;
+    white-space: nowrap;
+  }
+  .toast.visible {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header class="app-header">
+    <button type="button" class="brand brand-button" onclick="location.href='./home.html'" aria-label="홈으로">
+      <div class="brand-mark">P</div>
+      <div class="brand-text">
+        <div class="brand-name">PASS</div>
+        <div class="brand-sub">관계형 SNS</div>
+      </div>
+    </button>
+    <div class="header-actions">
+      <button type="button" class="point-pill" onclick="showToast('인증 포인트 — 500점')">
+        <span class="dot">P</span><span id="pointAmt">500</span>
+      </button>
+      <button type="button" class="icon-btn" onclick="location.href='./home.html?notif=1'" aria-label="알림">
+        🔔
+        <span class="icon-btn-dot"></span>
+      </button>
+    </div>
+  </header>
+
+  <div class="welcome-bar">
+    <span class="welcome-emoji">👋</span>
+    <span class="welcome-msg"><strong id="welcomeName">사용자</strong>님의 증명서</span>
+  </div>
+
+  <main class="content">
+    <!-- CHON ID 영역 -->
+    <div class="id-card-area" id="idCardArea"></div>
+
+    <!-- 추가할 모임 선택 -->
+    <div class="section-title">CHON 인증 모임</div>
+    <div class="moim-card">
+      <div class="moim-plus">+</div>
+      <div class="moim-title">추가할 모임을<br/>선택해주세요</div>
+      <div class="moim-list">
+        <button type="button" class="moim-btn" onclick="openMoim('family')">가족증</button>
+        <button type="button" class="moim-btn" onclick="openMoim('class')">학급증</button>
+        <button type="button" class="moim-btn disabled" onclick="showToast('동창증 — 준비 중입니다')">동창증</button>
+        <button type="button" class="moim-btn" onclick="openMoim('friend')">동호회</button>
+      </div>
+    </div>
+  </main>
+
+  <nav class="bottom-nav">
+    <button type="button" class="nav-btn" onclick="location.href='./home.html'">
+      <div class="nav-btn-icon">🏠</div>
+      <div class="nav-btn-label">홈</div>
+    </button>
+    <button type="button" class="nav-btn" onclick="location.href='./contact.html'">
+      <div class="nav-btn-icon">📰</div>
+      <div class="nav-btn-label">연락처</div>
+    </button>
+    <button type="button" class="nav-btn center active">
+      <div class="nav-circle">🆔</div>
+      <div class="nav-btn-label">증명서</div>
+    </button>
+    <button type="button" class="nav-btn" onclick="location.href='./home.html?page=auth'">
+      <div class="nav-btn-icon">🤝</div>
+      <div class="nav-btn-label">인증</div>
+    </button>
+    <button type="button" class="nav-btn" onclick="location.href='./home.html?page=my'">
+      <div class="nav-btn-icon">👤</div>
+      <div class="nav-btn-label">마이페이지</div>
+    </button>
+  </nav>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// =========================================================
+// State
+// =========================================================
+function hasSelfId() {
+  try { return localStorage.getItem('selfIdCreated') === '1'; } catch (e) { return false; }
+}
+function getSelfId() {
+  try { return JSON.parse(localStorage.getItem('passSelfId') || 'null'); } catch (e) { return null; }
+}
+function getUser() {
+  try { return JSON.parse(localStorage.getItem('passUser') || 'null'); } catch (e) { return null; }
+}
+
+function romanize(name) {
+  const map = { '홍':'Hong','길':'gil','순':'soon','민':'min','수':'soo','지':'ji','영':'young',
+                '박':'Park','김':'Kim','이':'Lee','최':'Choi','정':'Jung','희':'hee','철':'chul',
+                '하':'ha','상':'sang','호':'ho','선':'sun','경':'kyung' };
+  return [...(name||'')].map(c => map[c] || c).join(' ').trim() || (name || '');
+}
+
+// QR 코드 — 7x7 가짜 패턴 (이름 시드 기반)
+function qrPattern(seed) {
+  let h = 0;
+  for (let i = 0; i < (seed || 'x').length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+  const cells = [];
+  for (let i = 0; i < 49; i++) {
+    // 코너 finder pattern (사각형)
+    const x = i % 7, y = Math.floor(i / 7);
+    const isFinder =
+      (x < 2 && y < 2) || (x > 4 && y < 2) || (x < 2 && y > 4) ||
+      (x === 0 || x === 6 || y === 0 || y === 6) && (x < 2 || x > 4 || y < 2 || y > 4);
+    h = (h * 1664525 + 1013904223) >>> 0;
+    const on = isFinder || (h & 1);
+    cells.push(`<span${on ? '' : ' class="off"'}></span>`);
+  }
+  return cells.join('');
+}
+
+function renderIdCard() {
+  const area = document.getElementById('idCardArea');
+  if (!area) return;
+
+  if (hasSelfId()) {
+    const id = getSelfId() || {};
+    const name = id.name || '홍길순';
+    const roman = romanize(name);
+    area.innerHTML = `
+      <div class="id-card" onclick="location.href='../auth/self-id.html?mode=view'" style="cursor:pointer">
+        <div class="id-card-title">CHON ID</div>
+        <div class="id-card-photo">${id.gender === 'female' ? '👩' : '👨'}</div>
+        <div class="id-card-name">${escapeHtml(name)}</div>
+        <div class="id-card-roman">${escapeHtml(roman)}</div>
+        <div class="id-card-qr">${qrPattern(name)}</div>
+        <div class="id-card-footer">⊕ CHON</div>
+      </div>
+    `;
+  } else {
+    area.innerHTML = `
+      <div class="id-empty-card" onclick="location.href='../auth/self-id.html'">
+        <div class="id-empty-emoji">📱</div>
+        <div class="id-empty-title">CHON DID 트로피</div>
+        <div class="id-empty-sub">신분증 정보로 위·변조 불가능한<br/>본인 ID를 발급받으세요.</div>
+        <span class="id-empty-cta">발급받기 →</span>
+      </div>
+    `;
+  }
+}
+
+function openMoim(kind) {
+  const map = {
+    family: '../views/family-tree.html',
+    class:  '../views/class-id.html',
+    friend: '../views/friends.html',
+  };
+  if (map[kind]) location.href = map[kind];
+}
+
+// =========================================================
+// Toast
+// =========================================================
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('visible');
+  clearTimeout(window._toastT);
+  window._toastT = setTimeout(() => t.classList.remove('visible'), 2200);
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// =========================================================
+// Init
+// =========================================================
+(function init() {
+  const u = getUser();
+  const wn = document.getElementById('welcomeName');
+  if (wn && u?.name) wn.textContent = u.name;
+  renderIdCard();
+})();
+</script>
+</body>
+</html>
