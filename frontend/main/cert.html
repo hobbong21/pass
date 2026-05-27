@@ -125,13 +125,32 @@
     font-size: 13px; font-weight: 800;
     color: var(--chon-orange-dark);
     cursor: pointer;
+    font-family: inherit;
+    transition: box-shadow 0.15s, transform 0.12s;
   }
+  .point-pill:active { transform: scale(0.97); }
   .point-pill .dot {
     width: 14px; height: 14px;
     border-radius: 50%;
     background: var(--chon-yellow);
     display: inline-flex; align-items: center; justify-content: center;
     font-size: 9px; color: white; font-weight: 900;
+  }
+  /* ID 카드 아래 큰 사이즈 변형 */
+  .point-pill-below {
+    margin: 18px auto 0;
+    padding: 10px 22px;
+    font-size: 15px;
+    gap: 8px;
+    box-shadow: 0 6px 16px rgba(247, 147, 30, 0.18);
+    border-color: var(--chon-orange);
+  }
+  .point-pill-below:hover { box-shadow: 0 8px 22px rgba(247, 147, 30, 0.28); }
+  .point-pill-below .dot { width: 18px; height: 18px; font-size: 11px; }
+  .point-pill-below .point-pill-label {
+    color: var(--text-secondary);
+    font-weight: 700;
+    margin-left: 2px;
   }
 
   .welcome-bar {
@@ -595,9 +614,6 @@
       </div>
     </button>
     <div class="header-actions">
-      <button type="button" class="point-pill" onclick="location.href='./trust.html'" aria-label="인증 포인트 · 레벨 보기">
-        <span class="dot">P</span><span id="pointAmt">500</span>
-      </button>
       <button type="button" class="icon-btn" onclick="location.href='./home.html?notif=1'" aria-label="알림">
         🔔
         <span class="icon-btn-dot"></span>
@@ -756,6 +772,11 @@ function renderIdCard() {
         <div class="id-card-qr">${qrPattern(name)}</div>
         <div class="id-card-footer">⊕ CHON</div>
       </div>
+      <button type="button" class="point-pill point-pill-below" onclick="location.href='./trust.html'" aria-label="인증 포인트 · 레벨 보기">
+        <span class="dot">P</span>
+        <span id="pointAmt">500</span>
+        <span class="point-pill-label">인증 포인트</span>
+      </button>
     `;
   } else {
     area.innerHTML = `
@@ -769,6 +790,11 @@ function renderIdCard() {
         <div class="id-empty-sub">신분증 정보로 위·변조 불가능한<br/>본인 ID를 발급받으세요.</div>
         <span class="id-empty-cta">발급받기 →</span>
       </div>
+      <button type="button" class="point-pill point-pill-below" onclick="location.href='./trust.html'" aria-label="인증 포인트 · 레벨 보기">
+        <span class="dot">P</span>
+        <span id="pointAmt">500</span>
+        <span class="point-pill-label">인증 포인트</span>
+      </button>
     `;
   }
 }
