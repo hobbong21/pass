@@ -230,6 +230,10 @@
     box-shadow: 0 8px 24px rgba(247, 147, 30, 0.28);
     color: white;
   }
+  .hero-card.hero-card--green {
+    background: linear-gradient(135deg, #6BCB7F 0%, #2EB573 60%, #1F9460 100%);
+    box-shadow: 0 8px 24px rgba(46, 181, 115, 0.28);
+  }
   .hero-card::before {
     content: '';
     position: absolute;
@@ -822,6 +826,23 @@
     font-weight: 600;
     margin-top: 2px;
   }
+  .msg-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--chon-orange-dark);
+    background: var(--chon-yellow-soft);
+    border-radius: var(--radius-pill);
+    padding: 2px 8px;
+    margin-top: 4px;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .msg-group-ico { font-size: 10px; }
   .msg-menu {
     background: transparent;
     border: none;
@@ -979,10 +1000,6 @@
     box-shadow: 0 -16px 32px rgba(0,0,0,0.16);
   }
   .modal-sheet.visible { transform: translateX(-50%) translateY(0); }
-  .modal-sheet.notif-sheet {
-    max-height: 80vh;
-    overflow-y: auto;
-  }
   .modal-grip {
     width: 40px; height: 4px;
     background: #D1D5DB;
@@ -1753,7 +1770,7 @@
     </button>
     <div class="header-actions">
       <button type="button" class="icon-btn" onclick="openScanner()" aria-label="QR 스캔" title="QR 스캔"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7" y="7" width="10" height="10" rx="1.5"/></svg></button>
-      <button class="icon-btn" onclick="openNotifSheet()" aria-label="알림">
+      <button class="icon-btn" onclick="switchPage('auth')" aria-label="알림">
         🔔
         <span class="icon-btn-dot"></span>
       </button>
@@ -1762,7 +1779,7 @@
 
   <div class="welcome-bar">
     <span class="welcome-emoji">👋</span>
-    <span class="welcome-msg"><button type="button" class="welcome-user" onclick="location.href='./cert.html'">사용자</button>님 환영합니다 · 오늘도 즐거운 하루되세요</span>
+    <span class="welcome-msg"><button type="button" class="welcome-user" id="welcomeName" onclick="location.href='./cert.html'">사용자</button>님 환영합니다 · 오늘도 즐거운 하루되세요</span>
   </div>
 
   <main class="content">
@@ -1783,9 +1800,17 @@
         <div class="hero-illust" id="heroIllust">📱</div>
       </div>
 
+      <!-- Hero — 증명서 만들기·보기 (cert.html 슬라이드 2: 인증 모임 picker) -->
+      <div class="hero-card hero-card--green" onclick="location.href='./cert.html?slide=1'">
+        <div class="hero-eyebrow">증명서 만들기</div>
+        <div class="hero-title">증명서 보기</div>
+        <div class="hero-cta">바로가기 →</div>
+        <div class="hero-illust">📄</div>
+      </div>
+
       <div class="msg-section" id="msgSection">
         <div class="msg-section-head">
-          <span class="msg-section-title">나에게 온 메시지</span>
+          <span class="msg-section-title">모임에서 온 메시지</span>
           <div class="msg-pager" id="msgPager">
             <button type="button" class="msg-pager-btn" id="msgPrevBtn" onclick="msgPrevPage()" aria-label="이전 페이지">‹</button>
             <span class="msg-pager-indicator">
@@ -1802,6 +1827,22 @@
     <!-- ============ AUTH (center tab) ============ -->
     <section class="page" id="pageAuth">
       <div class="section-title section-title--mt-8">인증 센터</div>
+
+      <div class="section-title">오늘의 활동</div>
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-value orange">3</div>
+          <div class="stat-label">인증 요청</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value green">2</div>
+          <div class="stat-label">상호 인증</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value blue">5</div>
+          <div class="stat-label">통화 보호</div>
+        </div>
+      </div>
 
       <div class="feature-card" onclick="openAuthSheet()">
         <div class="feature-info">
@@ -1829,7 +1870,23 @@
         <div class="activity-tag pending">응답 대기</div>
       </div>
 
-      <div class="section-title">완료된 인증</div>
+      <div class="section-title">최근 활동</div>
+      <div class="activity-item" onclick="showToast('📞 김민수님 통화')">
+        <div class="activity-icon">📞</div>
+        <div class="activity-info">
+          <div class="activity-title">김민수님과 인증 통화</div>
+          <div class="activity-meta">방금 전 · 1-hop 가족</div>
+        </div>
+        <div class="activity-tag">완료</div>
+      </div>
+      <div class="activity-item" onclick="showToast('📄 증명서 발급')">
+        <div class="activity-icon blue">📄</div>
+        <div class="activity-info">
+          <div class="activity-title">관계 증명서 발급</div>
+          <div class="activity-meta">2시간 전 · 자녀 증명</div>
+        </div>
+        <div class="activity-tag">완료</div>
+      </div>
       <div class="activity-item">
         <div class="activity-icon green">✓</div>
         <div class="activity-info">
@@ -1886,89 +1943,6 @@
     </section>
 
     <!-- ============ MY (프로필) ============ -->
-    <section class="page" id="pageMy">
-      <div class="profile-hero">
-        <div class="profile-avatar-big" id="profileAvatar">
-          <img class="profile-avatar-photo is-hidden" id="profileAvatarPhoto" alt=""/>
-          <span class="profile-avatar-text" id="profileAvatarText">홍</span>
-        </div>
-        <div class="profile-name" id="profileName">홍길순</div>
-        <div class="profile-phone" id="profilePhone">010-****-1234</div>
-        <!-- 프로필 편집은 cert.html(증명서) CHON ID 사진 클릭으로 진입 -->
-        <button class="profile-edit-btn" onclick="location.href='./cert.html'">내 증명서 · 트로피 보기</button>
-      </div>
-
-      <!-- 인증 포인트/레벨/뱃지 진입 카드 -->
-      <div class="trust-link-card" onclick="location.href='./trust.html'">
-        <div class="trust-link-icon">🏆</div>
-        <div class="trust-link-info">
-          <div class="trust-link-title">인증 포인트 · 레벨</div>
-          <div class="trust-link-desc">Trust Garden · Level · Reward Points · Badges</div>
-        </div>
-        <div class="trust-link-arrow">›</div>
-      </div>
-
-      <div class="settings-section">
-        <div class="settings-group">
-          <div class="settings-row" onclick="showToast('🔔 알림 설정')">
-            <div class="settings-icon">🔔</div>
-            <div class="settings-label">알림</div>
-            <div class="settings-value">켜짐</div>
-            <div class="settings-arrow">›</div>
-          </div>
-          <div class="settings-row" onclick="showToast('🔊 음성 안내')">
-            <div class="settings-icon">🔊</div>
-            <div class="settings-label">음성 안내</div>
-            <div class="settings-value">꺼짐</div>
-            <div class="settings-arrow">›</div>
-          </div>
-          <div class="settings-row" onclick="showToast('🌐 공공장소 모드')">
-            <div class="settings-icon">🌐</div>
-            <div class="settings-label">공공장소 모드</div>
-            <div class="settings-value">꺼짐</div>
-            <div class="settings-arrow">›</div>
-          </div>
-        </div>
-
-        <div class="settings-group">
-          <div class="settings-row" onclick="showToast('🛡️ 하드웨어 인증')">
-            <div class="settings-icon security">🛡️</div>
-            <div class="settings-label">하드웨어 인증</div>
-            <div class="settings-value settings-value--trusted">TRUSTED</div>
-            <div class="settings-arrow">›</div>
-          </div>
-          <div class="settings-row" onclick="showToast('📱 단말 관리')">
-            <div class="settings-icon security">📱</div>
-            <div class="settings-label">단말 관리</div>
-            <div class="settings-value">1대</div>
-            <div class="settings-arrow">›</div>
-          </div>
-          <div class="settings-row" onclick="showToast('🔐 개인정보')">
-            <div class="settings-icon security">🔐</div>
-            <div class="settings-label">개인정보</div>
-            <div class="settings-arrow">›</div>
-          </div>
-        </div>
-
-        <div class="settings-group">
-          <div class="settings-row" onclick="openSupportSheet()">
-            <div class="settings-icon">📨</div>
-            <div class="settings-label">고객센터 (문의/신고)</div>
-            <div class="settings-arrow">›</div>
-          </div>
-          <div class="settings-row" onclick="showToast('⚠️ 분실/도난 신고')">
-            <div class="settings-icon warning">⚠️</div>
-            <div class="settings-label">분실/도난 신고</div>
-            <div class="settings-arrow">›</div>
-          </div>
-          <div class="settings-row" onclick="logoutPass()">
-            <div class="settings-icon danger">🚪</div>
-            <div class="settings-label settings-label--danger">로그아웃</div>
-            <div class="settings-arrow">›</div>
-          </div>
-        </div>
-      </div>
-    </section>
   </main>
 
   <nav class="bottom-nav">
@@ -1988,60 +1962,14 @@
       <div class="nav-btn-icon">🤝</div>
       <div class="nav-btn-label">인증</div>
     </button>
-    <button type="button" class="nav-btn" onclick="switchPage('my')">
-      <div class="nav-btn-icon">👤</div>
-      <div class="nav-btn-label">마이페이지</div>
+    <button type="button" class="nav-btn" onclick="location.href='./all.html'">
+      <div class="nav-btn-icon">☰</div>
+      <div class="nav-btn-label">전체</div>
     </button>
   </nav>
 </div>
 
 <!-- Notification sheet -->
-<div class="modal-sheet notif-sheet" id="notifSheet">
-  <div class="modal-grip"></div>
-  <div class="modal-title">🔔 알림</div>
-  <div class="modal-sub">최근 인증 활동을 확인하세요</div>
-  <div class="section-title section-title--mt-8">오늘의 활동</div>
-  <div class="stats-row">
-    <div class="stat-card">
-      <div class="stat-value orange">3</div>
-      <div class="stat-label">인증 요청</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value green">2</div>
-      <div class="stat-label">상호 인증</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value blue">5</div>
-      <div class="stat-label">통화 보호</div>
-    </div>
-  </div>
-  <div class="section-title">최근 활동</div>
-  <div class="activity-item" onclick="showToast('📞 김민수님 통화')">
-    <div class="activity-icon">📞</div>
-    <div class="activity-info">
-      <div class="activity-title">김민수님과 인증 통화</div>
-      <div class="activity-meta">방금 전 · 1-hop 가족</div>
-    </div>
-    <div class="activity-tag">완료</div>
-  </div>
-  <div class="activity-item" onclick="showToast('🪪 상호 인증')">
-    <div class="activity-icon green">🪪</div>
-    <div class="activity-info">
-      <div class="activity-title">박지영님 상호 인증 요청</div>
-      <div class="activity-meta">5분 전 · 응답 대기</div>
-    </div>
-    <div class="activity-tag pending">대기</div>
-  </div>
-  <div class="activity-item" onclick="showToast('📄 증명서 발급')">
-    <div class="activity-icon blue">📄</div>
-    <div class="activity-info">
-      <div class="activity-title">관계 증명서 발급</div>
-      <div class="activity-meta">2시간 전 · 자녀 증명</div>
-    </div>
-    <div class="activity-tag">완료</div>
-  </div>
-</div>
-
 <!-- Customer Support sheet (문의/신고 하기) -->
 <div class="modal-sheet support-sheet" id="supportSheet">
   <div class="modal-grip"></div>
@@ -2102,40 +2030,6 @@
 </div>
 
 <!-- Edit Profile sheet -->
-<div class="modal-sheet edit-profile-sheet" id="editProfileSheet">
-  <div class="modal-grip"></div>
-  <div class="modal-title">프로필 편집</div>
-  <div class="modal-sub">이름·이니셜·프로필 사진을 수정합니다</div>
-  <div class="edit-form">
-    <div class="edit-field">
-      <label class="edit-label">프로필 사진</label>
-      <div class="avatar-edit-row">
-        <div class="avatar-preview" id="avatarPreview">
-          <img class="avatar-preview-img is-hidden" id="avatarPreviewImg" alt=""/>
-          <span class="avatar-preview-text" id="avatarPreviewText">홍</span>
-        </div>
-        <div class="avatar-edit-actions">
-          <label class="avatar-pick-btn" for="editImageInput">📷 사진 선택</label>
-          <input type="file" id="editImageInput" accept="image/*" class="is-hidden" onchange="handleAvatarFile(event)"/>
-          <button class="avatar-remove-btn is-hidden" id="avatarRemoveBtn" onclick="removeAvatarPhoto()">사진 제거</button>
-        </div>
-      </div>
-    </div>
-    <div class="edit-field">
-      <label class="edit-label" for="editName">이름</label>
-      <input type="text" class="edit-input" id="editName" placeholder="홍길순" autocomplete="off" maxlength="20"/>
-    </div>
-    <div class="edit-field">
-      <label class="edit-label" for="editInitial">아바타 이니셜 (1글자) — 사진 없을 때 표시</label>
-      <input type="text" class="edit-input" id="editInitial" placeholder="홍" autocomplete="off" maxlength="1"/>
-    </div>
-    <div class="edit-actions">
-      <button class="edit-btn-cancel" onclick="closeEditProfile()">취소</button>
-      <button class="edit-btn-save" onclick="saveProfile()">저장</button>
-    </div>
-  </div>
-</div>
-
 <!-- Auth modal sheet -->
 <div class="modal-backdrop" id="modalBackdrop" onclick="closeAllSheets()"></div>
 <div class="modal-sheet" id="authSheet">
@@ -2325,7 +2219,8 @@ async function applyUser() {
     const demoAvatar = (demoUser && demoUser.avatar) || '데';
     const demoPhoto = (demoUser && demoUser.photo) || null;
     setAvatar(demoAvatar, demoPhoto);
-    document.getElementById('profileName').textContent = demoName;
+    const pn = document.getElementById('profileName');
+    if (pn) pn.textContent = demoName;
     const wn = document.getElementById('welcomeName');
     if (wn) wn.textContent = demoName;
     const ph = document.getElementById('profilePhone');
@@ -2354,7 +2249,8 @@ async function applyUser() {
     const nick = user.name || user.email.split('@')[0];
     const initial = (user.avatar || nick.charAt(0)).toUpperCase();
     setAvatar(initial, user.photo || null);
-    document.getElementById('profileName').textContent = nick;
+    const pn = document.getElementById('profileName');
+    if (pn) pn.textContent = nick;
     const wn = document.getElementById('welcomeName');
     if (wn) wn.textContent = nick;
     const ph = document.getElementById('profilePhone');
@@ -2371,10 +2267,12 @@ async function applyUser() {
 // Page navigation
 // ============================================================
 function switchPage(page) {
+  if (page === 'my') { location.href = './all.html'; return; }
   document.querySelectorAll('.nav-btn, .icon-btn[data-page]').forEach(b => b.classList.toggle('active', b.dataset.page === page));
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  const map = { home: 'pageHome', auth: 'pageAuth', rel: 'pageRel', my: 'pageMy' };
-  document.getElementById(map[page]).classList.add('active');
+  const map = { home: 'pageHome', auth: 'pageAuth', rel: 'pageRel' };
+  const el = document.getElementById(map[page]);
+  if (el) el.classList.add('active');
   document.querySelector('.content').scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -2453,18 +2351,8 @@ function closeAuthSheet() {
   document.getElementById('authSheet').classList.remove('visible');
   document.getElementById('modalBackdrop').classList.remove('visible');
 }
-function openNotifSheet() {
-  document.getElementById('notifSheet').classList.add('visible');
-  document.getElementById('modalBackdrop').classList.add('visible');
-}
-function closeNotifSheet() {
-  document.getElementById('notifSheet').classList.remove('visible');
-  document.getElementById('modalBackdrop').classList.remove('visible');
-}
 function closeAllSheets() {
   closeAuthSheet();
-  closeNotifSheet();
-  closeEditProfile();
   closeSupportSheet();
 }
 
@@ -2598,114 +2486,6 @@ function renderSupportHistory() {
   }).join('');
 }
 
-// ============================================================
-// 프로필 편집
-// ============================================================
-// 편집 중인 임시 이미지 DataURL (취소 시 폐기)
-let pendingAvatarPhoto = null;
-
-function openEditProfile() {
-  const nameEl = document.getElementById('profileName');
-  const textEl = document.getElementById('profileAvatarText');
-  const photoEl = document.getElementById('profileAvatarPhoto');
-
-  document.getElementById('editName').value = (nameEl.textContent || '').trim();
-  document.getElementById('editInitial').value = (textEl?.textContent || '').trim().charAt(0);
-
-  // 현재 사진을 미리보기에 반영
-  const previewImg = document.getElementById('avatarPreviewImg');
-  const previewText = document.getElementById('avatarPreviewText');
-  const removeBtn = document.getElementById('avatarRemoveBtn');
-  if (photoEl && !photoEl.classList.contains('is-hidden') && photoEl.src) {
-    previewImg.src = photoEl.src;
-    previewImg.classList.remove('is-hidden');
-    removeBtn.classList.remove('is-hidden');
-    pendingAvatarPhoto = photoEl.src;
-  } else {
-    previewImg.classList.add('is-hidden');
-    previewImg.removeAttribute('src');
-    removeBtn.classList.add('is-hidden');
-    pendingAvatarPhoto = null;
-  }
-  previewText.textContent = (textEl?.textContent || '').trim().charAt(0) || '?';
-
-  document.getElementById('editProfileSheet').classList.add('visible');
-  document.getElementById('modalBackdrop').classList.add('visible');
-  setTimeout(() => document.getElementById('editName').focus(), 250);
-}
-
-function closeEditProfile() {
-  document.getElementById('editProfileSheet').classList.remove('visible');
-  document.getElementById('modalBackdrop').classList.remove('visible');
-  pendingAvatarPhoto = null;
-  document.getElementById('editImageInput').value = '';
-}
-
-function handleAvatarFile(evt) {
-  const file = evt.target.files && evt.target.files[0];
-  if (!file) return;
-  if (!file.type.startsWith('image/')) { showToast('⚠️ 이미지 파일만 선택할 수 있습니다'); return; }
-  if (file.size > 5 * 1024 * 1024) { showToast('⚠️ 5MB 이하 이미지로 선택하세요'); return; }
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    pendingAvatarPhoto = e.target.result;
-    const img = document.getElementById('avatarPreviewImg');
-    img.src = pendingAvatarPhoto;
-    img.classList.remove('is-hidden');
-    document.getElementById('avatarRemoveBtn').classList.remove('is-hidden');
-  };
-  reader.readAsDataURL(file);
-}
-
-function removeAvatarPhoto() {
-  pendingAvatarPhoto = null;
-  const img = document.getElementById('avatarPreviewImg');
-  img.classList.add('is-hidden');
-  img.removeAttribute('src');
-  document.getElementById('avatarRemoveBtn').classList.add('is-hidden');
-  document.getElementById('editImageInput').value = '';
-}
-
-async function saveProfile() {
-  const name = document.getElementById('editName').value.trim();
-  const initial = document.getElementById('editInitial').value.trim().charAt(0);
-  if (!name) { showToast('⚠️ 이름을 입력하세요'); return; }
-  const avatar = (initial || name.charAt(0)).toUpperCase();
-  const photo = pendingAvatarPhoto;
-
-  // 화면 즉시 반영 — 이름·이니셜
-  document.getElementById('profileName').textContent = name;
-  const wn = document.getElementById('welcomeName');
-  if (wn) wn.textContent = name;
-  const textEl = document.getElementById('profileAvatarText');
-  if (textEl) textEl.textContent = avatar;
-
-  // 사진 반영 (있으면 표시, 없으면 숨김)
-  const photoEl = document.getElementById('profileAvatarPhoto');
-  if (photoEl) {
-    if (photo) {
-      photoEl.src = photo;
-      photoEl.classList.remove('is-hidden');
-    } else {
-      photoEl.classList.add('is-hidden');
-      photoEl.removeAttribute('src');
-    }
-  }
-
-  // 세션 스토리지 갱신
-  try {
-    const cur = JSON.parse(localStorage.getItem('passUser') || '{}');
-    localStorage.setItem('passUser', JSON.stringify({ ...cur, name, avatar, photo: photo || null }));
-  } catch (e) {}
-
-  // 백엔드 연동
-  if (window.PassAPI && PassAPI.isLoggedIn()) {
-    try { await PassAPI.users.updateMe({ name, avatar, photo }); } catch (e) { /* 실패해도 로컬은 유지 */ }
-  }
-
-  closeEditProfile();
-  showToast('✓ 프로필 저장됨');
-}
 function chooseAuth(type) {
   const labels = {
     mutual: '🤝 상호 인증',
@@ -2761,20 +2541,20 @@ async function logoutPass() {
 }
 
 // ============================================================
-// 나에게 온 메시지 — 페이지네이션
+// 모임에서 온 메시지 — 페이지네이션
 // ============================================================
 const MSG_PER_PAGE = 3;
 let msgPageIndex = 0;
 
 // 데모 메시지 (실제 운영에서는 API 응답으로 대체)
 const MESSAGES = [
-  { initial: '이', name: '이상호', badge: '모임원', time: '1시간 전', body: '주말에 등산 같이 가실 분?' },
-  { initial: '박', name: '박지영', badge: '모임원', time: '1시간 전', body: '새로 배운 라떼아트 🥛' },
-  { initial: '김', name: '김민수', badge: '모임원', time: '1시간 전', body: '오늘 한강에서 자전거 타고 왔어요 🚴' },
-  { initial: '최', name: '최서연', badge: '2-hop',  time: '3시간 전', body: '내일 회의 시간 변경됐어요. 14시→15시' },
-  { initial: '정', name: '정유진', badge: '모임원', time: '5시간 전', body: '카페 추천 좀 부탁해요 ☕' },
-  { initial: '장', name: '장수민', badge: '가족',   time: '어제',     body: '엄마 생신 선물 같이 정할까?' },
-  { initial: '윤', name: '윤서아', badge: '모임원', time: '어제',     body: '오늘 모임 사진 단톡방에 올렸어요 📷' },
+  { initial: '이', name: '이상호', badge: '모임원', group: '주말 등산 모임',   time: '1시간 전', body: '주말에 등산 같이 가실 분?' },
+  { initial: '박', name: '박지영', badge: '모임원', group: '라떼아트 클래스',  time: '1시간 전', body: '새로 배운 라떼아트 🥛' },
+  { initial: '김', name: '김민수', badge: '모임원', group: '한강 사이클 모임', time: '1시간 전', body: '오늘 한강에서 자전거 타고 왔어요 🚴' },
+  { initial: '최', name: '최서연', badge: '2-hop',  group: '회사 동료방',       time: '3시간 전', body: '내일 회의 시간 변경됐어요. 14시→15시' },
+  { initial: '정', name: '정유진', badge: '모임원', group: '카페 투어 모임',   time: '5시간 전', body: '카페 추천 좀 부탁해요 ☕' },
+  { initial: '장', name: '장수민', badge: '가족',   group: '우리 가족',         time: '어제',     body: '엄마 생신 선물 같이 정할까?' },
+  { initial: '윤', name: '윤서아', badge: '모임원', group: '사진 동호회',       time: '어제',     body: '오늘 모임 사진 단톡방에 올렸어요 📷' },
 ];
 
 function escapeHtmlMsg(s) {
@@ -2800,6 +2580,7 @@ function renderMsgPage() {
             <span class="msg-name">${escapeHtmlMsg(m.name)}</span>
             <span class="msg-badge">${escapeHtmlMsg(m.badge)}</span>
           </div>
+          ${m.group ? `<div class="msg-group"><span class="msg-group-ico">🏷</span><span>${escapeHtmlMsg(m.group)}</span></div>` : ''}
           <div class="msg-time">${escapeHtmlMsg(m.time)}</div>
         </div>
         <button type="button" class="msg-menu" aria-label="더보기">⋯</button>
@@ -2877,18 +2658,20 @@ document.addEventListener('keydown', e => {
 applyUser();
 updateTrust();
 
-// 외부 페이지에서 ?page=auth|my 또는 ?notif=1 로 진입 시 처리
+// 외부 페이지에서 ?page=auth 로 진입 시 처리
 // 증명서(?page=rel)는 별도 페이지로 분리되어 cert.html 로 리다이렉트
+// 전체(?page=my 호환)는 all.html 로 리다이렉트
+// 알림(?notif=1) 호환 — 인증 탭으로 이동
+// 고객센터(?support=1) — 문의/신고 시트 자동 오픈
 (function applyInitialPage() {
   try {
     const params = new URLSearchParams(location.search);
     const p = params.get('page');
-    if (p === 'rel') {
-      location.replace('./cert.html');
-      return;
-    }
-    if (p && ['home', 'auth', 'my'].includes(p)) switchPage(p);
-    if (params.get('notif') === '1') setTimeout(openNotifSheet, 100);
+    if (p === 'rel') { location.replace('./cert.html'); return; }
+    if (p === 'my')  { location.replace('./all.html'); return; }
+    if (p && ['home', 'auth'].includes(p)) switchPage(p);
+    else if (params.get('notif') === '1') switchPage('auth');
+    if (params.get('support') === '1') setTimeout(openSupportSheet, 150);
   } catch (e) {}
 })();
 </script>

@@ -413,6 +413,7 @@ function goBack() {
   const ret = params.get('return');
   if (ret === 'home')    { location.href = './home.html'; return; }
   if (ret === 'contact') { location.href = './contact.html'; return; }
+  if (ret === 'all')     { location.href = './all.html'; return; }
   // 기본: 증명서 (트로피 사진을 클릭해 들어왔으므로)
   location.href = './cert.html';
 }

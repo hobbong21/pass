@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#FFA000">
+<title>PASS — 전체</title>
+<script src="../lib/auth-guard.js" data-require="login"></script>
+<script src="../lib/pass-api.js"></script>
+<script src="../lib/scanner.js"></script>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/static/pretendard.min.css" rel="stylesheet">
+<style>
+  :root {
+    --chon-orange: #F7931E;
+    --chon-orange-dark: #E87F0A;
+    --chon-orange-light: #FFC78A;
+    --chon-yellow: #FFC300;
+    --chon-yellow-soft: #FFF3D6;
+    --bg-app: #FFFBF0;
+    --bg-card: #FFFFFF;
+    --sidebar-bg: #FFF1D6;
+    --sidebar-active: var(--chon-orange);
+    --text-primary: #1F1F1F;
+    --text-secondary: #5B5B5B;
+    --text-tertiary: #9CA3AF;
+    --border-light: #F1F5F9;
+    --line: #E5E7EB;
+    --danger: #DC2626;
+    --success: #16A34A;
+
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+    --shadow-md: 0 6px 18px rgba(0,0,0,0.08);
+
+    --radius-md: 14px;
+    --radius-lg: 20px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --nav-h: 76px;
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg-app);
+    color: var(--text-primary);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  .app {
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+    background: var(--bg-app);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    box-shadow: 0 0 40px rgba(0,0,0,0.06);
+  }
+  @media (min-width: 768px) {
+    body { padding: 32px 0; background: #F5F7FB; }
+    .app { border-radius: 28px; overflow: hidden; min-height: calc(100dvh - 64px); box-shadow: var(--shadow-md); }
+  }
+
+  /* ============ Header (통일) ============ */
+  .app-header {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    background: var(--bg-app);
+    padding: calc(14px + var(--safe-top)) 20px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand-button { background: transparent; border: none; padding: 0; cursor: pointer; font-family: inherit; color: inherit; text-align: left; }
+  .brand-button:active { transform: scale(0.97); }
+  .brand-mark {
+    width: 36px; height: 36px;
+    border-radius: 11px;
+    background: linear-gradient(135deg, var(--chon-orange), #5BBA6F);
+    color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 900; font-size: 16px;
+    box-shadow: var(--shadow-sm);
+  }
+  .brand-name { font-size: 20px; font-weight: 900; letter-spacing: -0.5px; }
+  .brand-sub { font-size: 11px; color: var(--text-secondary); font-weight: 700; margin-top: -2px; }
+  .brand-text { line-height: 1.1; }
+  .header-actions { display: flex; align-items: center; gap: 8px; }
+  .icon-btn {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: white;
+    border: 1px solid var(--border-light);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 18px;
+    position: relative;
+  }
+  .icon-btn-dot {
+    position: absolute; top: 8px; right: 10px;
+    width: 8px; height: 8px;
+    background: #DC2626;
+    border-radius: 50%;
+    border: 2px solid white;
+  }
+
+  .welcome-bar {
+    background: linear-gradient(90deg, var(--chon-yellow-soft), white);
+    border-bottom: 1px solid var(--border-light);
+    padding: 10px 20px;
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; font-weight: 700;
+  }
+  .welcome-emoji { font-size: 16px; }
+  .welcome-msg strong { color: var(--chon-orange-dark); font-weight: 900; }
+  .welcome-user {
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    font: inherit;
+    color: var(--chon-orange-dark);
+    font-weight: 900;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: rgba(247, 147, 30, 0.35);
+    text-decoration-thickness: 1.5px;
+    transition: text-decoration-color 0.15s, transform 0.12s;
+  }
+  .welcome-user:hover { text-decoration-color: var(--chon-orange-dark); }
+  .welcome-user:active { transform: scale(0.97); }
+
+  .all-section-title {
+    padding: 16px 20px 8px;
+    font-size: 15px;
+    font-weight: 900;
+    color: var(--text-primary);
+    letter-spacing: -0.3px;
+  }
+
+  /* ============ Top tabs ============ */
+  .all-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    background: var(--bg-app);
+    border-bottom: 1px solid var(--line);
+  }
+  .all-tab {
+    background: transparent;
+    border: none;
+    padding: 14px 8px;
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text-tertiary);
+    font-family: inherit;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    position: relative;
+  }
+  .all-tab .tab-ico { font-size: 16px; line-height: 1; }
+  .all-tab.active { color: var(--text-primary); }
+  .all-tab.active::after {
+    content: '';
+    position: absolute;
+    left: 16%; right: 16%;
+    bottom: -1px;
+    height: 2px;
+    background: var(--chon-orange);
+    border-radius: 2px;
+  }
+  .all-tab + .all-tab { border-left: 1px solid var(--line); }
+
+  /* ============ Body (sidebar + content) ============ */
+  .all-body {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 112px 1fr;
+    min-height: 0;
+    padding-bottom: calc(var(--nav-h) + 12px + var(--safe-bottom));
+  }
+  .all-sidebar {
+    background: var(--sidebar-bg);
+    display: flex;
+    flex-direction: column;
+    padding: 4px 0 24px;
+  }
+  .all-cat {
+    background: transparent;
+    border: none;
+    padding: 16px 10px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    font-family: inherit;
+    cursor: pointer;
+    border-left: 3px solid transparent;
+    line-height: 1.35;
+  }
+  .all-cat:active { background: rgba(0,0,0,0.04); }
+  .all-cat.active {
+    background: var(--chon-orange);
+    color: white;
+    border-left-color: var(--chon-orange-dark);
+    font-weight: 900;
+  }
+
+  .all-content {
+    background: var(--bg-card);
+    padding: 8px 0;
+  }
+  .all-item {
+    width: 100%;
+    background: transparent;
+    border: none;
+    text-align: left;
+    padding: 16px 18px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-family: inherit;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    border-bottom: 1px solid var(--border-light);
+  }
+  .all-item:last-child { border-bottom: none; }
+  .all-item:active { background: #FAFBFC; }
+  .all-item-main { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .all-item-ico { font-size: 18px; line-height: 1; }
+  .all-item-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .all-item-meta { font-size: 12px; font-weight: 700; color: var(--text-tertiary); }
+  .all-item-meta.danger { color: var(--danger); }
+  .all-item-meta.success { color: var(--success); }
+  .all-item-arrow { color: var(--text-tertiary); font-size: 18px; }
+  .all-empty {
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--text-tertiary);
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  /* ============ Bottom nav (shared) ============ */
+  .bottom-nav {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 0;
+    width: 100%;
+    max-width: 480px;
+    background: white;
+    border-top: 1px solid var(--line);
+    height: calc(var(--nav-h) + var(--safe-bottom));
+    padding-bottom: var(--safe-bottom);
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    align-items: center;
+    z-index: 50;
+  }
+  .nav-btn {
+    background: transparent;
+    border: none;
+    padding: 8px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    color: var(--text-tertiary);
+    font-family: inherit;
+    cursor: pointer;
+  }
+  .nav-btn-icon { font-size: 22px; line-height: 1; }
+  .nav-btn-label { font-size: 10px; font-weight: 800; }
+  .nav-btn.active { color: var(--chon-orange-dark); }
+  .nav-btn.center { position: relative; padding-top: 0; }
+  .nav-btn.center .nav-circle {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--chon-orange), var(--chon-yellow));
+    color: white;
+    font-size: 24px;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: -22px;
+    box-shadow: 0 6px 16px rgba(247, 147, 30, 0.45);
+  }
+  .nav-btn.center .nav-btn-label { color: var(--chon-orange-dark); margin-top: 4px; }
+
+  /* Hamburger lines icon */
+  .ico-hamburger {
+    width: 22px; height: 22px;
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+  }
+  .ico-hamburger span {
+    display: block;
+    height: 2.5px;
+    width: 100%;
+    background: currentColor;
+    border-radius: 2px;
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: calc(var(--nav-h) + 24px + var(--safe-bottom));
+    left: 50%;
+    transform: translateX(-50%) translateY(40px);
+    background: rgba(31, 31, 31, 0.94);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 200;
+    max-width: 80vw;
+    text-align: center;
+  }
+  .toast.visible {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header class="app-header">
+    <button type="button" class="brand brand-button" onclick="location.href='./home.html'" aria-label="홈으로">
+      <div class="brand-mark">P</div>
+      <div class="brand-text">
+        <div class="brand-name">PASS</div>
+        <div class="brand-sub">관계형 SNS</div>
+      </div>
+    </button>
+    <div class="header-actions">
+      <button type="button" class="icon-btn" onclick="openScanner()" aria-label="QR 스캔" title="QR 스캔"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7" y="7" width="10" height="10" rx="1.5"/></svg></button>
+      <button type="button" class="icon-btn" onclick="location.href='./home.html?page=auth'" aria-label="알림">
+        🔔
+        <span class="icon-btn-dot"></span>
+      </button>
+    </div>
+  </header>
+
+  <div class="welcome-bar">
+    <span class="welcome-emoji">👋</span>
+    <span class="welcome-msg"><button type="button" class="welcome-user" id="welcomeName" onclick="location.href='./cert.html'">사용자</button>님 환영합니다 · 오늘도 즐거운 하루되세요</span>
+  </div>
+
+  <div class="all-section-title" id="allSectionTitle">인증 센터</div>
+
+  <nav class="all-tabs" role="tablist">
+    <button type="button" class="all-tab active" data-tab="cert" onclick="switchTab('cert')" role="tab">
+      <span class="tab-ico">🛡️</span><span>인증센터</span>
+    </button>
+    <button type="button" class="all-tab" data-tab="my" onclick="switchTab('my')" role="tab">
+      <span class="tab-ico">👤</span><span>내정보관리</span>
+    </button>
+  </nav>
+
+  <div class="all-body">
+    <aside class="all-sidebar" id="allSidebar" aria-label="카테고리"></aside>
+    <section class="all-content" id="allContent" aria-live="polite"></section>
+  </div>
+
+  <nav class="bottom-nav">
+    <button type="button" class="nav-btn" onclick="location.href='./home.html'">
+      <div class="nav-btn-icon">🏠</div>
+      <div class="nav-btn-label">홈</div>
+    </button>
+    <button type="button" class="nav-btn" onclick="location.href='./contact.html'">
+      <div class="nav-btn-icon">📰</div>
+      <div class="nav-btn-label">연락처</div>
+    </button>
+    <button type="button" class="nav-btn center" onclick="location.href='./cert.html'">
+      <div class="nav-circle">🆔</div>
+      <div class="nav-btn-label">증명서</div>
+    </button>
+    <button type="button" class="nav-btn" onclick="location.href='./home.html?page=auth'">
+      <div class="nav-btn-icon">🤝</div>
+      <div class="nav-btn-label">인증</div>
+    </button>
+    <button type="button" class="nav-btn active">
+      <div class="nav-btn-icon" aria-hidden="true">
+        <span class="ico-hamburger"><span></span><span></span><span></span></span>
+      </div>
+      <div class="nav-btn-label">전체</div>
+    </button>
+  </nav>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// =========================================================
+// Data — categories & items
+// =========================================================
+const MENU = {
+  cert: [
+    {
+      id: 'chon-id',
+      label: 'CHON ID',
+      items: [
+        { ico: '🪪', label: 'CHON DID 트로피', href: './cert.html' },
+        { ico: '📱', label: '자기 자신 인증',   href: '../auth/self-id.html' },
+      ],
+    },
+    {
+      id: 'family',
+      label: '가족·관계',
+      items: [
+        { ico: '🌳', label: '가계도 보기',     href: '../views/family-tree.html' },
+        { ico: '📄', label: '관계 증명서 발급', toast: '📄 관계 증명서 발급' },
+      ],
+    },
+    {
+      id: 'group',
+      label: '모임·동호회',
+      items: [
+        { ico: '👥', label: '동호회',  href: '../views/friends.html' },
+        { ico: '🎓', label: '학급증',  href: '../views/class-id.html' },
+      ],
+    },
+    {
+      id: 'auth-activity',
+      label: '인증 활동',
+      items: [
+        { ico: '🆕', label: '새 인증 요청',     href: './home.html?page=auth' },
+        { ico: '⏱',  label: '대기 중인 인증', href: './home.html?page=auth' },
+        { ico: '✓',  label: '최근 활동',       href: './home.html?page=auth' },
+      ],
+    },
+    {
+      id: 'points',
+      label: '인증 포인트',
+      items: [
+        { ico: '🏆', label: '인증 포인트 · 레벨', href: './trust.html' },
+        { ico: '🎖', label: '뱃지',              href: './trust.html' },
+      ],
+    },
+  ],
+  my: [
+    {
+      id: 'profile',
+      label: '프로필',
+      items: [
+        { ico: '👤', label: '프로필 편집', href: './profile-edit.html?return=all' },
+        { ico: '📷', label: '사진 변경',   href: './profile-edit.html?return=all' },
+      ],
+    },
+    {
+      id: 'settings',
+      label: '환경설정',
+      items: [
+        { ico: '🔔', label: '알림',          meta: '켜짐', toast: '🔔 알림 설정' },
+        { ico: '🔊', label: '음성 안내',     meta: '꺼짐', toast: '🔊 음성 안내' },
+        { ico: '🌐', label: '공공장소 모드', meta: '꺼짐', toast: '🌐 공공장소 모드' },
+      ],
+    },
+    {
+      id: 'security',
+      label: '보안·디바이스',
+      items: [
+        { ico: '🛡️', label: '하드웨어 인증', meta: 'TRUSTED', metaClass: 'success', toast: '🛡️ 하드웨어 인증' },
+        { ico: '📱', label: '단말 관리',     meta: '1대',     toast: '📱 단말 관리' },
+        { ico: '🔐', label: '개인정보',                       toast: '🔐 개인정보' },
+      ],
+    },
+    {
+      id: 'support',
+      label: '고객지원',
+      items: [
+        { ico: '📨', label: '고객센터 (문의/신고)', href: './home.html?support=1' },
+        { ico: '⚠️', label: '분실/도난 신고',        toast: '⚠️ 분실/도난 신고' },
+      ],
+    },
+    {
+      id: 'account',
+      label: '계정',
+      items: [
+        { ico: '🚪', label: '로그아웃', metaClass: 'danger', action: 'logout' },
+      ],
+    },
+  ],
+};
+
+// =========================================================
+// State
+// =========================================================
+let activeTab = 'cert';
+let activeCat = MENU.cert[0].id;
+
+// =========================================================
+// Render
+// =========================================================
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function renderSidebar() {
+  const cats = MENU[activeTab] || [];
+  const sb = document.getElementById('allSidebar');
+  sb.innerHTML = cats.map(c =>
+    `<button type="button" class="all-cat${c.id === activeCat ? ' active' : ''}" data-cat="${escapeHtml(c.id)}" onclick="selectCat('${escapeHtml(c.id)}')">${escapeHtml(c.label)}</button>`
+  ).join('');
+}
+
+function renderContent() {
+  const cats = MENU[activeTab] || [];
+  const cat = cats.find(c => c.id === activeCat) || cats[0];
+  const content = document.getElementById('allContent');
+  if (!cat || !cat.items?.length) {
+    content.innerHTML = `<div class="all-empty">표시할 항목이 없습니다</div>`;
+    return;
+  }
+  content.innerHTML = cat.items.map((it, idx) => {
+    const metaCls = it.metaClass ? ' ' + it.metaClass : '';
+    const meta = it.meta ? `<span class="all-item-meta${metaCls}">${escapeHtml(it.meta)}</span>` : '';
+    return `
+      <button type="button" class="all-item" data-cat="${escapeHtml(cat.id)}" data-idx="${idx}" onclick="onItem('${escapeHtml(cat.id)}', ${idx})">
+        <span class="all-item-main">
+          <span class="all-item-ico">${it.ico || '•'}</span>
+          <span class="all-item-label">${escapeHtml(it.label)}</span>
+        </span>
+        ${meta}
+        <span class="all-item-arrow">›</span>
+      </button>
+    `;
+  }).join('');
+}
+
+const TAB_TITLES = { cert: '인증 센터', my: '내 정보 관리' };
+
+function switchTab(tab) {
+  if (!MENU[tab]) return;
+  activeTab = tab;
+  document.querySelectorAll('.all-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  activeCat = MENU[tab][0]?.id;
+  const t = document.getElementById('allSectionTitle');
+  if (t) t.textContent = TAB_TITLES[tab] || '';
+  renderSidebar();
+  renderContent();
+}
+
+function selectCat(id) {
+  activeCat = id;
+  renderSidebar();
+  renderContent();
+}
+
+function onItem(catId, idx) {
+  const cats = MENU[activeTab] || [];
+  const cat = cats.find(c => c.id === catId);
+  const it = cat?.items?.[idx];
+  if (!it) return;
+  if (it.action === 'logout') { logoutPass(); return; }
+  if (it.href)  { location.href = it.href; return; }
+  if (it.toast) { showToast(it.toast); return; }
+}
+
+// =========================================================
+// Greeting name — CHON ID name > passUser.name > email handle
+// =========================================================
+function resolveName() {
+  try {
+    const idRaw = localStorage.getItem('passSelfId');
+    if (idRaw) {
+      const id = JSON.parse(idRaw);
+      if (id?.name) return id.name;
+    }
+  } catch (e) {}
+  try {
+    const u = JSON.parse(localStorage.getItem('passUser') || '{}');
+    if (u.name) return u.name;
+    if (u.email) return u.email.split('@')[0];
+  } catch (e) {}
+  return '사용자';
+}
+
+function applyGreet() {
+  const name = resolveName();
+  const el = document.getElementById('welcomeName');
+  if (el) el.textContent = name;
+}
+
+// =========================================================
+// Logout
+// =========================================================
+async function logoutPass() {
+  if (!confirm('로그아웃 하시겠습니까?\n\n간편 번호(2FA) 등록은 이 디바이스에 유지됩니다.\n다음 로그인 시 간편 번호 6자리로 빠르게 들어올 수 있습니다.')) return;
+  if (window.PassAPI && PassAPI.isLoggedIn()) {
+    try { await PassAPI.auth.logout(false); } catch (e) {}
+  }
+  if (window.PassAPI) PassAPI.clearSession();
+  else {
+    try { localStorage.removeItem('passUser'); localStorage.removeItem('passWelcomed'); } catch (e) {}
+  }
+  window.location.href = '../auth/login.html';
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('visible');
+  clearTimeout(window._toastT);
+  window._toastT = setTimeout(() => t.classList.remove('visible'), 2200);
+}
+
+// =========================================================
+// Init
+// =========================================================
+applyGreet();
+renderSidebar();
+renderContent();
+</script>
+</body>
+</html>

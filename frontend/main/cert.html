@@ -616,7 +616,7 @@
     </button>
     <div class="header-actions">
       <button type="button" class="icon-btn" onclick="openScanner()" aria-label="QR 스캔" title="QR 스캔"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7" y="7" width="10" height="10" rx="1.5"/></svg></button>
-      <button type="button" class="icon-btn" onclick="location.href='./home.html?notif=1'" aria-label="알림">
+      <button type="button" class="icon-btn" onclick="location.href='./home.html?page=auth'" aria-label="알림">
         🔔
         <span class="icon-btn-dot"></span>
       </button>
@@ -675,9 +675,9 @@
       <div class="nav-btn-icon">🤝</div>
       <div class="nav-btn-label">인증</div>
     </button>
-    <button type="button" class="nav-btn" onclick="location.href='./home.html?page=my'">
-      <div class="nav-btn-icon">👤</div>
-      <div class="nav-btn-label">마이페이지</div>
+    <button type="button" class="nav-btn" onclick="location.href='./all.html'">
+      <div class="nav-btn-icon">☰</div>
+      <div class="nav-btn-label">전체</div>
     </button>
   </nav>
 </div>
@@ -925,6 +925,13 @@ function escapeHtml(s) {
   if (wn && u?.name) wn.textContent = u.name;
   renderIdCard();
   showOnboardIfNeeded();
+
+  // ?slide=1 로 진입 시 인증 모임 picker(슬라이드 2)로 바로 이동
+  try {
+    const params = new URLSearchParams(location.search);
+    const s = parseInt(params.get('slide') || '', 10);
+    if (Number.isFinite(s) && s > 0) goSlide(s);
+  } catch (e) {}
 })();
 </script>
 </body>
