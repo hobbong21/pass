@@ -951,6 +951,23 @@
   .welcome-emoji { font-size: 16px; line-height: 1; }
   .welcome-msg { flex: 1; }
   .welcome-msg strong { color: var(--chon-orange-dark); font-weight: 900; }
+  .welcome-user {
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    font: inherit;
+    color: var(--chon-orange-dark);
+    font-weight: 900;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: rgba(247, 147, 30, 0.35);
+    text-decoration-thickness: 1.5px;
+    transition: text-decoration-color 0.15s, transform 0.12s;
+  }
+  .welcome-user:hover { text-decoration-color: var(--chon-orange-dark); }
+  .welcome-user:active { transform: scale(0.97); }
   .welcome-reset {
     background: white;
     border: 1px solid #F1F5F9;
@@ -1038,7 +1055,7 @@
   </header>
   <div class="welcome-bar">
     <span class="welcome-emoji">👋</span>
-    <span class="welcome-msg"><strong>사용자</strong>님 환영합니다 · 오늘도 즐거운 하루되세요</span>
+    <span class="welcome-msg"><button type="button" class="welcome-user" onclick="location.href='../main/cert.html'">사용자</button>님 환영합니다 · 오늘도 즐거운 하루되세요</span>
     <button class="welcome-reset" onclick="resetAll()">처음부터</button>
   </div>
   <div class="content">
