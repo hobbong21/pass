@@ -9,6 +9,7 @@ import { RelationsModule } from './relations/relations.module';
 import { PostsModule } from './posts/posts.module';
 import { ChatModule } from './chat/chat.module';
 import { GraphsModule } from './graphs/graphs.module';
+import { GraphQueryModule } from './graph-query/graph-query.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { GraphsModule } from './graphs/graphs.module';
     PostsModule,
     ChatModule,
     GraphsModule,
+    GraphQueryModule,
   ],
 })
 export class AppModule {}

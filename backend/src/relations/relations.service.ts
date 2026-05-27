@@ -13,6 +13,10 @@ export class RelationsService {
   // ============================================================
   // 관계 요청 — fromUser → toUser
   // status는 PENDING으로 시작 (상대방 confirm 시 confirmed)
+  //
+  // pending은 본질적으로 단방향(요청자→대상)이므로 한 방향만 저장.
+  // confirmed 시점에 respond()에서 역방향 edge를 mirror — 그때
+  // mirrorSubtype()이 family/class kind에 맞게 대칭 변환함.
   // ============================================================
   async request(
     fromUserId: string,
@@ -243,13 +247,36 @@ export class RelationsService {
     return u ? { id: u.id, email: u.email, name: u.name, avatar: u.avatar } : null;
   }
 
-  /// 가족 관계 미러링 — '아버지' ↔ '아들/딸' 등은 알기 어려우므로 subtype만 보존
-  /// family는 tier를 양쪽이 다르게 가질 수 있어 subtype은 mirror 시 null 또는 동일 tier
+  /// 가족 tier 대칭 매핑 — 윗세대/아랫세대는 뒤집고, 동세대/배우자는 그대로
+  /// 정확한 호칭(아버지/아들 등)은 meta에 보관하고 여기서는 tier만 다룸
+  private static readonly FAMILY_TIER_MIRROR: Record<string, string> = {
+    grandparents:       'grandchildren',
+    grandchildren:      'grandparents',
+    parents:            'children',
+    children:           'parents',
+    'parents-in-law':   'children-in-law',
+    'children-in-law':  'parents-in-law',
+    'aunts-uncles':     'nieces-nephews',
+    'nieces-nephews':   'aunts-uncles',
+    siblings:           'siblings',
+    'siblings-in-law':  'siblings-in-law',
+    spouse:             'spouse',
+    cousins:            'cousins',
+  };
+
+  /// 친구 hop 미러링은 그대로 (양쪽 거리 동일)
+  /// 학급 role 미러링: teacher↔student, parent는 그대로
+  private static readonly CLASS_ROLE_MIRROR: Record<string, string> = {
+    teacher: 'student',
+    student: 'teacher',
+    parent:  'parent',
+  };
+
   private mirrorSubtype(kind: string, subtype: string | null): string | null {
-    if (kind === 'family') {
-      // tier 매핑은 application 레이어에서 처리. 여기서는 그대로 두지 않고 'other'로
-      return null;
-    }
+    if (!subtype) return null;
+    if (kind === 'family') return RelationsService.FAMILY_TIER_MIRROR[subtype] ?? subtype;
+    if (kind === 'class')  return RelationsService.CLASS_ROLE_MIRROR[subtype] ?? subtype;
+    // friend hop은 양쪽 동일
     return subtype;
   }
 }
