@@ -711,11 +711,61 @@
   /* ============================================
      Message Card — 나에게 온 메시지
      ============================================ */
+  /* 메시지 페이지네이션 — 한 화면에 N장씩, 페이지 단위 전환 */
+  .msg-section { margin-bottom: 16px; }
+  .msg-section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 0 4px 10px;
+  }
+  .msg-section-title {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--text-secondary);
+  }
+  .msg-pager {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .msg-pager-btn {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: white;
+    border: 1px solid var(--border-light);
+    color: var(--text-primary);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.12s, border-color 0.12s, color 0.12s;
+  }
+  .msg-pager-btn:not(:disabled):hover { border-color: var(--chon-orange); color: var(--chon-orange-dark); }
+  .msg-pager-btn:not(:disabled):active { background: var(--chon-yellow-soft); }
+  .msg-pager-btn:disabled { color: var(--text-tertiary); cursor: not-allowed; opacity: 0.5; }
+  .msg-pager-indicator {
+    min-width: 42px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--text-secondary);
+    padding: 0 4px;
+  }
+  .msg-pager-indicator strong { color: var(--chon-orange-dark); }
   .msg-list {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    margin-bottom: 16px;
+  }
+  .msg-card { flex-shrink: 0; animation: msgPageIn 0.22s ease; }
+  @keyframes msgPageIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
   }
   .msg-card {
     background: white;
@@ -1669,85 +1719,18 @@
         <div class="hero-illust" id="heroIllust">📱</div>
       </div>
 
-      <div class="section-title">나에게 온 메시지</div>
-      <div class="msg-list" id="msgList">
-        <article class="msg-card">
-          <div class="msg-header">
-            <div class="msg-avatar">이</div>
-            <div class="msg-meta">
-              <div class="msg-name-row">
-                <span class="msg-name">이상호</span>
-                <span class="msg-badge">모임원</span>
-              </div>
-              <div class="msg-time">1시간 전</div>
-            </div>
-            <button type="button" class="msg-menu" aria-label="더보기">⋯</button>
+      <div class="msg-section" id="msgSection">
+        <div class="msg-section-head">
+          <span class="msg-section-title">나에게 온 메시지</span>
+          <div class="msg-pager" id="msgPager">
+            <button type="button" class="msg-pager-btn" id="msgPrevBtn" onclick="msgPrevPage()" aria-label="이전 페이지">‹</button>
+            <span class="msg-pager-indicator">
+              <strong id="msgPageNow">1</strong> / <span id="msgPageTotal">1</span>
+            </span>
+            <button type="button" class="msg-pager-btn" id="msgNextBtn" onclick="msgNextPage()" aria-label="다음 페이지">›</button>
           </div>
-          <div class="msg-body">주말에 등산 같이 가실 분?</div>
-          <div class="msg-actions">
-            <button type="button" class="msg-action" onclick="toggleLike(this)">
-              <span class="msg-action-icon">♡</span><span>0</span>
-            </button>
-            <button type="button" class="msg-action" onclick="showToast('💬 댓글')">
-              <span class="msg-action-icon">💬</span><span>0</span>
-            </button>
-            <button type="button" class="msg-action right" onclick="showToast('이상호님에게 메시지 보내기')">
-              <span class="msg-action-icon">✉</span><span>메시지</span>
-            </button>
-          </div>
-        </article>
-
-        <article class="msg-card">
-          <div class="msg-header">
-            <div class="msg-avatar">박</div>
-            <div class="msg-meta">
-              <div class="msg-name-row">
-                <span class="msg-name">박지영</span>
-                <span class="msg-badge">모임원</span>
-              </div>
-              <div class="msg-time">1시간 전</div>
-            </div>
-            <button type="button" class="msg-menu" aria-label="더보기">⋯</button>
-          </div>
-          <div class="msg-body">새로 배운 라떼아트 🥛</div>
-          <div class="msg-actions">
-            <button type="button" class="msg-action" onclick="toggleLike(this)">
-              <span class="msg-action-icon">♡</span><span>0</span>
-            </button>
-            <button type="button" class="msg-action" onclick="showToast('💬 댓글')">
-              <span class="msg-action-icon">💬</span><span>0</span>
-            </button>
-            <button type="button" class="msg-action right" onclick="showToast('박지영님에게 메시지 보내기')">
-              <span class="msg-action-icon">✉</span><span>메시지</span>
-            </button>
-          </div>
-        </article>
-
-        <article class="msg-card">
-          <div class="msg-header">
-            <div class="msg-avatar">김</div>
-            <div class="msg-meta">
-              <div class="msg-name-row">
-                <span class="msg-name">김민수</span>
-                <span class="msg-badge">모임원</span>
-              </div>
-              <div class="msg-time">1시간 전</div>
-            </div>
-            <button type="button" class="msg-menu" aria-label="더보기">⋯</button>
-          </div>
-          <div class="msg-body">오늘 한강에서 자전거 타고 왔어요 🚴</div>
-          <div class="msg-actions">
-            <button type="button" class="msg-action" onclick="toggleLike(this)">
-              <span class="msg-action-icon">♡</span><span>0</span>
-            </button>
-            <button type="button" class="msg-action" onclick="showToast('💬 댓글')">
-              <span class="msg-action-icon">💬</span><span>0</span>
-            </button>
-            <button type="button" class="msg-action right" onclick="showToast('김민수님에게 메시지 보내기')">
-              <span class="msg-action-icon">✉</span><span>메시지</span>
-            </button>
-          </div>
-        </article>
+        </div>
+        <div class="msg-list" id="msgList"></div>
       </div>
 
     </section>
@@ -2759,7 +2742,89 @@ async function logoutPass() {
 }
 
 // ============================================================
-// Message card actions (나에게 온 메시지)
+// 나에게 온 메시지 — 페이지네이션
+// ============================================================
+const MSG_PER_PAGE = 3;
+let msgPageIndex = 0;
+
+// 데모 메시지 (실제 운영에서는 API 응답으로 대체)
+const MESSAGES = [
+  { initial: '이', name: '이상호', badge: '모임원', time: '1시간 전', body: '주말에 등산 같이 가실 분?' },
+  { initial: '박', name: '박지영', badge: '모임원', time: '1시간 전', body: '새로 배운 라떼아트 🥛' },
+  { initial: '김', name: '김민수', badge: '모임원', time: '1시간 전', body: '오늘 한강에서 자전거 타고 왔어요 🚴' },
+  { initial: '최', name: '최서연', badge: '2-hop',  time: '3시간 전', body: '내일 회의 시간 변경됐어요. 14시→15시' },
+  { initial: '정', name: '정유진', badge: '모임원', time: '5시간 전', body: '카페 추천 좀 부탁해요 ☕' },
+  { initial: '장', name: '장수민', badge: '가족',   time: '어제',     body: '엄마 생신 선물 같이 정할까?' },
+  { initial: '윤', name: '윤서아', badge: '모임원', time: '어제',     body: '오늘 모임 사진 단톡방에 올렸어요 📷' },
+];
+
+function escapeHtmlMsg(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function renderMsgPage() {
+  const list = document.getElementById('msgList');
+  if (!list) return;
+
+  const total = Math.max(1, Math.ceil(MESSAGES.length / MSG_PER_PAGE));
+  msgPageIndex = Math.max(0, Math.min(msgPageIndex, total - 1));
+
+  const start = msgPageIndex * MSG_PER_PAGE;
+  const page = MESSAGES.slice(start, start + MSG_PER_PAGE);
+
+  list.innerHTML = page.map(m => `
+    <article class="msg-card">
+      <div class="msg-header">
+        <div class="msg-avatar">${escapeHtmlMsg(m.initial)}</div>
+        <div class="msg-meta">
+          <div class="msg-name-row">
+            <span class="msg-name">${escapeHtmlMsg(m.name)}</span>
+            <span class="msg-badge">${escapeHtmlMsg(m.badge)}</span>
+          </div>
+          <div class="msg-time">${escapeHtmlMsg(m.time)}</div>
+        </div>
+        <button type="button" class="msg-menu" aria-label="더보기">⋯</button>
+      </div>
+      <div class="msg-body">${escapeHtmlMsg(m.body)}</div>
+      <div class="msg-actions">
+        <button type="button" class="msg-action" onclick="toggleLike(this)">
+          <span class="msg-action-icon">♡</span><span>0</span>
+        </button>
+        <button type="button" class="msg-action" onclick="showToast('💬 댓글')">
+          <span class="msg-action-icon">💬</span><span>0</span>
+        </button>
+        <button type="button" class="msg-action right" onclick="showToast('${escapeHtmlMsg(m.name)}님에게 메시지 보내기')">
+          <span class="msg-action-icon">✉</span><span>메시지</span>
+        </button>
+      </div>
+    </article>
+  `).join('');
+
+  // 인디케이터/버튼 갱신
+  document.getElementById('msgPageNow').textContent = msgPageIndex + 1;
+  document.getElementById('msgPageTotal').textContent = total;
+  document.getElementById('msgPrevBtn').disabled = msgPageIndex === 0;
+  document.getElementById('msgNextBtn').disabled = msgPageIndex >= total - 1;
+
+  // 페이지가 1장뿐이면 페이저 숨김
+  const pager = document.getElementById('msgPager');
+  if (pager) pager.style.display = total <= 1 ? 'none' : 'inline-flex';
+}
+
+function msgNextPage() {
+  msgPageIndex++;
+  renderMsgPage();
+}
+function msgPrevPage() {
+  msgPageIndex--;
+  renderMsgPage();
+}
+
+// 초기 렌더
+renderMsgPage();
+
+// ============================================================
+// Message card actions
 // ============================================================
 function toggleLike(btn) {
   const span = btn.querySelector('span:last-child');
