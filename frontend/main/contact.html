@@ -414,6 +414,255 @@
   .cta-btn:active { transform: scale(0.98); background: var(--chon-orange-dark); }
 
   /* ============================================
+     Modal — Chat sheet + Invite sheet
+     ============================================ */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 99;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.22s;
+  }
+  .modal-backdrop.visible { opacity: 1; pointer-events: auto; }
+
+  .modal-sheet {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%) translateY(100%);
+    width: 100%;
+    max-width: 480px;
+    background: var(--bg-card);
+    border-radius: 24px 24px 0 0;
+    z-index: 100;
+    transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 -16px 32px rgba(0,0,0,0.18);
+    display: flex;
+    flex-direction: column;
+    max-height: 90dvh;
+  }
+  .modal-sheet.visible { transform: translateX(-50%) translateY(0); }
+
+  /* ----- Chat sheet ----- */
+  .chat-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px 12px;
+    border-bottom: 1px solid var(--border-light);
+    flex-shrink: 0;
+  }
+  .chat-header-grip {
+    position: absolute;
+    top: 8px; left: 50%;
+    transform: translateX(-50%);
+    width: 40px; height: 4px;
+    background: #D1D5DB;
+    border-radius: 2px;
+  }
+  .chat-avatar {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: var(--chon-green-soft);
+    color: var(--chon-green);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 900;
+    font-size: 16px;
+    flex-shrink: 0;
+    box-shadow: 0 0 0 2px var(--chon-green) inset;
+  }
+  .chat-name { flex: 1; font-size: 16px; font-weight: 800; }
+  .chat-sub { font-size: 11px; color: var(--chon-green); font-weight: 700; margin-top: 1px; }
+  .chat-name-wrap { flex: 1; min-width: 0; }
+  .chat-close {
+    width: 32px; height: 32px;
+    border: none; background: transparent;
+    cursor: pointer; font-size: 18px;
+    color: var(--text-secondary);
+    font-family: inherit;
+  }
+  .chat-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: var(--bg-app);
+    min-height: 240px;
+  }
+  .chat-day {
+    align-self: center;
+    font-size: 11px;
+    color: var(--text-tertiary);
+    background: white;
+    padding: 4px 12px;
+    border-radius: var(--radius-pill);
+    margin: 4px 0;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  }
+  .chat-msg {
+    max-width: 72%;
+    padding: 9px 13px;
+    border-radius: 18px;
+    font-size: 14px;
+    line-height: 1.4;
+    word-break: break-word;
+    animation: msgIn 0.18s ease;
+  }
+  @keyframes msgIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .chat-msg.them {
+    align-self: flex-start;
+    background: white;
+    color: var(--text-primary);
+    border-bottom-left-radius: 6px;
+    box-shadow: var(--shadow-sm);
+  }
+  .chat-msg.me {
+    align-self: flex-end;
+    background: var(--chon-orange);
+    color: white;
+    border-bottom-right-radius: 6px;
+    box-shadow: 0 2px 8px rgba(247, 147, 30, 0.25);
+  }
+  .chat-msg-time {
+    font-size: 10px;
+    color: var(--text-tertiary);
+    margin: 2px 4px;
+    align-self: flex-end;
+  }
+  .chat-msg-time.them { align-self: flex-start; }
+
+  .chat-input-row {
+    display: flex;
+    gap: 8px;
+    padding: 10px 12px calc(10px + var(--safe-bottom));
+    border-top: 1px solid var(--border-light);
+    background: white;
+    flex-shrink: 0;
+  }
+  .chat-input {
+    flex: 1;
+    height: 44px;
+    background: var(--bg-app);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-pill);
+    padding: 0 16px;
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+    color: var(--text-primary);
+  }
+  .chat-input:focus { border-color: var(--chon-orange); }
+  .chat-send {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: var(--chon-orange);
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    flex-shrink: 0;
+    transition: background 0.15s;
+  }
+  .chat-send:disabled { background: var(--line); cursor: not-allowed; }
+  .chat-send:not(:disabled):active { background: var(--chon-orange-dark); }
+
+  /* ----- Invite sheet ----- */
+  .invite-sheet {
+    padding: 24px 22px calc(24px + var(--safe-bottom));
+    position: relative;
+  }
+  .invite-grip {
+    position: absolute;
+    top: 8px; left: 50%;
+    transform: translateX(-50%);
+    width: 40px; height: 4px;
+    background: #D1D5DB;
+    border-radius: 2px;
+  }
+  .invite-icon {
+    width: 64px; height: 64px;
+    border-radius: 18px;
+    background: var(--chon-yellow-soft);
+    color: var(--chon-orange-dark);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px;
+    margin: 12px auto 14px;
+  }
+  .invite-title {
+    text-align: center;
+    font-size: 19px;
+    font-weight: 900;
+    margin-bottom: 6px;
+    color: var(--text-primary);
+    letter-spacing: -0.3px;
+  }
+  .invite-sub {
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.55;
+    margin-bottom: 8px;
+  }
+  .invite-sub strong { color: var(--chon-orange-dark); font-weight: 800; }
+  .invite-name {
+    text-align: center;
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text-primary);
+    background: var(--bg-app);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-pill);
+    padding: 8px 16px;
+    display: inline-block;
+    margin: 14px auto 18px;
+  }
+  .invite-name-row { text-align: center; }
+  .invite-info {
+    background: var(--chon-yellow-soft);
+    border: 1px solid var(--chon-orange-light);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    margin-bottom: 16px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.55;
+  }
+  .invite-info-title { color: var(--chon-orange-dark); font-weight: 800; margin-bottom: 4px; }
+  .invite-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .invite-btn {
+    width: 100%;
+    height: 52px;
+    border-radius: var(--radius-pill);
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+    border: 1.5px solid var(--line);
+    background: white;
+    color: var(--text-primary);
+    transition: border-color 0.15s, background 0.12s;
+  }
+  .invite-btn.primary {
+    background: var(--chon-orange);
+    color: white;
+    border-color: var(--chon-orange);
+    box-shadow: 0 6px 16px rgba(247, 147, 30, 0.28);
+  }
+  .invite-btn.primary:active { background: var(--chon-orange-dark); }
+  .invite-btn:not(.primary):hover { border-color: var(--chon-orange); }
+
+  /* ============================================
      Bottom Nav (home.html 과 동일)
      ============================================ */
   .bottom-nav {
@@ -551,6 +800,46 @@
 
   <div class="cta-area">
     <button class="cta-btn" onclick="openManualInput()">전화번호로 직접 입력</button>
+  </div>
+
+  <!-- ============ 채팅/초대 시트 ============ -->
+  <div class="modal-backdrop" id="modalBackdrop" onclick="closeSheets()"></div>
+
+  <!-- 채팅 시트 (인증된 CHON 가족) -->
+  <div class="modal-sheet" id="chatSheet" role="dialog" aria-modal="true" aria-labelledby="chatName">
+    <div class="chat-header-grip"></div>
+    <div class="chat-header">
+      <div class="chat-avatar" id="chatAvatar">·</div>
+      <div class="chat-name-wrap">
+        <div class="chat-name" id="chatName">대화</div>
+        <div class="chat-sub">● CHON 인증된 모임원</div>
+      </div>
+      <button type="button" class="chat-close" onclick="closeSheets()" aria-label="닫기">✕</button>
+    </div>
+    <div class="chat-body" id="chatBody"></div>
+    <form class="chat-input-row" id="chatForm" onsubmit="sendChatMessage(event)">
+      <input type="text" class="chat-input" id="chatInput" placeholder="메시지 입력" autocomplete="off"/>
+      <button type="submit" class="chat-send" id="chatSendBtn" aria-label="전송">➤</button>
+    </form>
+  </div>
+
+  <!-- 초대 시트 (미인증 — 초대 가능) -->
+  <div class="modal-sheet invite-sheet" id="inviteSheet" role="dialog" aria-modal="true" aria-labelledby="inviteTitle">
+    <div class="invite-grip"></div>
+    <div class="invite-icon">📨</div>
+    <h2 class="invite-title" id="inviteTitle">CHON 인증으로 초대</h2>
+    <p class="invite-sub">아직 CHON 가입이 안 된 분이에요.<br/>초대 메시지를 보내면 가입 후 <strong>상호 인증</strong>을 통해 안전하게 대화할 수 있어요.</p>
+    <div class="invite-name-row">
+      <span class="invite-name" id="inviteName">—</span>
+    </div>
+    <div class="invite-info">
+      <div class="invite-info-title">📌 인증 단계 안내</div>
+      <div>① 초대 링크 전송 → ② 상대가 CHON 가입 → ③ 자동 매칭 → ④ 상호 인증 후 채팅 시작</div>
+    </div>
+    <div class="invite-actions">
+      <button type="button" class="invite-btn primary" onclick="sendInvite()">SMS / 카카오로 초대하기</button>
+      <button type="button" class="invite-btn" onclick="closeSheets()">취소</button>
+    </div>
   </div>
 
   <nav class="bottom-nav">
@@ -713,11 +1002,115 @@ function render() {
 
 function openContact(kind, name) {
   if (kind === 'chon') {
-    showToast(name + '님과 대화 시작');
+    openChatWith(name);
   } else {
-    showToast(name + '님에게 초대 전송');
+    openInviteFor(name);
   }
 }
+
+// =========================================================
+// Sheets — Chat / Invite
+// =========================================================
+let chatTarget = null;
+
+// 사람당 대화 이력 (간단 캐시 — 새로고침하면 사라짐)
+const chatHistories = {};
+
+function getInitial(name) {
+  return (name || '').slice(0, 1) || '?';
+}
+
+function nowHM() {
+  const d = new Date();
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mm = String(d.getMinutes()).padStart(2, '0');
+  return `${hh}:${mm}`;
+}
+
+function openChatWith(name) {
+  chatTarget = name;
+  document.getElementById('chatName').textContent = name;
+  document.getElementById('chatAvatar').textContent = getInitial(name);
+  // 이력 로드 (없으면 데모 인사 1개)
+  if (!chatHistories[name]) {
+    chatHistories[name] = [
+      { who: 'them', text: '안녕하세요! 반가워요 😊', time: nowHM() },
+    ];
+  }
+  renderChat();
+  document.getElementById('modalBackdrop').classList.add('visible');
+  document.getElementById('chatSheet').classList.add('visible');
+  setTimeout(() => document.getElementById('chatInput').focus(), 250);
+}
+
+function openInviteFor(name) {
+  chatTarget = name;
+  document.getElementById('inviteName').textContent = name;
+  document.getElementById('modalBackdrop').classList.add('visible');
+  document.getElementById('inviteSheet').classList.add('visible');
+}
+
+function closeSheets() {
+  document.getElementById('modalBackdrop').classList.remove('visible');
+  document.getElementById('chatSheet').classList.remove('visible');
+  document.getElementById('inviteSheet').classList.remove('visible');
+  chatTarget = null;
+}
+
+function renderChat() {
+  if (!chatTarget) return;
+  const body = document.getElementById('chatBody');
+  const history = chatHistories[chatTarget] || [];
+  const today = new Date();
+  const dayLabel = `${today.getMonth()+1}월 ${today.getDate()}일`;
+  body.innerHTML =
+    `<div class="chat-day">${dayLabel}</div>` +
+    history.map(m => `
+      <div class="chat-msg ${m.who}">${escapeHtml(m.text)}</div>
+      <div class="chat-msg-time ${m.who}">${m.time}</div>
+    `).join('');
+  // 스크롤을 맨 아래로
+  setTimeout(() => { body.scrollTop = body.scrollHeight; }, 0);
+}
+
+function sendChatMessage(e) {
+  if (e) e.preventDefault();
+  if (!chatTarget) return;
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  chatHistories[chatTarget].push({ who: 'me', text, time: nowHM() });
+  input.value = '';
+  renderChat();
+  // 데모 자동 응답 (1~2초 후)
+  setTimeout(() => {
+    if (!chatTarget) return;
+    const replies = [
+      '네 알겠어요!',
+      '좋아요 👍',
+      '확인할게요 🙏',
+      '오케이 곧 답할게요',
+      '재밌네요 😄',
+    ];
+    chatHistories[chatTarget].push({
+      who: 'them',
+      text: replies[Math.floor(Math.random() * replies.length)],
+      time: nowHM(),
+    });
+    renderChat();
+  }, 800 + Math.random() * 800);
+}
+
+function sendInvite() {
+  if (!chatTarget) return;
+  closeSheets();
+  showToast('📨 ' + chatTarget + '님에게 초대 메시지를 보냈어요');
+}
+
+// ESC 로 시트 닫기
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeSheets();
+});
 
 function onSearch() {
   state.filterQ = document.getElementById('searchInput').value.trim();
