@@ -115,64 +115,65 @@
     animation: fadeIn 0.28s ease;
   }
   .slide.active { display: flex; }
+
+  /* Slide 1 — PASS splash (gradient logo + wordmark + spinner) */
+  .slide.intro {
+    padding: 0;
+    align-items: center;
+    justify-content: center;
+  }
+  .splash-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+  }
+  .splash-logo {
+    width: 96px;
+    height: 96px;
+    border-radius: 22px;
+    background: linear-gradient(135deg, #F39C12 0%, #C9A540 50%, #6BAE5A 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 18px 38px rgba(243,156,18,0.28),
+                0 0 0 14px rgba(255,221,158,0.30);
+    color: #FFFFFF;
+    font-weight: 900;
+    font-size: 44px;
+    letter-spacing: -1px;
+  }
+  .splash-name {
+    margin-top: 18px;
+    font-size: 26px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    color: #C7BFB1;
+  }
+  .splash-spinner {
+    position: absolute;
+    bottom: 56px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 3px solid rgba(243,156,18,0.20);
+    border-top-color: var(--chon-orange);
+    animation: splashSpin 0.9s linear infinite;
+  }
+  @keyframes splashSpin {
+    to { transform: translateX(-50%) rotate(360deg); }
+  }
   @keyframes fadeIn {
     from { opacity: 0; transform: translateY(8px); }
     to { opacity: 1; transform: translateY(0); }
   }
 
-  /* Slide 1 — Logo hero */
-  .logo-hero {
-    margin-top: 12px;
-    height: 280px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-  }
-  .logo-ring {
-    width: 220px; height: 220px;
-    border-radius: 50%;
-    background: radial-gradient(circle at 50% 50%,
-                  #FFFFFF 0%,
-                  #FFF6E0 55%,
-                  rgba(255,246,224,0) 78%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-  }
-  .logo-mark {
-    width: 132px; height: 132px;
-    border-radius: 28px;
-    background: #FFFFFF;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 12px 28px rgba(247,147,30,0.18);
-  }
-  .logo-mark svg { width: 78px; height: 78px; display: block; }
-  .logo-badge {
-    position: absolute;
-    right: 30px;
-    bottom: 22px;
-    width: 52px; height: 52px;
-    border-radius: 50%;
-    background: #FFFFFF;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-  }
-  .logo-badge-inner {
-    width: 40px; height: 40px;
-    border-radius: 50%;
-    background: #2E7D4F;
-    color: #FFFFFF;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .logo-badge-inner svg { width: 22px; height: 22px; }
+  /* Hide chrome (topbar + bottom CTA) while splash is showing */
+  .app.is-splash .topbar,
+  .app.is-splash .bottom-area { display: none; }
 
   /* Slide title & description */
   .slide-title {
@@ -358,39 +359,13 @@
 
   <div class="slides">
 
-    <!-- ============ Slide 1 — Identity ============ -->
-    <section class="slide active" data-slide="1">
-      <div class="logo-hero">
-        <div class="logo-ring">
-          <div class="logo-mark">
-            <!-- Multi-color geometric CHON mark -->
-            <svg viewBox="0 0 100 100" fill="none">
-              <!-- Top-left blue triangle -->
-              <path d="M50 12 L50 50 L20 32 Z" fill="#0A3D8C"/>
-              <!-- Top-right yellow triangle -->
-              <path d="M50 12 L80 32 L50 50 Z" fill="#FFC107"/>
-              <!-- Right red triangle -->
-              <path d="M80 32 L80 70 L50 50 Z" fill="#E53935"/>
-              <!-- Bottom-right orange triangle -->
-              <path d="M50 50 L80 70 L50 88 Z" fill="#F39C12"/>
-              <!-- Bottom-left -->
-              <path d="M50 50 L50 88 L20 70 Z" fill="#F0F0F0" opacity="0.0"/>
-              <!-- Left dark fold -->
-              <path d="M20 32 L50 50 L20 70 Z" fill="#0A3D8C" opacity="0.85"/>
-            </svg>
-          </div>
-        </div>
-        <div class="logo-badge">
-          <div class="logo-badge-inner">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 2 L20 6 V12 C20 17 16 21 12 22 C8 21 4 17 4 12 V6 Z"></path>
-            </svg>
-          </div>
-        </div>
+    <!-- ============ Slide 1 — PASS splash ============ -->
+    <section class="slide active intro" data-slide="1">
+      <div class="splash-center">
+        <div class="splash-logo">P</div>
+        <div class="splash-name">PASS</div>
       </div>
-      <h1 class="slide-title">위조할 수 없는
-본인 인증</h1>
-      <p class="slide-desc">휴대폰이 "이건 진짜 나입니다"라고 직접 증명해요. 가족이 인증되면 통화할 때 바로 알 수 있어요.</p>
+      <div class="splash-spinner" aria-hidden="true"></div>
     </section>
 
     <!-- ============ Slide 2 — Green / Safe ============ -->
@@ -486,17 +461,30 @@
   const TOTAL = 4;
   let current = 1;
 
+  const app      = document.querySelector('.app');
   const slides   = document.querySelectorAll('.slide');
   const dots     = document.querySelectorAll('.dot');
   const ctaBtn   = document.getElementById('ctaBtn');
   const skipBtn  = document.getElementById('skipBtn');
   const backBtn  = document.getElementById('backBtn');
 
+  const SPLASH_MS = 2500;
+  let splashTimer = null;
+
   function render() {
     slides.forEach(s => s.classList.toggle('active', Number(s.dataset.slide) === current));
     dots.forEach(d => d.classList.toggle('active', Number(d.dataset.dot) === current));
     ctaBtn.textContent = current === TOTAL ? '시작하기' : '다음';
     skipBtn.style.visibility = current === TOTAL ? 'hidden' : 'visible';
+
+    // Slide 1 is a splash — hide topbar/bottom CTA and auto-advance after a moment
+    app.classList.toggle('is-splash', current === 1);
+    if (splashTimer) { clearTimeout(splashTimer); splashTimer = null; }
+    if (current === 1) {
+      splashTimer = setTimeout(() => {
+        if (current === 1) { current = 2; render(); }
+      }, SPLASH_MS);
+    }
   }
 
   function next() {

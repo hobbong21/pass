@@ -10,6 +10,11 @@
  *
  * paint 전 동기 실행이라 깜빡임 없음. localStorage 차단 환경에선 가드 비활성(통과).
  */
+// === [임시] 로그인 연동 비활성화 플래그 ===
+// true 인 동안 모든 보호 페이지의 로그인 가드를 건너뛰고 데모 세션을 자동 주입함.
+// 원래대로 되돌리려면 이 상수만 false 로 바꾸면 됨.
+const DISABLE_AUTH_GUARD = true;
+
 (function () {
   try {
     const me = document.currentScript;
@@ -30,7 +35,9 @@
     let isDev = false;
     try {
       const params = new URLSearchParams(location.search);
-      if (params.get('dev') === '1') {
+      if (DISABLE_AUTH_GUARD) {
+        isDev = true;
+      } else if (params.get('dev') === '1') {
         localStorage.setItem('pass_dev_mode', '1');
         isDev = true;
       } else if (localStorage.getItem('pass_dev_mode') === '1') {
