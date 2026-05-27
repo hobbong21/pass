@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#FFFBF0">
+<title>PASS — 프로필 편집</title>
+<script src="../lib/auth-guard.js" data-require="login"></script>
+<script src="../lib/pass-api.js"></script>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/static/pretendard.min.css" rel="stylesheet">
+<style>
+  :root {
+    --chon-orange: #F7931E;
+    --chon-orange-dark: #E87F0A;
+    --chon-orange-light: #FFC78A;
+    --chon-yellow: #FFC300;
+    --chon-yellow-soft: #FFF3D6;
+    --bg-app: #FFFBF0;
+    --bg-card: #FFFFFF;
+    --text-primary: #1F1F1F;
+    --text-secondary: #5B5B5B;
+    --text-tertiary: #9CA3AF;
+    --border-light: #F1F5F9;
+    --line: #E5E7EB;
+    --error: #DC2626;
+
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+    --shadow-md: 0 6px 18px rgba(0,0,0,0.08);
+    --radius-md: 14px;
+    --radius-lg: 20px;
+    --radius-pill: 999px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg-app);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+  }
+  .app {
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+    background: var(--bg-app);
+    display: flex;
+    flex-direction: column;
+  }
+  @media (min-width: 768px) {
+    body { padding: 32px 0; background: #F5F7FB; }
+    .app {
+      border-radius: 28px;
+      overflow: hidden;
+      min-height: calc(100dvh - 64px);
+      box-shadow: var(--shadow-md);
+    }
+  }
+
+  /* Top bar */
+  .topbar {
+    padding: calc(10px + var(--safe-top)) 12px 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .back-btn {
+    width: 40px; height: 40px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-primary);
+    font-family: inherit;
+    padding: 0;
+  }
+  .back-btn svg { width: 22px; height: 22px; }
+  .back-btn:active { opacity: 0.6; }
+  .topbar-title {
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+  }
+
+  /* Body */
+  .body {
+    flex: 1;
+    padding: 16px 20px 0;
+  }
+  .form-section {
+    margin-bottom: 22px;
+  }
+  .section-label {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 10px;
+  }
+
+  /* Avatar */
+  .avatar-area {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: 24px 20px;
+    border: 1px solid var(--border-light);
+    text-align: center;
+  }
+  .avatar-preview {
+    width: 120px; height: 120px;
+    margin: 0 auto 14px;
+    border-radius: 26px;
+    background: linear-gradient(135deg, #FFD580, var(--chon-orange));
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    font-weight: 900;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 8px 24px rgba(247, 147, 30, 0.25);
+  }
+  .avatar-preview img {
+    position: absolute;
+    inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+  }
+  .avatar-buttons {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .avatar-btn {
+    background: var(--chon-yellow-soft);
+    border: 1.5px solid var(--chon-orange);
+    color: var(--chon-orange-dark);
+    padding: 10px 20px;
+    border-radius: var(--radius-pill);
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s;
+  }
+  .avatar-btn:hover { background: white; }
+  .avatar-btn:active { transform: scale(0.97); }
+  .avatar-btn.danger {
+    background: white;
+    border-color: #FCA5A5;
+    color: var(--error);
+  }
+  .avatar-btn.danger:hover { background: #FEF2F2; }
+  .avatar-hint {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    margin-top: 10px;
+  }
+
+  /* Form fields */
+  .field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .field {
+    background: white;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-light);
+    padding: 14px 16px;
+    transition: border-color 0.15s;
+  }
+  .field:focus-within { border-color: var(--chon-orange); }
+  .field-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+  }
+  .field-input {
+    width: 100%;
+    border: none;
+    outline: none;
+    font-family: inherit;
+    font-size: 16px;
+    color: var(--text-primary);
+    background: transparent;
+    padding: 0;
+  }
+  .field-input::placeholder { color: var(--text-tertiary); }
+  .field.readonly { background: var(--bg-app); }
+  .field.readonly .field-input { color: var(--text-secondary); }
+
+  /* Footer */
+  .footer-bar {
+    padding: 12px 20px calc(20px + var(--safe-bottom));
+    background: var(--bg-app);
+    border-top: 1px solid var(--border-light);
+    display: flex;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .footer-btn {
+    flex: 1;
+    height: 52px;
+    border-radius: var(--radius-pill);
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+    border: 1.5px solid transparent;
+    transition: background 0.15s, transform 0.12s;
+  }
+  .footer-btn.cancel {
+    background: white;
+    border-color: var(--border-light);
+    color: var(--text-secondary);
+  }
+  .footer-btn.cancel:active { transform: scale(0.97); background: var(--bg-app); }
+  .footer-btn.save {
+    background: var(--chon-orange);
+    color: white;
+    box-shadow: 0 6px 16px rgba(247, 147, 30, 0.28);
+  }
+  .footer-btn.save:active { background: var(--chon-orange-dark); transform: scale(0.97); }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #1F1F1F;
+    color: white;
+    padding: 12px 22px;
+    border-radius: var(--radius-pill);
+    font-size: 13px;
+    font-weight: 700;
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 200;
+    white-space: nowrap;
+  }
+  .toast.visible {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="topbar">
+    <button type="button" class="back-btn" onclick="goBack()" aria-label="뒤로">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+    </button>
+    <div class="topbar-title">프로필 편집</div>
+  </div>
+
+  <div class="body">
+    <!-- Avatar -->
+    <div class="form-section">
+      <div class="section-label">프로필 사진</div>
+      <div class="avatar-area">
+        <div class="avatar-preview" id="avatarPreview">
+          <img id="avatarImg" alt="" style="display:none"/>
+          <span id="avatarInitial">홍</span>
+        </div>
+        <div class="avatar-buttons">
+          <button type="button" class="avatar-btn" onclick="document.getElementById('avatarFile').click()">사진 변경</button>
+          <button type="button" class="avatar-btn danger" id="avatarRemoveBtn" onclick="removeAvatar()" style="display:none">사진 제거</button>
+        </div>
+        <p class="avatar-hint">JPG, PNG · 5MB 이하 권장</p>
+        <input type="file" id="avatarFile" accept="image/*" hidden onchange="onAvatarFile(event)"/>
+      </div>
+    </div>
+
+    <!-- Fields -->
+    <div class="form-section">
+      <div class="section-label">기본 정보</div>
+      <div class="field-group">
+        <label class="field">
+          <div class="field-label">이름</div>
+          <input type="text" class="field-input" id="fieldName" placeholder="이름을 입력해 주세요" autocomplete="name"/>
+        </label>
+
+        <div class="field readonly">
+          <div class="field-label">이메일 · 로그인 ID</div>
+          <input type="email" class="field-input" id="fieldEmail" readonly/>
+        </div>
+
+        <div class="field readonly">
+          <div class="field-label">휴대폰 번호</div>
+          <input type="tel" class="field-input" id="fieldPhone" readonly placeholder="등록 없음"/>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-bar">
+    <button type="button" class="footer-btn cancel" onclick="goBack()">취소</button>
+    <button type="button" class="footer-btn save" onclick="saveProfile()">저장</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// State — localStorage.passUser 기반
+// ============================================================
+function getUser() {
+  try { return JSON.parse(localStorage.getItem('passUser') || 'null'); } catch (e) { return null; }
+}
+function saveUser(u) {
+  try { localStorage.setItem('passUser', JSON.stringify(u)); } catch (e) {}
+}
+
+let pendingPhoto = null; // 새로 선택한 사진 (data URL) — 저장 전까지 유지
+
+// ============================================================
+// 진입 시 폼 채움
+// ============================================================
+(function init() {
+  const u = getUser() || {};
+  document.getElementById('fieldName').value  = u.name || '';
+  document.getElementById('fieldEmail').value = u.email || '';
+  document.getElementById('fieldPhone').value = u.phone || '';
+
+  // 아바타 — 사진 있으면 표시
+  const img = document.getElementById('avatarImg');
+  const initial = document.getElementById('avatarInitial');
+  const removeBtn = document.getElementById('avatarRemoveBtn');
+  if (u.photo) {
+    img.src = u.photo;
+    img.style.display = 'block';
+    initial.style.display = 'none';
+    removeBtn.style.display = '';
+    pendingPhoto = u.photo;
+  } else {
+    initial.textContent = (u.name || '?').slice(0, 1);
+    img.style.display = 'none';
+    initial.style.display = '';
+    removeBtn.style.display = 'none';
+  }
+})();
+
+// ============================================================
+// 사진 선택 / 제거
+// ============================================================
+function onAvatarFile(e) {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+  if (!file.type.startsWith('image/')) { showToast('⚠️ 이미지 파일만 선택할 수 있습니다'); return; }
+  if (file.size > 5 * 1024 * 1024)    { showToast('⚠️ 5MB 이하 이미지로 선택하세요'); return; }
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    pendingPhoto = ev.target.result;
+    document.getElementById('avatarImg').src = pendingPhoto;
+    document.getElementById('avatarImg').style.display = 'block';
+    document.getElementById('avatarInitial').style.display = 'none';
+    document.getElementById('avatarRemoveBtn').style.display = '';
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeAvatar() {
+  pendingPhoto = null;
+  const img = document.getElementById('avatarImg');
+  img.style.display = 'none';
+  img.removeAttribute('src');
+  document.getElementById('avatarInitial').style.display = '';
+  document.getElementById('avatarRemoveBtn').style.display = 'none';
+  document.getElementById('avatarFile').value = '';
+}
+
+// ============================================================
+// 저장 / 뒤로가기
+// ============================================================
+function saveProfile() {
+  const name = document.getElementById('fieldName').value.trim();
+  if (!name) { showToast('⚠️ 이름을 입력해 주세요'); return; }
+
+  const cur = getUser() || {};
+  const next = {
+    ...cur,
+    name,
+    photo: pendingPhoto || null,
+    avatarInitial: name.charAt(0),
+  };
+  saveUser(next);
+  showToast('✓ 프로필이 저장되었습니다');
+  setTimeout(goBack, 600);
+}
+
+function goBack() {
+  // ?return=cert 같은 경로가 있으면 그쪽으로
+  const params = new URLSearchParams(location.search);
+  const ret = params.get('return');
+  if (ret === 'home')    { location.href = './home.html'; return; }
+  if (ret === 'contact') { location.href = './contact.html'; return; }
+  // 기본: 증명서 (트로피 사진을 클릭해 들어왔으므로)
+  location.href = './cert.html';
+}
+
+// ============================================================
+// Toast
+// ============================================================
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('visible');
+  clearTimeout(window._toastT);
+  window._toastT = setTimeout(() => t.classList.remove('visible'), 2200);
+}
+</script>
+</body>
+</html>

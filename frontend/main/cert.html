@@ -279,7 +279,23 @@
     color: var(--chon-orange-dark);
     overflow: hidden;
     box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.15s;
   }
+  .id-card-photo::after {
+    content: '✎';
+    position: absolute;
+    right: 6px; bottom: 6px;
+    width: 22px; height: 22px;
+    background: var(--chon-orange);
+    color: white;
+    border-radius: 50%;
+    font-size: 12px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+  }
+  .id-card-photo:active { transform: scale(0.96); }
   .id-card-name { font-size: 24px; font-weight: 900; }
   .id-card-roman { font-size: 12px; opacity: 0.92; margin-top: 2px; font-weight: 600; }
   .id-card-qr {
@@ -579,7 +595,7 @@
       </div>
     </button>
     <div class="header-actions">
-      <button type="button" class="point-pill" onclick="showToast('인증 포인트 — 500점')">
+      <button type="button" class="point-pill" onclick="location.href='./trust.html'" aria-label="인증 포인트 · 레벨 보기">
         <span class="dot">P</span><span id="pointAmt">500</span>
       </button>
       <button type="button" class="icon-btn" onclick="location.href='./home.html?notif=1'" aria-label="알림">
@@ -730,7 +746,11 @@ function renderIdCard() {
       </div>
       <div class="id-card" onclick="location.href='../auth/self-id.html?mode=view'">
         <div class="id-card-title">CHON ID</div>
-        <div class="id-card-photo">${id.gender === 'female' ? '👩' : '👨'}</div>
+        <div class="id-card-photo" onclick="event.stopPropagation(); location.href='./profile-edit.html?return=cert'" title="사진 클릭 → 프로필 편집">
+          ${(getUser() && getUser().photo)
+            ? `<img src="${escapeHtml(getUser().photo)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:12px"/>`
+            : (id.gender === 'female' ? '👩' : '👨')}
+        </div>
         <div class="id-card-name">${escapeHtml(name)}</div>
         <div class="id-card-roman">${escapeHtml(roman)}</div>
         <div class="id-card-qr">${qrPattern(name)}</div>

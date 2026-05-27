@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#FFFBF0">
+<title>PASS — 인증 포인트 · 레벨</title>
+<script src="../lib/auth-guard.js" data-require="login"></script>
+<script src="../lib/pass-api.js"></script>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/static/pretendard.min.css" rel="stylesheet">
+<style>
+  :root {
+    --chon-orange: #F7931E;
+    --chon-orange-dark: #E87F0A;
+    --chon-orange-light: #FFC78A;
+    --chon-yellow: #FFC300;
+    --chon-yellow-soft: #FFF3D6;
+    --bg-app: #FFFBF0;
+    --bg-empty: #F8FAFC;
+    --text-primary: #1F1F1F;
+    --text-secondary: #5B5B5B;
+    --text-tertiary: #9CA3AF;
+    --border-light: #F1F5F9;
+
+    --friend-green: #5BBA6F;
+    --friend-green-dark: #16A34A;
+    --friend-green-light: #ECFDF5;
+    --trust-gold: #EAB308;
+    --trust-gold-bg: #FEF3C7;
+
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+    --shadow-md: 0 6px 18px rgba(0,0,0,0.08);
+
+    --radius-md: 14px;
+    --radius-lg: 20px;
+    --radius-pill: 999px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg-app);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+  }
+  .app {
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+    background: var(--bg-app);
+    display: flex;
+    flex-direction: column;
+  }
+  @media (min-width: 768px) {
+    body { padding: 32px 0; background: #F5F7FB; }
+    .app {
+      border-radius: 28px;
+      overflow: hidden;
+      min-height: calc(100dvh - 64px);
+      box-shadow: var(--shadow-md);
+    }
+  }
+
+  /* Top bar */
+  .topbar {
+    padding: calc(10px + var(--safe-top)) 12px 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .back-btn {
+    width: 40px; height: 40px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-primary);
+    font-family: inherit;
+    padding: 0;
+  }
+  .back-btn svg { width: 22px; height: 22px; }
+  .back-btn:active { opacity: 0.6; }
+  .topbar-title {
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+  }
+
+  .body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 0 calc(24px + var(--safe-bottom));
+  }
+
+  /* Trust Garden (스테이지 hero) */
+  .trust-hero {
+    margin: 14px 16px 12px;
+    background: linear-gradient(135deg, #ECFDF5 0%, #FEF3C7 100%);
+    border: 2px solid var(--friend-green);
+    border-radius: var(--radius-lg);
+    padding: 22px 18px;
+    text-align: center;
+  }
+  .trust-stage-emoji {
+    font-size: 64px;
+    line-height: 1;
+    margin-bottom: 8px;
+    filter: drop-shadow(0 4px 12px rgba(91,186,111,0.3));
+  }
+  .trust-stage-name {
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--friend-green-dark);
+    margin-bottom: 2px;
+  }
+  .trust-stage-num {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--text-secondary);
+    margin-bottom: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .trust-progress-wrap {
+    background: rgba(255,255,255,0.7);
+    border-radius: var(--radius-pill);
+    height: 10px;
+    overflow: hidden;
+    margin-bottom: 8px;
+    border: 1px solid rgba(91,186,111,0.3);
+  }
+  .trust-progress-bar {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, var(--friend-green), var(--trust-gold));
+    border-radius: var(--radius-pill);
+    transition: width 0.6s ease;
+  }
+  .trust-progress-text {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 700;
+  }
+  .trust-progress-text strong { color: var(--friend-green-dark); }
+
+  /* Trust cards */
+  .trust-cards {
+    padding: 0 16px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .trust-card {
+    background: white;
+    border: 1px solid #E2E8F0;
+    border-radius: var(--radius-md);
+    padding: 14px;
+  }
+  .trust-card-title {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .level-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  .level-pill {
+    text-align: center;
+    padding: 10px 4px;
+    border-radius: var(--radius-md);
+    background: var(--bg-empty);
+    border: 1.5px solid #E2E8F0;
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--text-tertiary);
+  }
+  .level-pill.current {
+    background: linear-gradient(135deg, var(--friend-green), var(--trust-gold));
+    border-color: var(--trust-gold);
+    color: white;
+    box-shadow: 0 4px 12px rgba(234,179,8,0.3);
+    transform: scale(1.05);
+  }
+  .level-pill-num { font-size: 16px; font-weight: 900; margin-bottom: 2px; }
+  .level-pill-name { font-size: 9px; }
+  .level-desc { font-size: 11px; color: var(--text-secondary); line-height: 1.5; }
+
+  .points-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .points-stat {
+    background: var(--trust-gold-bg);
+    border: 1.5px solid var(--trust-gold);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    text-align: center;
+  }
+  .points-stat-value {
+    font-size: 26px;
+    font-weight: 900;
+    color: #92400E;
+    line-height: 1;
+  }
+  .points-stat-label {
+    font-size: 10px;
+    font-weight: 800;
+    color: #92400E;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-top: 6px;
+  }
+  .points-detail {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #F1F5F9;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .points-row-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+  }
+  .points-row-item strong { color: var(--friend-green-dark); }
+
+  .badges-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .badge {
+    background: var(--bg-empty);
+    border: 1.5px solid #E2E8F0;
+    border-radius: var(--radius-md);
+    padding: 14px 8px;
+    text-align: center;
+    transition: all 0.2s;
+    opacity: 0.45;
+  }
+  .badge.earned {
+    opacity: 1;
+    background: linear-gradient(135deg, var(--friend-green-light), white);
+    border-color: var(--friend-green);
+  }
+  .badge.earned.gold {
+    background: linear-gradient(135deg, var(--trust-gold-bg), white);
+    border-color: var(--trust-gold);
+  }
+  .badge-emoji { font-size: 30px; line-height: 1; margin-bottom: 6px; }
+  .badge-name { font-size: 11px; font-weight: 800; }
+  .badge-desc { font-size: 9px; color: var(--text-tertiary); margin-top: 2px; font-weight: 600; }
+
+  /* 통계 행 (모임원 / 포스트 / Trust pts) */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding: 0 16px 24px;
+  }
+  .stat-card {
+    background: white;
+    border: 1px solid #E2E8F0;
+    border-radius: var(--radius-md);
+    padding: 14px 8px;
+    text-align: center;
+  }
+  .stat-value {
+    font-size: 22px;
+    font-weight: 900;
+  }
+  .stat-value.green  { color: #16A34A; }
+  .stat-value.orange { color: var(--chon-orange-dark); }
+  .stat-value.amber  { color: #92400E; }
+  .stat-label {
+    font-size: 10px; font-weight: 800;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-top: 4px;
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="topbar">
+    <button type="button" class="back-btn" onclick="goBack()" aria-label="뒤로">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+    </button>
+    <div class="topbar-title">인증 포인트 · 레벨</div>
+  </div>
+
+  <div class="body">
+    <!-- Trust Garden hero -->
+    <div class="trust-hero">
+      <div class="trust-stage-emoji" id="trustStageEmoji">🪴</div>
+      <div class="trust-stage-name" id="trustStageName">묘목</div>
+      <div class="trust-stage-num" id="trustStageNum">Stage 3 / 7</div>
+      <div class="trust-progress-wrap">
+        <div class="trust-progress-bar" id="trustProgressBar"></div>
+      </div>
+      <div class="trust-progress-text" id="trustProgressText">
+        <strong>60</strong> / 100 pts (다음 단계까지 40)
+      </div>
+    </div>
+
+    <div class="trust-cards">
+      <div class="trust-card">
+        <div class="trust-card-title">🎖️ Trust Level</div>
+        <div class="level-row" id="levelRow"></div>
+        <div class="level-desc" id="levelDesc">Lv2 · 관계가 시작됩니다. 모임원을 더 늘려보세요.</div>
+      </div>
+
+      <div class="trust-card">
+        <div class="trust-card-title">💎 Reward Points</div>
+        <div class="points-row">
+          <div class="points-stat">
+            <div class="points-stat-value" id="pointsEarned">60</div>
+            <div class="points-stat-label">누적 획득</div>
+          </div>
+          <div class="points-stat">
+            <div class="points-stat-value" id="pointsBalance">36</div>
+            <div class="points-stat-label">사용 가능</div>
+          </div>
+        </div>
+        <div class="points-detail" id="pointsDetail"></div>
+      </div>
+
+      <div class="trust-card">
+        <div class="trust-card-title">🏆 Badges</div>
+        <div class="badges-grid" id="badgesGrid"></div>
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-value green"  id="pStatFriends">3</div>
+        <div class="stat-label">모임원</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value orange" id="pStatPosts">0</div>
+        <div class="stat-label">포스트</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value amber"  id="pStatPoints">60</div>
+        <div class="stat-label">Trust Pts</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// Trust 데이터 모델 — home.html 의 것과 동일 (향후 PassAPI 연동)
+// ============================================================
+const TRUST_STAGES = [
+  { emoji: '🌰', name: '씨앗', max: 20 },
+  { emoji: '🌱', name: '새싹', max: 50 },
+  { emoji: '🪴', name: '묘목', max: 100 },
+  { emoji: '🌿', name: '작은나무', max: 200 },
+  { emoji: '🌳', name: '나무', max: 400 },
+  { emoji: '🌲', name: '큰나무', max: 800 },
+  { emoji: '🏞️', name: '숲', max: Infinity }
+];
+const TRUST_LEVELS = [
+  { lv: 1, name: '시작',       desc: '관계의 첫 발걸음을 떼었어요.', threshold: 0 },
+  { lv: 2, name: '관계 시작', desc: '관계가 시작됩니다. 모임원을 더 늘려보세요.', threshold: 3 },
+  { lv: 3, name: '믿음 쌓기', desc: '신뢰가 자라고 있어요.', threshold: 6 },
+  { lv: 4, name: '신뢰 깊어짐', desc: '두터운 신뢰 관계를 만들고 있어요.', threshold: 16 },
+  { lv: 5, name: '신뢰 마스터', desc: '진정한 관계의 달인입니다.', threshold: 51 }
+];
+const TRUST_BADGES = [
+  { id: 'b1', emoji: '🌱', name: '첫 모임원',   desc: '모임원 1명' },
+  { id: 'b2', emoji: '🤝', name: '5인 모임',     desc: '모임원 5명' },
+  { id: 'b3', emoji: '🔗', name: '추천 마스터', desc: '2-hop 인증 3명', gold: true },
+  { id: 'b4', emoji: '📝', name: '첫 포스트',   desc: '포스트 1개' },
+  { id: 'b5', emoji: '💬', name: '대화 시작',   desc: '메시지 보내기' },
+  { id: 'b6', emoji: '🏆', name: '신뢰 마스터', desc: 'Trust 200+', gold: true }
+];
+
+// 데모 상태 — 실제 데이터는 향후 API 연동
+const trustDemo = {
+  points: 60,
+  friendsConfirmed: 3,
+  friendsPending: 0,
+  ffConfirmed: 0,
+  postsMine: 0,
+  msgsMine: 0,
+  badges: { b1: true, b2: false, b3: false, b4: false, b5: false, b6: false }
+};
+
+function getTrustStage(pts) {
+  let cum = 0;
+  for (let i = 0; i < TRUST_STAGES.length; i++) {
+    const st = TRUST_STAGES[i];
+    if (pts < st.max) {
+      return { ...st, index: i, min: cum, progress: (pts - cum) / (st.max - cum) };
+    }
+    cum = st.max;
+  }
+  return { ...TRUST_STAGES[TRUST_STAGES.length - 1], index: TRUST_STAGES.length - 1, min: cum, progress: 1 };
+}
+
+function getTrustLevel(friendsConfirmed) {
+  let lv = TRUST_LEVELS[0];
+  for (const l of TRUST_LEVELS) if (friendsConfirmed >= l.threshold) lv = l;
+  return lv;
+}
+
+function render() {
+  const s = trustDemo;
+  const pts = s.points;
+  const stage = getTrustStage(pts);
+  const level = getTrustLevel(s.friendsConfirmed);
+
+  document.getElementById('trustStageEmoji').textContent = stage.emoji;
+  document.getElementById('trustStageName').textContent = stage.name;
+  document.getElementById('trustStageNum').textContent = `Stage ${stage.index + 1} / ${TRUST_STAGES.length}`;
+  document.getElementById('trustProgressBar').style.width = (stage.progress * 100).toFixed(0) + '%';
+  if (stage.max === Infinity) {
+    document.getElementById('trustProgressText').innerHTML = `<strong>${pts}</strong> pts · 최고 단계 달성! 🎉`;
+  } else {
+    document.getElementById('trustProgressText').innerHTML = `<strong>${pts}</strong> / ${stage.max} pts (다음 단계까지 ${stage.max - pts})`;
+  }
+
+  document.getElementById('levelRow').innerHTML = TRUST_LEVELS.map(l => `
+    <div class="level-pill ${l.lv === level.lv ? 'current' : ''}">
+      <div class="level-pill-num">Lv${l.lv}</div>
+      <div class="level-pill-name">${l.name}</div>
+    </div>
+  `).join('');
+  document.getElementById('levelDesc').textContent = `Lv${level.lv} · ${level.desc}`;
+
+  document.getElementById('pointsEarned').textContent = pts;
+  document.getElementById('pointsBalance').textContent = Math.floor(pts * 0.6);
+  const breakdown = [
+    { label: '가입 보너스', val: 10 },
+    { label: '모임원 인증 (1-hop)', val: s.friendsConfirmed * 15 },
+    { label: '2-hop 인증', val: s.ffConfirmed * 8 },
+    { label: '포스트', val: s.postsMine * 2 },
+    { label: '대기 관계', val: s.friendsPending * 3 }
+  ].filter(b => b.val > 0);
+  document.getElementById('pointsDetail').innerHTML = breakdown.map(b =>
+    `<div class="points-row-item"><span>${b.label}</span><strong>+${b.val} pt</strong></div>`
+  ).join('');
+
+  document.getElementById('badgesGrid').innerHTML = TRUST_BADGES.map(b => {
+    const earned = !!s.badges[b.id];
+    return `
+      <div class="badge ${earned ? 'earned' : ''} ${earned && b.gold ? 'gold' : ''}">
+        <div class="badge-emoji">${earned ? b.emoji : '🔒'}</div>
+        <div class="badge-name">${b.name}</div>
+        <div class="badge-desc">${b.desc}</div>
+      </div>
+    `;
+  }).join('');
+
+  document.getElementById('pStatFriends').textContent = s.friendsConfirmed;
+  document.getElementById('pStatPosts').textContent   = s.postsMine;
+  document.getElementById('pStatPoints').textContent  = pts;
+}
+
+function goBack() {
+  // history 가 있으면 이전, 없으면 증명서로
+  if (window.history.length > 1) window.history.back();
+  else window.location.href = './cert.html';
+}
+
+render();
+</script>
+</body>
+</html>

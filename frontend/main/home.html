@@ -1224,8 +1224,53 @@
   .settings-arrow { color: var(--text-tertiary); font-size: 14px; }
 
   /* ============================================
-     TRUST Garden (pageMy 하단)
+     Trust Link Card — pageMy 의 인증 포인트/레벨 진입 카드
      ============================================ */
+  .trust-link-card {
+    margin: 0 16px 14px;
+    background: linear-gradient(135deg, #FEF3C7 0%, #ECFDF5 100%);
+    border: 1.5px solid var(--trust-gold);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    transition: box-shadow 0.15s, transform 0.12s;
+  }
+  .trust-link-card:hover { box-shadow: var(--shadow-md); }
+  .trust-link-card:active { transform: scale(0.99); }
+  .trust-link-icon {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: white;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  }
+  .trust-link-info { flex: 1; min-width: 0; }
+  .trust-link-title {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+  }
+  .trust-link-desc {
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-weight: 600;
+  }
+  .trust-link-arrow {
+    color: var(--text-tertiary);
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+
+  /* ============================================
+     TRUST Garden (pageMy 하단) — 더 이상 사용 안 됨 (trust.html 로 이동) */
+  /* 아래 .trust-* 클래스들은 cert.html, trust.html 에서 사용 */
+  /* ============================================ */
   .trust-hero {
     margin: 14px 16px 12px;
     background: linear-gradient(135deg, #ECFDF5 0%, #FEF3C7 100%);
@@ -1847,63 +1892,18 @@
         </div>
         <div class="profile-name" id="profileName">홍길순</div>
         <div class="profile-phone" id="profilePhone">010-****-1234</div>
-        <button class="profile-edit-btn" onclick="openEditProfile()">프로필 편집</button>
+        <!-- 프로필 편집은 cert.html(증명서) CHON ID 사진 클릭으로 진입 -->
+        <button class="profile-edit-btn" onclick="location.href='./cert.html'">내 증명서 · 트로피 보기</button>
       </div>
 
-      <!-- Trust Garden (프로필 편집 아래) -->
-      <div class="trust-hero">
-        <div class="trust-stage-emoji" id="trustStageEmoji">🪴</div>
-        <div class="trust-stage-name" id="trustStageName">묘목</div>
-        <div class="trust-stage-num" id="trustStageNum">Stage 3 / 7</div>
-        <div class="trust-progress-wrap">
-          <div class="trust-progress-bar" id="trustProgressBar"></div>
+      <!-- 인증 포인트/레벨/뱃지 진입 카드 -->
+      <div class="trust-link-card" onclick="location.href='./trust.html'">
+        <div class="trust-link-icon">🏆</div>
+        <div class="trust-link-info">
+          <div class="trust-link-title">인증 포인트 · 레벨</div>
+          <div class="trust-link-desc">Trust Garden · Level · Reward Points · Badges</div>
         </div>
-        <div class="trust-progress-text" id="trustProgressText">
-          <strong>60</strong> / 100 pts (다음 단계까지 40)
-        </div>
-      </div>
-
-      <div class="trust-cards">
-        <div class="trust-card">
-          <div class="trust-card-title">🎖️ Trust Level</div>
-          <div class="level-row" id="levelRow"></div>
-          <div class="level-desc" id="levelDesc">Lv2 · 관계가 시작됩니다. 모임원을 더 늘려보세요.</div>
-        </div>
-
-        <div class="trust-card">
-          <div class="trust-card-title">💎 Reward Points</div>
-          <div class="points-row">
-            <div class="points-stat">
-              <div class="points-stat-value" id="pointsEarned">60</div>
-              <div class="points-stat-label">누적 획득</div>
-            </div>
-            <div class="points-stat">
-              <div class="points-stat-value" id="pointsBalance">36</div>
-              <div class="points-stat-label">사용 가능</div>
-            </div>
-          </div>
-          <div class="points-detail" id="pointsDetail"></div>
-        </div>
-
-        <div class="trust-card">
-          <div class="trust-card-title">🏆 Badges</div>
-          <div class="badges-grid" id="badgesGrid"></div>
-        </div>
-      </div>
-
-      <div class="profile-stats-row">
-        <div class="profile-stat">
-          <div class="profile-stat-value profile-stat-value--green" id="pStatFriends">3</div>
-          <div class="profile-stat-label">모임원</div>
-        </div>
-        <div class="profile-stat">
-          <div class="profile-stat-value profile-stat-value--orange" id="pStatPosts">0</div>
-          <div class="profile-stat-label">포스트</div>
-        </div>
-        <div class="profile-stat">
-          <div class="profile-stat-value profile-stat-value--amber" id="pStatPoints">60</div>
-          <div class="profile-stat-label">Trust Pts</div>
-        </div>
+        <div class="trust-link-arrow">›</div>
       </div>
 
       <div class="settings-section">
