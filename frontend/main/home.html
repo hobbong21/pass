@@ -2396,8 +2396,8 @@ function refreshHeroCard() {
   const issued = hasSelfId();
 
   if (issued) {
-    eyebrow.textContent = displayName ? (displayName + '님의') : '나의';
-    title.innerHTML = 'CHON DID<br/>트로피';
+    eyebrow.textContent = '[이용자]님의';
+    title.innerHTML = '내 ID 보기';
     cta.textContent = 'ID 보기 →';
     illust.textContent = '🪪';
   } else {
@@ -2415,7 +2415,7 @@ function refreshHeroCard() {
   if (gIcon && gCta) {
     if (issued) {
       gIcon.textContent    = '🪪';
-      gEyebrow.textContent = displayName ? (displayName + '님의') : '나의';
+      gEyebrow.textContent = '[이용자]님의';
       gDesc.innerHTML      = '발급 완료 — 발급된 트로피 카드를<br/>확인하고 상호 인증을 시작하세요.';
       gCta.textContent     = 'ID 보기 →';
     } else {
