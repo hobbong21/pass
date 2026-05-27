@@ -698,7 +698,7 @@ function render() {
       skip.classList.add('is-hidden');
       break;
     case 'step5':
-      primary.textContent = '홈으로 돌아가기';
+      primary.textContent = '내 증명서로 이동';
       primary.disabled = false;
       skip.classList.add('is-hidden');
       break;
@@ -842,6 +842,7 @@ function skipFlow() {
 }
 
 function goHome() {
+  // 발급 완료 → 트로피가 보관된 증명서 페이지로 직행
   try {
     localStorage.setItem('selfIdCreated', '1');
     localStorage.setItem('passSelfId', JSON.stringify({
@@ -853,7 +854,7 @@ function goHome() {
       issuedAt: Date.now(),
     }));
   } catch (e) {}
-  window.location.href = '../main/home.html';
+  window.location.href = '../main/cert.html';
 }
 
 // =========================================================
@@ -893,6 +894,9 @@ function showToast(msg) {
 render();
 if (window._viewMode) {
   prepareIdCard();
+  // view 모드: 이미 발급된 ID 보기 → 버튼은 "확인"
+  const primary = document.getElementById('primaryBtn');
+  if (primary) primary.textContent = '확인';
 }
 </script>
 </body>
