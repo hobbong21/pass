@@ -6,6 +6,7 @@
 <title>PASS 학급증 — 3-way 토글 (학급증/추가하기/인증현황)</title>
 <script src="../lib/auth-guard.js" data-require="login"></script>
 <script src="../lib/pass-api.js"></script>
+<script src="../lib/scanner.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800;900&display=swap" rel="stylesheet">
 <style>
@@ -1050,6 +1051,7 @@
       </div>
     </button>
     <div class="uh-actions">
+      <button type="button" class="uh-icon-btn" onclick="openScanner()" aria-label="QR 스캔" title="QR 스캔"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7" y="7" width="10" height="10" rx="1.5"/></svg></button>
       <button class="uh-icon-btn" onclick="window.location.href='../main/home.html?notif=1'" aria-label="알림">🔔<span class="uh-icon-dot"></span></button>
     </div>
   </header>
