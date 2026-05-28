@@ -213,8 +213,25 @@
     font-size: 13px;
     font-weight: 700;
     color: var(--text-primary);
+    flex: 1;
+    min-width: 0;
   }
   .safety-text strong { color: var(--chon-orange-dark); }
+  /* 우측 "설정 ›" 칩 — 보이스피싱 설정으로 딥링크 */
+  .safety-settings-btn {
+    background: transparent;
+    border: 1.5px solid var(--chon-orange-light, #FED7AA);
+    color: var(--chon-orange-dark);
+    padding: 5px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+    flex-shrink: 0;
+    transition: background 0.15s;
+  }
+  .safety-settings-btn:active { background: var(--chon-yellow-soft, #FFF3D6); }
 
   /* ============================================
      Hero — CHON DID 트로피
@@ -762,29 +779,40 @@
     padding: 0 4px;
   }
   .msg-pager-indicator strong { color: var(--chon-orange-dark); }
+  /* 메신저 스타일 단일 행 — 아바타 · 이름 · 미리보기 · 시각 · 안 읽음 배지 */
   .msg-list {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    background: white;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    overflow: hidden;
   }
-  .msg-card { flex-shrink: 0; animation: msgPageIn 0.22s ease; }
   @keyframes msgPageIn {
     from { opacity: 0; transform: translateY(6px); }
     to   { opacity: 1; transform: translateY(0); }
   }
   .msg-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
     background: white;
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-md);
-    padding: 14px 16px 12px;
-    transition: box-shadow 0.15s;
+    border: none;
+    border-bottom: 1px solid var(--border-light);
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: background 0.12s;
+    animation: msgPageIn 0.22s ease;
+    font-family: inherit;
+    width: 100%;
+    text-align: left;
   }
-  .msg-card:hover { box-shadow: var(--shadow-md); }
+  .msg-card:last-child { border-bottom: none; }
+  .msg-card:hover { background: #FAFBFC; }
+  .msg-card:active { background: #F1F5F9; }
   .msg-empty {
-    background: white;
-    border: 1px dashed var(--border-light);
-    border-radius: var(--radius-md);
-    padding: 22px 18px;
+    background: transparent;
+    padding: 24px 18px;
     text-align: center;
     color: var(--text-secondary);
   }
@@ -796,16 +824,10 @@
     color: var(--text-tertiary);
     line-height: 1.5;
   }
-  .msg-header {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    margin-bottom: 8px;
-  }
   .msg-avatar {
-    width: 38px; height: 38px;
+    width: 44px; height: 44px;
     border-radius: 50%;
-    background: var(--friend-green);
+    background: linear-gradient(135deg, #34D399, #059669);
     color: white;
     display: flex;
     align-items: center;
@@ -814,96 +836,67 @@
     font-size: 15px;
     flex-shrink: 0;
   }
-  .msg-avatar.purple { background: #7C3AED; }
-  .msg-avatar.orange { background: var(--chon-orange); }
-  .msg-avatar.blue   { background: #3B82F6; }
-  .msg-meta { flex: 1; min-width: 0; padding-top: 2px; }
-  .msg-name-row {
+  .msg-avatar.family { background: linear-gradient(135deg, #34D399, #059669); }
+  .msg-avatar.club   { background: linear-gradient(135deg, #60A5FA, #2563EB); }
+  .msg-info {
+    flex: 1;
+    min-width: 0;
+  }
+  .msg-top-row {
     display: flex;
-    align-items: center;
-    gap: 6px;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
   }
   .msg-name {
     font-size: 14px;
     font-weight: 800;
     color: var(--text-primary);
-  }
-  .msg-badge {
-    background: var(--friend-green-light);
-    color: var(--friend-green-dark);
-    font-size: 10px;
-    font-weight: 800;
-    padding: 2px 8px;
-    border-radius: var(--radius-pill);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
   }
   .msg-time {
     font-size: 11px;
     color: var(--text-tertiary);
     font-weight: 600;
-    margin-top: 2px;
+    flex-shrink: 0;
+    white-space: nowrap;
   }
-  .msg-group {
-    display: inline-flex;
+  .msg-bottom-row {
+    display: flex;
     align-items: center;
-    gap: 4px;
-    font-size: 11px;
-    font-weight: 800;
-    color: var(--chon-orange-dark);
-    background: var(--chon-yellow-soft);
-    border-radius: var(--radius-pill);
-    padding: 2px 8px;
-    margin-top: 4px;
-    max-width: 100%;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 3px;
+  }
+  .msg-preview {
+    font-size: 12.5px;
+    color: var(--text-secondary);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    font-weight: 500;
+    flex: 1;
+    min-width: 0;
   }
-  .msg-group-ico { font-size: 10px; }
-  .msg-menu {
-    background: transparent;
-    border: none;
-    color: var(--text-tertiary);
-    cursor: pointer;
-    font-size: 18px;
-    font-weight: 900;
-    padding: 4px 6px;
-    border-radius: 6px;
-    font-family: inherit;
-    line-height: 1;
+  .msg-unread {
+    background: var(--chon-orange);
+    color: white;
+    border-radius: 999px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 6px;
+    font-size: 10.5px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     flex-shrink: 0;
   }
-  .msg-menu:hover { background: var(--bg-empty); color: var(--text-primary); }
-  .msg-body {
-    font-size: 14px;
-    color: var(--text-primary);
-    line-height: 1.5;
-    margin: 4px 2px 12px;
-    font-weight: 500;
-  }
-  .msg-actions {
-    display: flex;
-    align-items: center;
-    gap: 22px;
-    padding-top: 10px;
-    border-top: 1px solid var(--border-light);
-  }
-  .msg-action {
-    background: transparent;
-    border: none;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    color: var(--text-secondary);
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    font-family: inherit;
-    padding: 4px 0;
-    transition: color 0.12s;
-  }
-  .msg-action:hover { color: var(--chon-orange-dark); }
-  .msg-action-icon { font-size: 16px; line-height: 1; }
-  .msg-action.right { margin-left: auto; color: var(--chon-orange-dark); }
+
+  /* 채팅 팝업 — frontend/lib/chat-popup.js 가 CSS·HTML을 자동 주입 */
 
   /* ============================================
      Empty placeholder (for other tabs)
@@ -1801,11 +1794,12 @@
   <main class="content">
     <!-- ============ HOME ============ -->
     <section class="page active" id="pageHome">
-      <div class="safety-banner">
+      <div class="safety-banner" id="safetyBanner">
         <div class="safety-icon">🛡️</div>
-        <div class="safety-text">
+        <div class="safety-text" id="safetyText">
           실시간으로 <strong>CHON DID</strong>를 보호합니다
         </div>
+        <button type="button" class="safety-settings-btn" onclick="location.href='./all.html?tab=cert&cat=voice-phishing&open=safeCall'" aria-label="안심콜 보호 설정으로 이동">설정 ›</button>
       </div>
 
       <!-- Hero — CHON DID 트로피 (Self ID 발급/조회) -->
@@ -2081,6 +2075,8 @@
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- 채팅 팝업은 lib/chat-popup.js가 DOM에 자동 주입 -->
 
 <script>
 // ============================================================
@@ -2581,7 +2577,11 @@ const MSG_POOL_CLUB = [
   '다음에 또 봬요',
   '단톡방에 일정 올렸어요',
 ];
-const MSG_TIME_POOL = ['10분 전', '1시간 전', '3시간 전', '5시간 전', '어제', '2일 전'];
+// 최근 5일 범위 내 hash 기반 결정적 timestamp 분포
+const MSG_TIME_RANGE_MS = 5 * 24 * 60 * 60 * 1000;
+
+// 메시지 데이터 — 채팅 팝업에서 인덱스로 조회
+let currentMessages = [];
 
 function escapeHtmlMsg(s) {
   return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -2592,6 +2592,24 @@ function stableHash(s) {
   let h = 0;
   for (let i = 0; i < (s || '').length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
   return h;
+}
+
+// 메시지 도착 시각 표시 — 오늘은 "오후 2:35", 어제는 "어제 오후 2:35", 그 외 "5월 27일 오후 2:35"
+function formatMessageTime(ts) {
+  const d = new Date(ts);
+  const now = new Date();
+  const h24 = d.getHours();
+  const ampm = h24 < 12 ? '오전' : '오후';
+  const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
+  const mm = String(d.getMinutes()).padStart(2, '0');
+  const timeStr = `${ampm} ${h12}:${mm}`;
+
+  const sameYear = d.getFullYear() === now.getFullYear();
+  const dayDiff = Math.floor((new Date(now.getFullYear(), now.getMonth(), now.getDate()) - new Date(d.getFullYear(), d.getMonth(), d.getDate())) / 86400000);
+  if (dayDiff === 0)  return timeStr;
+  if (dayDiff === 1)  return `어제 ${timeStr}`;
+  if (sameYear)       return `${d.getMonth() + 1}월 ${d.getDate()}일 ${timeStr}`;
+  return `${d.getFullYear()}.${d.getMonth() + 1}.${d.getDate()} ${timeStr}`;
 }
 
 function loadCertsForKind(key) {
@@ -2605,6 +2623,8 @@ function loadCertsForKind(key) {
 function buildMessages() {
   const messages = [];
 
+  const now = Date.now();
+
   const famCerts = loadCertsForKind('pass_family_certificates');
   for (const cert of famCerts) {
     const group = (cert.customTitle && cert.customTitle.trim()) || cert.title || '우리 가족';
@@ -2614,11 +2634,11 @@ function buildMessages() {
       messages.push({
         initial: (m.name || '?').charAt(0),
         name: m.name,
-        badge: '가족',
+        kind: 'family',
         group,
-        time: MSG_TIME_POOL[h % MSG_TIME_POOL.length],
+        ts: now - (h % MSG_TIME_RANGE_MS),
         body: MSG_POOL_FAMILY[h % MSG_POOL_FAMILY.length],
-        _sort: h,
+        unread: (h % 5) < 2 ? 0 : ((h % 3) + 1), // 약 60% 안 읽음, 1~3
       });
     }
   }
@@ -2632,11 +2652,11 @@ function buildMessages() {
       messages.push({
         initial: (m.name || '?').charAt(0),
         name: m.name,
-        badge: '모임원',
+        kind: 'club',
         group,
-        time: MSG_TIME_POOL[h % MSG_TIME_POOL.length],
+        ts: now - (h % MSG_TIME_RANGE_MS),
         body: MSG_POOL_CLUB[h % MSG_POOL_CLUB.length],
-        _sort: h,
+        unread: (h % 5) < 2 ? 0 : ((h % 3) + 1),
       });
     }
   }
@@ -2650,8 +2670,8 @@ function buildMessages() {
     return true;
   });
 
-  // 시간 다양성을 위해 해시 정렬 — 결정적이지만 같은 cert 멤버가 뭉치지 않게
-  unique.sort((a, b) => a._sort - b._sort);
+  // 최신순 정렬 (도착 시각 기준 내림차순)
+  unique.sort((a, b) => b.ts - a.ts);
   return unique;
 }
 
@@ -2659,7 +2679,8 @@ function renderMsgPage() {
   const list = document.getElementById('msgList');
   if (!list) return;
 
-  const messages = buildMessages();
+  currentMessages = buildMessages();
+  const messages = currentMessages;
 
   // 발급된 증명서가 없으면 빈 상태 안내
   if (messages.length === 0) {
@@ -2680,34 +2701,26 @@ function renderMsgPage() {
   const start = msgPageIndex * MSG_PER_PAGE;
   const page = messages.slice(start, start + MSG_PER_PAGE);
 
-  list.innerHTML = page.map(m => `
-    <article class="msg-card">
-      <div class="msg-header">
-        <div class="msg-avatar">${escapeHtmlMsg(m.initial)}</div>
-        <div class="msg-meta">
-          <div class="msg-name-row">
-            <span class="msg-name">${escapeHtmlMsg(m.name)}</span>
-            <span class="msg-badge">${escapeHtmlMsg(m.badge)}</span>
-          </div>
-          ${m.group ? `<div class="msg-group"><span class="msg-group-ico">🏷</span><span>${escapeHtmlMsg(m.group)}</span></div>` : ''}
-          <div class="msg-time">${escapeHtmlMsg(m.time)}</div>
-        </div>
-        <button type="button" class="msg-menu" aria-label="더보기">⋯</button>
-      </div>
-      <div class="msg-body">${escapeHtmlMsg(m.body)}</div>
-      <div class="msg-actions">
-        <button type="button" class="msg-action" onclick="toggleLike(this)">
-          <span class="msg-action-icon">♡</span><span>0</span>
-        </button>
-        <button type="button" class="msg-action" onclick="showToast('💬 댓글')">
-          <span class="msg-action-icon">💬</span><span>0</span>
-        </button>
-        <button type="button" class="msg-action right" onclick="showToast('${escapeHtmlMsg(m.name)}님에게 메시지 보내기')">
-          <span class="msg-action-icon">✉</span><span>메시지</span>
-        </button>
-      </div>
-    </article>
-  `).join('');
+  list.innerHTML = page.map((m, i) => {
+    const globalIdx = start + i;
+    const nameEsc = escapeHtmlMsg(m.name);
+    const kindClass = m.kind === 'club' ? 'club' : 'family';
+    const unreadHtml = m.unread > 0 ? `<span class="msg-unread">${m.unread}</span>` : '';
+    return `
+    <button type="button" class="msg-card" data-idx="${globalIdx}" onclick="openChatByIdx(${globalIdx})">
+      <span class="msg-avatar ${kindClass}">${escapeHtmlMsg(m.initial)}</span>
+      <span class="msg-info">
+        <span class="msg-top-row">
+          <span class="msg-name">${nameEsc}</span>
+          <span class="msg-time">${escapeHtmlMsg(formatMessageTime(m.ts))}</span>
+        </span>
+        <span class="msg-bottom-row">
+          <span class="msg-preview">${escapeHtmlMsg(m.body)}</span>
+          ${unreadHtml}
+        </span>
+      </span>
+    </button>`;
+  }).join('');
 
   // 인디케이터/버튼 갱신
   document.getElementById('msgPageNow').textContent = msgPageIndex + 1;
@@ -2737,19 +2750,59 @@ window.addEventListener('storage', (e) => {
   if (e.key === 'pass_family_certificates' || e.key === 'pass_club_certificates') {
     renderMsgPage();
   }
+  if (e.key === 'pass_voice_phishing') {
+    syncSafetyBanner();
+  }
 });
 
 // ============================================================
-// Message card actions
+// 안심콜 보호 상태 → safety-banner 동기화
+// pass_voice_phishing.safeCall.level (off/low/medium/high) 별로 다른 안내 문구
 // ============================================================
-function toggleLike(btn) {
-  const span = btn.querySelector('span:last-child');
-  const icon = btn.querySelector('.msg-action-icon');
-  const liked = btn.classList.toggle('is-liked');
-  const n = Number(span.textContent) || 0;
-  span.textContent = liked ? n + 1 : Math.max(0, n - 1);
-  icon.textContent = liked ? '♥' : '♡';
-  btn.style.color = liked ? '#DC2626' : '';
+const SAFETY_MESSAGES = {
+  off:    '<strong>안심콜 보호</strong>가 꺼져 있어요',
+  low:    '<strong>안심콜 약함</strong> — 명백한 보이스피싱만 차단합니다',
+  medium: '실시간으로 <strong>CHON DID</strong>를 보호합니다',
+  high:   '<strong>안심콜 강함</strong> — 통화가 자주 차단되면 강도를 낮출 수 있어요',
+};
+
+function syncSafetyBanner() {
+  const textEl = document.getElementById('safetyText');
+  if (!textEl) return;
+  let level = 'medium';
+  try {
+    const raw = localStorage.getItem('pass_voice_phishing');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      // 마이그레이션: enabled:false → level:'off' (all.html과 동일 규칙)
+      if (parsed && parsed.safeCall) {
+        if (parsed.safeCall.enabled === false && parsed.safeCall.level !== 'off') {
+          level = 'off';
+        } else {
+          level = parsed.safeCall.level || 'medium';
+        }
+      }
+    }
+  } catch (e) {}
+  textEl.innerHTML = SAFETY_MESSAGES[level] || SAFETY_MESSAGES.medium;
+}
+
+// 페이지 진입 시 1회 동기화 (같은 탭에서 설정 변경 후 돌아온 경우 반영)
+syncSafetyBanner();
+
+// ============================================================
+// 채팅 팝업 — 공용 lib/chat-popup.js (PassChat.open) 호출
+// ============================================================
+function openChatByIdx(idx) {
+  const m = currentMessages[idx];
+  if (!m || !window.PassChat) return;
+  window.PassChat.open({
+    name: m.name,
+    initial: m.initial,
+    kind: m.kind,            // 'family' | 'club'
+    body: m.body,
+    ts: m.ts,
+  });
 }
 
 // ============================================================
@@ -2792,5 +2845,6 @@ updateTrust();
 })();
 </script>
 <script src="../lib/welcome-name.js"></script>
+<script src="../lib/chat-popup.js"></script>
 </body>
 </html>

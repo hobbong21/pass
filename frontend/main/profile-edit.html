@@ -178,12 +178,15 @@
     gap: 14px;
   }
   .field {
+    display: block;
     background: white;
     border-radius: var(--radius-md);
     border: 1px solid var(--border-light);
     padding: 14px 16px;
     transition: border-color 0.15s;
   }
+  /* 유틸: display:none 인라인 스타일 대체 */
+  .is-hidden { display: none !important; }
   .field:focus-within { border-color: var(--chon-orange); }
   .field-label {
     font-size: 11px;
@@ -277,12 +280,12 @@
       <div class="section-label">프로필 사진</div>
       <div class="avatar-area">
         <div class="avatar-preview" id="avatarPreview">
-          <img id="avatarImg" alt="" style="display:none"/>
+          <img id="avatarImg" class="is-hidden" alt=""/>
           <span id="avatarInitial">홍</span>
         </div>
         <div class="avatar-buttons">
           <button type="button" class="avatar-btn" onclick="document.getElementById('avatarFile').click()">사진 변경</button>
-          <button type="button" class="avatar-btn danger" id="avatarRemoveBtn" onclick="removeAvatar()" style="display:none">사진 제거</button>
+          <button type="button" class="avatar-btn danger is-hidden" id="avatarRemoveBtn" onclick="removeAvatar()">사진 제거</button>
         </div>
         <p class="avatar-hint">JPG, PNG · 5MB 이하 권장</p>
         <input type="file" id="avatarFile" accept="image/*" hidden onchange="onAvatarFile(event)"/>
@@ -298,15 +301,15 @@
           <input type="text" class="field-input" id="fieldName" placeholder="이름을 입력해 주세요" autocomplete="name"/>
         </label>
 
-        <div class="field readonly">
+        <label class="field readonly">
           <div class="field-label">이메일 · 로그인 ID</div>
-          <input type="email" class="field-input" id="fieldEmail" readonly/>
-        </div>
+          <input type="email" class="field-input" id="fieldEmail" readonly placeholder="등록된 이메일이 없습니다"/>
+        </label>
 
-        <div class="field readonly">
+        <label class="field readonly">
           <div class="field-label">휴대폰 번호</div>
           <input type="tel" class="field-input" id="fieldPhone" readonly placeholder="등록 없음"/>
-        </div>
+        </label>
       </div>
     </div>
   </div>
@@ -347,15 +350,15 @@ let pendingPhoto = null; // 새로 선택한 사진 (data URL) — 저장 전까
   const removeBtn = document.getElementById('avatarRemoveBtn');
   if (u.photo) {
     img.src = u.photo;
-    img.style.display = 'block';
-    initial.style.display = 'none';
-    removeBtn.style.display = '';
+    img.classList.remove('is-hidden');
+    initial.classList.add('is-hidden');
+    removeBtn.classList.remove('is-hidden');
     pendingPhoto = u.photo;
   } else {
     initial.textContent = (u.name || '?').slice(0, 1);
-    img.style.display = 'none';
-    initial.style.display = '';
-    removeBtn.style.display = 'none';
+    img.classList.add('is-hidden');
+    initial.classList.remove('is-hidden');
+    removeBtn.classList.add('is-hidden');
   }
 })();
 
@@ -370,10 +373,11 @@ function onAvatarFile(e) {
   const reader = new FileReader();
   reader.onload = (ev) => {
     pendingPhoto = ev.target.result;
-    document.getElementById('avatarImg').src = pendingPhoto;
-    document.getElementById('avatarImg').style.display = 'block';
-    document.getElementById('avatarInitial').style.display = 'none';
-    document.getElementById('avatarRemoveBtn').style.display = '';
+    const img = document.getElementById('avatarImg');
+    img.src = pendingPhoto;
+    img.classList.remove('is-hidden');
+    document.getElementById('avatarInitial').classList.add('is-hidden');
+    document.getElementById('avatarRemoveBtn').classList.remove('is-hidden');
   };
   reader.readAsDataURL(file);
 }
@@ -381,10 +385,10 @@ function onAvatarFile(e) {
 function removeAvatar() {
   pendingPhoto = null;
   const img = document.getElementById('avatarImg');
-  img.style.display = 'none';
+  img.classList.add('is-hidden');
   img.removeAttribute('src');
-  document.getElementById('avatarInitial').style.display = '';
-  document.getElementById('avatarRemoveBtn').style.display = 'none';
+  document.getElementById('avatarInitial').classList.remove('is-hidden');
+  document.getElementById('avatarRemoveBtn').classList.add('is-hidden');
   document.getElementById('avatarFile').value = '';
 }
 

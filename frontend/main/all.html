@@ -645,15 +645,6 @@ const MENU = {
       ],
     },
     {
-      id: 'auth-activity',
-      label: '인증 활동',
-      items: [
-        { ico: '🆕', label: '새 인증 요청',     href: './home.html?page=auth' },
-        { ico: '⏱',  label: '대기 중인 인증', href: './home.html?page=auth' },
-        { ico: '✓',  label: '최근 활동',       href: './home.html?page=auth' },
-      ],
-    },
-    {
       id: 'points',
       label: '인증 포인트',
       items: [
@@ -665,32 +656,18 @@ const MENU = {
       id: 'settings',
       label: '환경설정',
       items: [
+        // 일반 환경설정
         { ico: '🔔', label: '알림',          meta: '켜짐', toast: '🔔 알림 설정' },
         { ico: '🔊', label: '음성 안내',     meta: '꺼짐', toast: '🔊 음성 안내' },
         { ico: '🌐', label: '공공장소 모드', meta: '꺼짐', toast: '🌐 공공장소 모드' },
-      ],
-    },
-    {
-      id: 'security',
-      label: '보안·디바이스',
-      items: [
+        // 보안·디바이스 통합
         { ico: '🛡️', label: '하드웨어 인증', meta: 'TRUSTED', metaClass: 'success', toast: '🛡️ 하드웨어 인증' },
         { ico: '📱', label: '단말 관리',     meta: '1대',     toast: '📱 단말 관리' },
         { ico: '🔐', label: '개인정보',                       toast: '🔐 개인정보' },
-      ],
-    },
-    {
-      id: 'support',
-      label: '고객지원',
-      items: [
+        // 고객지원 통합
         { ico: '📨', label: '고객센터 (문의/신고)', href: './home.html?support=1' },
         { ico: '⚠️', label: '분실/도난 신고',        toast: '⚠️ 분실/도난 신고' },
-      ],
-    },
-    {
-      id: 'account',
-      label: '계정',
-      items: [
+        // 계정 통합
         { ico: '🚪', label: '로그아웃', metaClass: 'danger', action: 'logout' },
       ],
     },
@@ -1119,12 +1096,48 @@ function showToast(msg) {
 }
 
 // =========================================================
-// Init
+// Init — ?tab=cert|my, ?cat=<id>, ?open=safeCall|report|blocked 지원
+// 다른 페이지(home.html 등)에서 딥링크로 진입 시 해당 카테고리/패널 자동 열기
 // =========================================================
 applyGreet();
-renderSidebar();
-renderContent();
+
+(function applyDeepLink() {
+  let targetTab = 'cert', targetCat = null, targetOpen = null;
+  try {
+    const params = new URLSearchParams(location.search);
+    const t = params.get('tab');
+    if (t === 'cert' || t === 'my') targetTab = t;
+    targetCat = params.get('cat');
+    targetOpen = params.get('open');
+  } catch (e) {}
+
+  activeTab = targetTab;
+  document.querySelectorAll('.all-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === activeTab));
+  const tEl = document.getElementById('allSectionTitle');
+  if (tEl) tEl.textContent = TAB_TITLES[activeTab] || '';
+
+  // cat 검증 + 선택 (없으면 첫 항목)
+  const cats = MENU[activeTab] || [];
+  if (targetCat && cats.some(c => c.id === targetCat)) {
+    activeCat = targetCat;
+  } else {
+    activeCat = cats[0]?.id;
+  }
+  renderSidebar();
+  renderContent();
+
+  // open 파라미터: 해당 inline 항목 찾아서 패널 자동 펼침
+  if (targetOpen) {
+    const cat = cats.find(c => c.id === activeCat);
+    const idx = cat?.items?.findIndex(it => it.inline === targetOpen);
+    if (idx !== undefined && idx >= 0) {
+      // 다음 tick에 toggle (DOM이 렌더된 후)
+      setTimeout(() => toggleInlinePanel(activeCat, idx, targetOpen), 0);
+    }
+  }
+})();
 </script>
 <script src="../lib/welcome-name.js"></script>
+<script src="../lib/chat-popup.js"></script>
 </body>
 </html>
