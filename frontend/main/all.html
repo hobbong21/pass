@@ -246,7 +246,189 @@
   .all-item-meta { font-size: 12px; font-weight: 700; color: var(--text-tertiary); }
   .all-item-meta.danger { color: var(--danger); }
   .all-item-meta.success { color: var(--success); }
-  .all-item-arrow { color: var(--text-tertiary); font-size: 18px; }
+  .all-item-arrow { color: var(--text-tertiary); font-size: 18px; transition: transform 0.18s; }
+  .all-item.expanded { background: #FAFBFC; }
+  .all-item.expanded .all-item-arrow { transform: rotate(90deg); }
+
+  /* 인라인 패널 — 메뉴 항목 아래로 펼쳐지는 영역 */
+  .all-item-panel {
+    background: #F8FAFC;
+    border-bottom: 1px solid var(--border-light);
+    padding: 14px 18px 18px;
+    animation: panelSlideDown 0.2s ease;
+  }
+  @keyframes panelSlideDown {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ============================================
+     보이스피싱 인라인 컴포넌트 (vp-)
+     ============================================ */
+  .vp-hint {
+    background: #FEE2E2;
+    border: 1px solid rgba(220,38,38,0.25);
+    border-radius: 10px;
+    padding: 8px 12px;
+    margin-bottom: 10px;
+    font-size: 11px;
+    color: #DC2626;
+    line-height: 1.5;
+  }
+  .vp-level-card {
+    background: white;
+    border: 1.5px solid var(--border-light);
+    border-radius: 12px;
+    padding: 12px 14px;
+  }
+  .vp-level-title { font-size: 12px; font-weight: 800; color: var(--text-primary); margin-bottom: 8px; }
+  .vp-level-options { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+  .vp-level-options.vp-level-options--4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+  .vp-level-opt {
+    padding: 9px 4px;
+    border: 2px solid var(--border-light);
+    border-radius: 8px;
+    background: white;
+    text-align: center;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 800;
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+  .vp-level-opt.selected {
+    background: #FEE2E2;
+    border-color: #DC2626;
+    color: #DC2626;
+  }
+  .vp-level-desc {
+    margin: 8px 0 0;
+    font-size: 11px;
+    color: var(--text-tertiary);
+    text-align: center;
+  }
+
+  .vp-form-card {
+    background: white;
+    border: 1.5px solid var(--border-light);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+  }
+  .vp-form-row { margin-bottom: 10px; }
+  .vp-form-row:last-child { margin-bottom: 0; }
+  .vp-form-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--text-secondary);
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  .vp-form-label-hint {
+    font-weight: 500;
+    color: var(--text-tertiary);
+    font-size: 10px;
+    text-transform: none;
+    margin-left: 4px;
+  }
+  .vp-form-input, .vp-form-select, .vp-form-textarea {
+    width: 100%;
+    padding: 9px 12px;
+    border: 2px solid var(--border-light);
+    border-radius: 10px;
+    font-size: 13px;
+    font-family: inherit;
+    background: white;
+  }
+  .vp-form-input:focus, .vp-form-select:focus, .vp-form-textarea:focus {
+    outline: none;
+    border-color: #DC2626;
+  }
+  .vp-form-textarea { resize: vertical; min-height: 54px; }
+  .vp-form-submit {
+    width: 100%;
+    background: #DC2626;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 900;
+    cursor: pointer;
+    font-family: inherit;
+    box-shadow: 0 4px 10px rgba(220,38,38,0.22);
+  }
+  .vp-form-submit:active { transform: scale(0.98); background: #B91C1C; }
+
+  .vp-list-title {
+    margin: 12px 0 6px;
+    font-size: 12px;
+    font-weight: 900;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .vp-list-count {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    font-weight: 600;
+  }
+  .vp-list-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: white;
+    border: 1.5px solid var(--border-light);
+    border-radius: 10px;
+    padding: 8px 10px;
+    margin-bottom: 5px;
+  }
+  .vp-list-info { flex: 1; min-width: 0; }
+  .vp-list-phone {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+  }
+  .vp-list-meta {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    margin-top: 2px;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+  .vp-list-badge {
+    display: inline-block;
+    background: #FEE2E2;
+    color: #DC2626;
+    padding: 1px 6px;
+    border-radius: 999px;
+    font-size: 9px;
+    font-weight: 800;
+    margin-right: 4px;
+  }
+  .vp-list-del {
+    border: 1.5px solid var(--border-light);
+    background: white;
+    color: var(--text-secondary);
+    padding: 5px 8px;
+    border-radius: 8px;
+    font-size: 10px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+    flex-shrink: 0;
+  }
+  .vp-list-del:active { transform: scale(0.95); }
+  .vp-empty {
+    text-align: center;
+    padding: 20px;
+    color: var(--text-tertiary);
+    font-size: 12px;
+  }
   .all-empty {
     padding: 40px 20px;
     text-align: center;
@@ -366,11 +548,11 @@
     <span class="welcome-msg"><button type="button" class="welcome-user" id="welcomeName" onclick="location.href='./cert.html'">사용자</button>님 환영합니다 · 오늘도 즐거운 하루되세요</span>
   </div>
 
-  <div class="all-section-title" id="allSectionTitle">인증 센터</div>
+  <div class="all-section-title" id="allSectionTitle">부가서비스</div>
 
   <nav class="all-tabs" role="tablist">
     <button type="button" class="all-tab active" data-tab="cert" onclick="switchTab('cert')" role="tab">
-      <span class="tab-ico">🛡️</span><span>인증센터</span>
+      <span class="tab-ico">🧩</span><span>부가서비스</span>
     </button>
     <button type="button" class="all-tab" data-tab="my" onclick="switchTab('my')" role="tab">
       <span class="tab-ico">👤</span><span>내정보관리</span>
@@ -417,6 +599,35 @@
 const MENU = {
   cert: [
     {
+      id: 'voice-phishing',
+      label: '보이스피싱',
+      items: [
+        { ico: '📞', label: '안심콜 보호',    inline: 'safeCall' },
+        { ico: '🚨', label: '의심 번호 신고', inline: 'report' },
+        { ico: '🚫', label: '차단 번호 관리', inline: 'blocked' },
+      ],
+    },
+    {
+      id: 'access-card',
+      label: '출입카드',
+      items: [
+        { ico: '🏢', label: '회사 출입증',  toast: '🏢 회사 출입증' },
+        { ico: '🏠', label: '아파트 키',    toast: '🏠 아파트 키' },
+        { ico: '🏫', label: '학교 출입증',  toast: '🏫 학교 출입증' },
+      ],
+    },
+    {
+      id: 'shop',
+      label: '상점',
+      items: [
+        { ico: '🎟', label: '멤버십 카드',  toast: '🎟 멤버십 카드' },
+        { ico: '🏷', label: '적립 카드',    toast: '🏷 적립 카드' },
+        { ico: '💳', label: '결제 수단',    toast: '💳 결제 수단' },
+      ],
+    },
+  ],
+  my: [
+    {
       id: 'chon-id',
       label: 'CHON ID',
       items: [
@@ -425,19 +636,12 @@ const MENU = {
       ],
     },
     {
-      id: 'family',
-      label: '가족·관계',
+      id: 'health',
+      label: '건강데이터',
       items: [
-        { ico: '🌳', label: '가계도 보기',     href: '../views/family-tree.html' },
-        { ico: '📄', label: '관계 증명서 발급', toast: '📄 관계 증명서 발급' },
-      ],
-    },
-    {
-      id: 'group',
-      label: '모임·동호회',
-      items: [
-        { ico: '👥', label: '동호회',  href: '../views/friends.html' },
-        { ico: '🎓', label: '학급증',  href: '../views/class-id.html' },
+        { ico: '💉', label: '백신 접종 증명',  toast: '💉 백신 접종 증명' },
+        { ico: '🩺', label: '건강검진 기록',   toast: '🩺 건강검진 기록' },
+        { ico: '🏥', label: '의료보험증',      toast: '🏥 의료보험증' },
       ],
     },
     {
@@ -455,16 +659,6 @@ const MENU = {
       items: [
         { ico: '🏆', label: '인증 포인트 · 레벨', href: './trust.html' },
         { ico: '🎖', label: '뱃지',              href: './trust.html' },
-      ],
-    },
-  ],
-  my: [
-    {
-      id: 'profile',
-      label: '프로필',
-      items: [
-        { ico: '👤', label: '프로필 편집', href: './profile-edit.html?return=all' },
-        { ico: '📷', label: '사진 변경',   href: './profile-edit.html?return=all' },
       ],
     },
     {
@@ -510,6 +704,58 @@ let activeTab = 'cert';
 let activeCat = MENU.cert[0].id;
 
 // =========================================================
+// 보이스피싱 인라인 state — voice-phishing.html 페이지를 흡수
+// =========================================================
+const VP_STORAGE_KEY = 'pass_voice_phishing';
+const VP_LEVEL_DESC = {
+  off:    '0 — 보호 없음. 모든 통화가 평소대로 연결됩니다.',
+  low:    '약함 — 명백한 보이스피싱 패턴만 경고',
+  medium: '보통 — 등록 안 된 번호도 주의 표시 (권장)',
+  high:   '강함 — 모든 외부 번호 차단 후 안내 SMS 전송',
+};
+const VP_LEVEL_LABEL = { off: '꺼짐', low: '약함', medium: '보통', high: '강함' };
+const VP_TYPE_LABEL = { phishing: '보이스피싱', spam: '스팸', ad: '광고', other: '기타' };
+
+function vpDefault() {
+  const now = Date.now();
+  return {
+    meta: { version: 1, createdAt: now, updatedAt: now },
+    safeCall: { enabled: true, level: 'medium' },
+    reports: [],
+    blocked: [],
+  };
+}
+function vpLoad() {
+  try {
+    const raw = localStorage.getItem(VP_STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && parsed.safeCall) {
+        // 마이그레이션: 이전 스키마에서 enabled:false였다면 level을 'off'로 정규화
+        if (parsed.safeCall.enabled === false && parsed.safeCall.level !== 'off') {
+          parsed.safeCall.level = 'off';
+        }
+        return parsed;
+      }
+    }
+  } catch (e) {}
+  return vpDefault();
+}
+function vpSave() {
+  vpData.meta.updatedAt = Date.now();
+  try { localStorage.setItem(VP_STORAGE_KEY, JSON.stringify(vpData)); }
+  catch (e) { console.warn('vpSave failed', e); }
+}
+const vpData = vpLoad();
+
+function vpNewId(p) { return p + '_' + Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-4); }
+function vpNormPhone(s) { return String(s || '').trim().replace(/[^0-9+\-]/g, ''); }
+function vpFormatDate(ts) {
+  const d = new Date(ts);
+  return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+}
+
+// =========================================================
 // Render
 // =========================================================
 function escapeHtml(s) {
@@ -533,22 +779,67 @@ function renderContent() {
     return;
   }
   content.innerHTML = cat.items.map((it, idx) => {
-    const metaCls = it.metaClass ? ' ' + it.metaClass : '';
-    const meta = it.meta ? `<span class="all-item-meta${metaCls}">${escapeHtml(it.meta)}</span>` : '';
+    // inline 항목은 vpData에서 meta 동적 계산
+    let metaText = it.meta, metaCls = it.metaClass;
+    if (it.inline === 'safeCall') {
+      const lv = vpData.safeCall.level || 'medium';
+      metaText = VP_LEVEL_LABEL[lv] || '꺼짐';
+      metaCls = lv !== 'off' ? 'success' : '';
+    } else if (it.inline === 'report') {
+      metaText = vpData.reports.length ? `${vpData.reports.length}건` : '';
+      metaCls = '';
+    } else if (it.inline === 'blocked') {
+      metaText = vpData.blocked.length ? `${vpData.blocked.length}건` : '';
+      metaCls = '';
+    }
+    const metaClsPart = metaCls ? ' ' + metaCls : '';
+    const metaHtml = metaText ? `<span class="all-item-meta${metaClsPart}">${escapeHtml(metaText)}</span>` : '';
     return `
       <button type="button" class="all-item" data-cat="${escapeHtml(cat.id)}" data-idx="${idx}" onclick="onItem('${escapeHtml(cat.id)}', ${idx})">
         <span class="all-item-main">
           <span class="all-item-ico">${it.ico || '•'}</span>
           <span class="all-item-label">${escapeHtml(it.label)}</span>
         </span>
-        ${meta}
+        ${metaHtml}
         <span class="all-item-arrow">›</span>
       </button>
     `;
   }).join('');
 }
 
-const TAB_TITLES = { cert: '인증 센터', my: '내 정보 관리' };
+// inline 항목의 meta 라벨만 가볍게 갱신 (패널 열린 상태 보존)
+function updateInlineItemMeta(catId, idx) {
+  const itemEl = document.querySelector(`.all-item[data-cat="${catId}"][data-idx="${idx}"]`);
+  if (!itemEl) return;
+  const cats = MENU[activeTab] || [];
+  const cat = cats.find(c => c.id === catId);
+  const it = cat?.items?.[idx];
+  if (!it) return;
+  let metaText = '', metaCls = '';
+  if (it.inline === 'safeCall') {
+    const lv = vpData.safeCall.level || 'medium';
+    metaText = VP_LEVEL_LABEL[lv] || '꺼짐';
+    metaCls = lv !== 'off' ? 'success' : '';
+  } else if (it.inline === 'report') {
+    metaText = vpData.reports.length ? `${vpData.reports.length}건` : '';
+  } else if (it.inline === 'blocked') {
+    metaText = vpData.blocked.length ? `${vpData.blocked.length}건` : '';
+  }
+  // 기존 meta span 제거 후 새로 삽입 (혹은 빈 경우 제거)
+  const oldMeta = itemEl.querySelector('.all-item-meta');
+  if (oldMeta) oldMeta.remove();
+  if (metaText) {
+    const span = document.createElement('span');
+    span.className = 'all-item-meta' + (metaCls ? ' ' + metaCls : '');
+    span.textContent = metaText;
+    // arrow 앞에 삽입
+    const arrow = itemEl.querySelector('.all-item-arrow');
+    if (arrow) itemEl.insertBefore(span, arrow);
+    else itemEl.appendChild(span);
+  }
+}
+
+const TAB_TITLES = { cert: '부가서비스', my: '내 정보 관리' };
 
 function switchTab(tab) {
   if (!MENU[tab]) return;
@@ -573,8 +864,210 @@ function onItem(catId, idx) {
   const it = cat?.items?.[idx];
   if (!it) return;
   if (it.action === 'logout') { logoutPass(); return; }
+  if (it.inline) { toggleInlinePanel(catId, idx, it.inline); return; }
   if (it.href)  { location.href = it.href; return; }
   if (it.toast) { showToast(it.toast); return; }
+}
+
+// =========================================================
+// Inline 패널 토글 — 한 번에 하나만 열림
+// =========================================================
+function toggleInlinePanel(catId, idx, kind) {
+  const itemEl = document.querySelector(`.all-item[data-cat="${catId}"][data-idx="${idx}"]`);
+  if (!itemEl) return;
+  const next = itemEl.nextElementSibling;
+  // 이미 열려 있으면 닫기
+  if (next && next.classList.contains('all-item-panel')) {
+    next.remove();
+    itemEl.classList.remove('expanded');
+    return;
+  }
+  // 다른 패널 모두 닫기
+  document.querySelectorAll('.all-item-panel').forEach(p => p.remove());
+  document.querySelectorAll('.all-item.expanded').forEach(e => e.classList.remove('expanded'));
+
+  const panel = document.createElement('div');
+  panel.className = 'all-item-panel';
+  panel.dataset.cat = catId;
+  panel.dataset.idx = idx;
+  panel.dataset.kind = kind;
+  itemEl.classList.add('expanded');
+  itemEl.insertAdjacentElement('afterend', panel);
+  renderInlinePanel(panel, kind);
+}
+
+function renderInlinePanel(panel, kind) {
+  if (kind === 'safeCall') renderSafeCallPanel(panel);
+  else if (kind === 'report') renderReportPanel(panel);
+  else if (kind === 'blocked') renderBlockedPanel(panel);
+}
+
+// 현재 열린 패널을 재렌더 (state 변경 후 호출)
+function refreshOpenPanel() {
+  const panel = document.querySelector('.all-item-panel');
+  if (!panel) return;
+  renderInlinePanel(panel, panel.dataset.kind);
+}
+
+// =========================================================
+// 보이스피싱 — 안심콜 보호 패널
+// =========================================================
+function renderSafeCallPanel(panel) {
+  const level = vpData.safeCall.level || 'medium';
+  panel.innerHTML = `
+    <div class="vp-hint">등록되지 않은 번호나 보이스피싱 패턴이 감지된 번호에 대해 경고·차단합니다.</div>
+    <div class="vp-level-card">
+      <div class="vp-level-title">차단 강도</div>
+      <div class="vp-level-options vp-level-options--4">
+        <button type="button" class="vp-level-opt ${level === 'off' ? 'selected' : ''}" onclick="vpSetLevel('off')">0</button>
+        <button type="button" class="vp-level-opt ${level === 'low' ? 'selected' : ''}" onclick="vpSetLevel('low')">약함</button>
+        <button type="button" class="vp-level-opt ${level === 'medium' ? 'selected' : ''}" onclick="vpSetLevel('medium')">보통</button>
+        <button type="button" class="vp-level-opt ${level === 'high' ? 'selected' : ''}" onclick="vpSetLevel('high')">강함</button>
+      </div>
+      <p class="vp-level-desc">${escapeHtml(VP_LEVEL_DESC[level] || '')}</p>
+    </div>
+  `;
+}
+
+function vpSetLevel(level) {
+  if (!['off', 'low', 'medium', 'high'].includes(level)) return;
+  vpData.safeCall.level = level;
+  // enabled 필드는 level에서 파생되도록 유지 (기존 데이터 호환)
+  vpData.safeCall.enabled = level !== 'off';
+  vpSave();
+  refreshOpenPanel();
+  updateInlineItemMeta('voice-phishing', 0);
+}
+
+// =========================================================
+// 보이스피싱 — 의심 번호 신고 패널
+// =========================================================
+function renderReportPanel(panel) {
+  const reports = vpData.reports.slice().reverse();
+  const listHtml = reports.length === 0
+    ? `<div class="vp-empty">아직 신고한 번호가 없습니다.</div>`
+    : reports.map(r => `
+        <div class="vp-list-row">
+          <div class="vp-list-info">
+            <div class="vp-list-phone">${escapeHtml(r.phone)}</div>
+            <div class="vp-list-meta">
+              <span class="vp-list-badge">${escapeHtml(VP_TYPE_LABEL[r.type] || r.type || '기타')}</span>
+              ${escapeHtml(vpFormatDate(r.reportedAt))}${r.memo ? '<br>' + escapeHtml(r.memo) : ''}
+            </div>
+          </div>
+          <button type="button" class="vp-list-del" onclick="vpDeleteReport('${escapeHtml(r.id)}')">🗑</button>
+        </div>
+      `).join('');
+  panel.innerHTML = `
+    <div class="vp-hint">보이스피싱·스팸으로 의심되는 번호를 신고하세요. 누적 신고가 많으면 자동 차단됩니다.</div>
+    <div class="vp-form-card">
+      <div class="vp-form-row">
+        <label class="vp-form-label" for="vpReportPhone">전화번호</label>
+        <input type="tel" class="vp-form-input" id="vpReportPhone" placeholder="010-1234-5678" inputmode="tel" autocomplete="off"/>
+      </div>
+      <div class="vp-form-row">
+        <label class="vp-form-label" for="vpReportType">신고 유형</label>
+        <select class="vp-form-select" id="vpReportType">
+          <option value="phishing">보이스피싱</option>
+          <option value="spam">스팸</option>
+          <option value="ad">광고</option>
+          <option value="other">기타</option>
+        </select>
+      </div>
+      <div class="vp-form-row">
+        <label class="vp-form-label" for="vpReportMemo">메모<span class="vp-form-label-hint">(선택)</span></label>
+        <textarea class="vp-form-textarea" id="vpReportMemo" placeholder="예: 은행을 사칭해서 OTP를 요구함" rows="2"></textarea>
+      </div>
+      <button type="button" class="vp-form-submit" onclick="vpSubmitReport()">🚨 신고 접수</button>
+    </div>
+    <div class="vp-list-title">신고 내역 ${reports.length ? `<span class="vp-list-count">${reports.length}건</span>` : ''}</div>
+    ${listHtml}
+  `;
+}
+
+function vpSubmitReport() {
+  const phone = vpNormPhone(document.getElementById('vpReportPhone').value);
+  const type = document.getElementById('vpReportType').value;
+  const memo = document.getElementById('vpReportMemo').value.trim();
+  if (!phone) { showToast('⚠️ 전화번호를 입력하세요'); return; }
+  if (phone.length < 7) { showToast('⚠️ 번호가 너무 짧습니다'); return; }
+  vpData.reports.push({
+    id: vpNewId('rep'), phone, type, memo: memo || null, reportedAt: Date.now(),
+  });
+  vpSave();
+  refreshOpenPanel();
+  updateInlineItemMeta('voice-phishing', 1);
+  showToast(`🚨 ${phone} 신고 접수`);
+}
+
+function vpDeleteReport(id) {
+  if (!confirm('이 신고를 삭제할까요?')) return;
+  vpData.reports = vpData.reports.filter(r => r.id !== id);
+  vpSave();
+  refreshOpenPanel();
+  updateInlineItemMeta('voice-phishing', 1);
+  showToast('🗑 삭제됨');
+}
+
+// =========================================================
+// 보이스피싱 — 차단 번호 관리 패널
+// =========================================================
+function renderBlockedPanel(panel) {
+  const blocked = vpData.blocked.slice().reverse();
+  const listHtml = blocked.length === 0
+    ? `<div class="vp-empty">차단된 번호가 없습니다.</div>`
+    : blocked.map(b => `
+        <div class="vp-list-row">
+          <div class="vp-list-info">
+            <div class="vp-list-phone">${escapeHtml(b.phone)}</div>
+            <div class="vp-list-meta">${escapeHtml(vpFormatDate(b.blockedAt))}${b.reason ? ' · ' + escapeHtml(b.reason) : ''}</div>
+          </div>
+          <button type="button" class="vp-list-del" onclick="vpDeleteBlocked('${escapeHtml(b.id)}')">↩</button>
+        </div>
+      `).join('');
+  panel.innerHTML = `
+    <div class="vp-hint">차단된 번호에서 걸려오는 통화는 자동으로 거부되고 알림이 표시되지 않습니다.</div>
+    <div class="vp-form-card">
+      <div class="vp-form-row">
+        <label class="vp-form-label" for="vpBlockPhone">차단할 번호</label>
+        <input type="tel" class="vp-form-input" id="vpBlockPhone" placeholder="010-9999-8888" inputmode="tel" autocomplete="off"/>
+      </div>
+      <div class="vp-form-row">
+        <label class="vp-form-label" for="vpBlockReason">차단 사유<span class="vp-form-label-hint">(선택)</span></label>
+        <input type="text" class="vp-form-input" id="vpBlockReason" placeholder="예: 광고 전화 반복" autocomplete="off"/>
+      </div>
+      <button type="button" class="vp-form-submit" onclick="vpAddBlocked()">🚫 차단 추가</button>
+    </div>
+    <div class="vp-list-title">차단된 번호 ${blocked.length ? `<span class="vp-list-count">${blocked.length}건</span>` : ''}</div>
+    ${listHtml}
+  `;
+}
+
+function vpAddBlocked() {
+  const phone = vpNormPhone(document.getElementById('vpBlockPhone').value);
+  const reason = document.getElementById('vpBlockReason').value.trim();
+  if (!phone) { showToast('⚠️ 전화번호를 입력하세요'); return; }
+  if (phone.length < 7) { showToast('⚠️ 번호가 너무 짧습니다'); return; }
+  if (vpData.blocked.some(b => b.phone === phone)) {
+    showToast('⚠️ 이미 차단된 번호입니다'); return;
+  }
+  vpData.blocked.push({
+    id: vpNewId('blk'), phone, reason: reason || null, blockedAt: Date.now(),
+  });
+  vpSave();
+  refreshOpenPanel();
+  updateInlineItemMeta('voice-phishing', 2);
+  showToast(`🚫 ${phone} 차단됨`);
+}
+
+function vpDeleteBlocked(id) {
+  const t = vpData.blocked.find(b => b.id === id);
+  if (!confirm(`${t ? t.phone + ' ' : ''}차단을 해제할까요?`)) return;
+  vpData.blocked = vpData.blocked.filter(b => b.id !== id);
+  vpSave();
+  refreshOpenPanel();
+  updateInlineItemMeta('voice-phishing', 2);
+  showToast('↩ 차단 해제됨');
 }
 
 // =========================================================
