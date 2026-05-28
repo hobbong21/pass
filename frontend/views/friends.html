@@ -2,1960 +2,2021 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PASS 모임 — 모임 + 모임원 추천</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#FFFBF0">
+<title>PASS — 동호회증 (모임 네트워크)</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/static/pretendard.min.css" rel="stylesheet">
 <script src="../lib/auth-guard.js" data-require="login"></script>
-<script src="../lib/pass-api.js"></script>
-<script src="../lib/scanner.js"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800;900&display=swap" rel="stylesheet">
 <style>
   :root {
     --chon-orange: #F7931E;
     --chon-orange-dark: #E87F0A;
     --chon-yellow-soft: #FFF3D6;
     --bg-app: #FFFBF0;
-    --bg-empty: #F8FAFC;
+    --bg-card: #FFFFFF;
     --text-primary: #1F1F1F;
     --text-secondary: #64748B;
     --text-tertiary: #94A3B8;
-
-    /* Friend Network colors */
-    --friend-green: #5BBA6F;
-    --friend-green-dark: #16A34A;
-    --friend-green-bg: #DCFCE7;
-    --friend-green-light: #ECFDF5;
-
-    /* Node colors */
+    --border-light: #E2E8F0;
+    --status-confirmed: #10B981;
+    --status-pending: #F59E0B;
+    /* 동호회 테마 (가족=초록, 동호회=블루) */
+    --club-blue: #3B82F6;
+    --club-blue-dark: #1E40AF;
     --node-male: #DBEAFE;
     --node-male-border: #6FA8DC;
     --node-female: #FCE7F3;
     --node-female-border: #E89BAA;
-    --node-self-bg: #FFFFFF;
-    --node-self-border: #F7931E;
-    --node-friend-bg: #DCFCE7;
-    --node-friend-border: #5BBA6F;
-    --node-ff-bg: #F0FDF4;
-    --node-ff-border: #BBF7D0;
-
-    /* Container colors */
-    --container-friends: rgba(91, 186, 111, 0.08);
-    --container-friends-border: rgba(91, 186, 111, 0.35);
-    --container-ff: rgba(187, 247, 208, 0.25);
-    --container-ff-border: rgba(187, 247, 208, 0.6);
-    --container-me: rgba(255, 230, 200, 0.7);
-    --container-me-border: rgba(247, 147, 30, 0.6);
-
-    --status-confirmed: #10B981;
-    --status-pending: #F59E0B;
-
+    --node-rec-border: #C4B5FD;
     --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
-    --shadow-md: 0 4px 14px rgba(0,0,0,0.08);
-    --shadow-lg: 0 10px 30px rgba(0,0,0,0.14);
-
+    --shadow-md: 0 6px 18px rgba(0,0,0,0.10);
     --radius-sm: 8px;
     --radius-md: 14px;
-    --radius-lg: 24px;
+    --radius-lg: 20px;
     --radius-pill: 999px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
   }
 
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
+  html, body { margin: 0; padding: 0; }
   body {
-    margin: 0;
-    padding: 0;
-    font-family: 'Noto Sans KR', -apple-system, sans-serif;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
     background: var(--bg-app);
     color: var(--text-primary);
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
   }
 
-  /* ============================================
-     Page Layout
-     ============================================ */
-  .page-header {
-    text-align: center;
-    padding: 24px 16px 16px;
-  }
-  .page-header h1 {
-    margin: 0 0 4px;
-    font-size: 22px;
-    font-weight: 900;
-  }
-  .page-header .subtitle {
-    color: var(--text-secondary);
-    font-size: 13px;
-  }
-  
-  .demo-badge {
-    background: var(--friend-green-light);
-    color: var(--friend-green-dark);
-    padding: 4px 10px;
-    border-radius: var(--radius-pill);
-    font-size: 11px;
-    font-weight: 700;
-    border: 1px solid var(--friend-green);
-  }
-
-  .device-row {
-    display: flex;
-    justify-content: center;
-    gap: 24px;
-    padding: 20px 12px;
-    flex-wrap: wrap;
-    align-items: flex-start;
-  }
-  .device-col { display: flex; flex-direction: column; align-items: center; }
-  .phone-caption {
-    background: var(--friend-green);
-    color: white;
-    padding: 8px 20px;
-    border-radius: var(--radius-pill);
-    font-size: 13px;
-    font-weight: 800;
-    margin-bottom: 14px;
-  }
-  .phone {
-    width: 380px;
-    max-width: 100%;
-    height: 800px;
-    background: #C8C2BC;
-    border-radius: 48px;
-    padding: 12px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
-  }
-  .phone-screen {
+  .app {
     width: 100%;
-    height: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 100vh;
+    min-height: 100dvh;
     background: var(--bg-app);
-    border-radius: 38px;
-    overflow: hidden;
-    position: relative;
     display: flex;
     flex-direction: column;
+    position: relative;
+  }
+  @media (min-width: 768px) {
+    body { padding: 32px 0; background: #F5F7FB; }
+    .app {
+      border-radius: 28px;
+      overflow: hidden;
+      min-height: calc(100dvh - 64px);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.12);
+    }
   }
 
-  .status-bar {
-    height: 40px;
+  /* Topbar */
+  .topbar {
+    padding: calc(14px + var(--safe-top)) 14px 10px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 12px 24px 0;
-    font-size: 13px;
-    font-weight: 700;
-    position: relative;
-    flex-shrink: 0;
-  }
-  .camera-dot {
-    width: 14px; height: 14px; border-radius: 50%;
-    background: #1F1F1F; border: 2px solid #2A2A2A;
-    position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
-  }
-  .app-header {
-    padding: 8px 16px 4px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
     gap: 8px;
+    background: var(--bg-app);
+    border-bottom: 1px solid #F1F5F9;
     flex-shrink: 0;
   }
-  .app-header h1 {
+  .icon-btn {
+    width: 36px; height: 36px;
+    border: none;
+    background: transparent;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-primary);
+    font-family: inherit;
+  }
+  .icon-btn:active { background: rgba(0,0,0,0.06); }
+  .icon-btn svg { width: 22px; height: 22px; }
+  .topbar h1 {
+    flex: 1;
     margin: 0;
     font-size: 17px;
     font-weight: 900;
-    flex: 1;
     text-align: center;
+    letter-spacing: -0.4px;
   }
-  .header-action {
-    background: white;
-    border: 1.5px solid var(--friend-green);
-    color: var(--friend-green-dark);
-    padding: 5px 12px;
-    border-radius: var(--radius-pill);
-    font-size: 12px;
-    font-weight: 800;
-    cursor: pointer;
-    font-family: inherit;
-    flex-shrink: 0;
-  }
-  .view-toggle {
+  .topbar-spacer { width: 36px; height: 36px; flex-shrink: 0; }
+
+  /* Stepper — 4단계 탭 */
+  .stepper {
     display: flex;
-    gap: 4px;
-    padding: 0 16px 12px;
+    gap: 6px;
+    padding: 12px 14px;
+    background: var(--bg-app);
     flex-shrink: 0;
   }
-  .view-toggle-btn {
+  .step {
     flex: 1;
     background: white;
-    border: 1.5px solid #E2E8F0;
-    color: var(--text-secondary);
-    padding: 9px 6px;
+    border: 1.5px solid var(--border-light);
     border-radius: var(--radius-md);
-    font-size: 12px;
-    font-weight: 800;
-    cursor: pointer;
+    padding: 10px 4px;
     font-family: inherit;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    transition: all 0.15s;
+  }
+  .step:active { transform: scale(0.97); }
+  .step-num {
+    font-size: 11px;
+    font-weight: 900;
+    color: var(--text-tertiary);
+    background: #F1F5F9;
+    width: 18px; height: 18px;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 4px;
   }
-  .view-toggle-btn.active {
-    background: var(--friend-green);
-    color: white;
-    border-color: var(--friend-green);
+  .step-label {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--text-secondary);
   }
+  .step.active {
+    background: var(--club-blue);
+    border-color: var(--club-blue);
+  }
+  .step.active .step-num {
+    background: white;
+    color: var(--club-blue-dark);
+  }
+  .step.active .step-label { color: white; }
+
+  /* Content area */
   .content {
     flex: 1;
-    background: white;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: calc(20px + var(--safe-bottom));
   }
-  .view-panel { display: none; }
-  .view-panel.active { display: block; }
+  .stage { padding: 8px 14px 24px; }
 
-  .summary-card {
-    background: linear-gradient(135deg, var(--friend-green-light), white);
-    margin: 14px 16px 8px;
-    padding: 14px 16px;
+  /* Hint banner */
+  .hint {
+    background: #EFF6FF;
+    border: 1px solid rgba(59,130,246,0.25);
     border-radius: var(--radius-md);
+    padding: 10px 12px;
+    margin: 6px 0 14px;
+    font-size: 12px;
+    color: var(--club-blue-dark);
+    line-height: 1.5;
+  }
+
+  /* ============================================
+     Stage 1 — 만들기
+     ============================================ */
+  .gen-row { margin-bottom: 18px; }
+  .gen-header {
     display: flex;
     align-items: center;
-    gap: 12px;
-    border: 1px solid var(--node-friend-border);
-  }
-  .summary-avatar {
-    width: 48px; height: 48px;
-    border-radius: 12px;
-    background: white;
-    border: 2.5px solid var(--friend-green);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 22px;
-    flex-shrink: 0;
-  }
-  .summary-info { flex: 1; min-width: 0; }
-  .summary-name { font-size: 15px; font-weight: 900; margin-bottom: 2px; }
-  .summary-stats {
-    font-size: 11px;
-    color: var(--friend-green-dark);
-    font-weight: 700;
-    display: flex;
-    gap: 10px;
-  }
-
-  /* ============================================
-     Verify Summary Card (인증현황)
-     ============================================ */
-  .verify-summary {
-    display: flex;
     gap: 8px;
-    padding: 12px 16px 16px;
+    margin-bottom: 8px;
+    padding: 0 2px;
   }
-  .verify-stat-card {
-    flex: 1;
-    background: white;
-    border: 1.5px solid #E2E8F0;
-    border-radius: var(--radius-md);
-    padding: 12px 8px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-  .verify-stat-card.confirmed {
-    border-color: rgba(16, 185, 129, 0.4);
-    background: rgba(16, 185, 129, 0.06);
-  }
-  .verify-stat-card.pending {
-    border-color: rgba(245, 158, 11, 0.4);
-    background: rgba(245, 158, 11, 0.06);
-  }
-  .verify-stat-card:active { transform: scale(0.97); }
-  .verify-stat-value {
-    font-size: 22px;
-    font-weight: 900;
-    line-height: 1;
-  }
-  .verify-stat-value.confirmed { color: var(--status-confirmed); }
-  .verify-stat-value.pending { color: var(--status-pending); }
-  .verify-stat-value.total { color: var(--text-primary); }
-  .verify-stat-label {
-    font-size: 10px;
-    color: var(--text-tertiary);
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-    margin-top: 6px;
-  }
-  .verify-quick-btn {
-    background: var(--friend-green);
+  .gen-num {
+    background: linear-gradient(135deg, var(--club-blue) 0%, var(--club-blue-dark) 100%);
     color: white;
-    border: none;
-    padding: 4px 10px;
-    border-radius: var(--radius-pill);
-    font-size: 11px;
-    font-weight: 800;
-    cursor: pointer;
-    font-family: inherit;
-    margin-left: 4px;
-  }
-  .verify-quick-btn:active { transform: scale(0.95); }
-
-  /* ============================================
-     Tree Canvas — Box Containment (추가하기)
-     ============================================ */
-  .tree-canvas {
-    padding: 14px 14px 30px;
-    overflow-x: visible;
-  }
-  .me-block {
-    background: var(--container-me);
-    border: 2px solid var(--container-me-border);
-    border-radius: var(--radius-md);
-    padding: 14px 12px 10px;
-    margin-bottom: 14px;
-    position: relative;
-  }
-  .me-block-label {
-    position: absolute;
-    top: -10px;
-    left: 14px;
-    background: white;
-    padding: 2px 10px;
+    padding: 2px 8px;
     border-radius: var(--radius-pill);
     font-size: 10px;
-    font-weight: 800;
-    color: var(--chon-orange-dark);
-    border: 1px solid var(--chon-orange-dark);
+    font-weight: 900;
+    letter-spacing: 0.3px;
   }
-  .me-block-row {
-    display: flex;
-    justify-content: center;
-  }
-
-  .friends-box {
-    background: var(--container-friends);
-    border: 2px solid var(--container-friends-border);
-    border-radius: var(--radius-md);
-    padding: 16px 12px 12px;
-    margin-bottom: 14px;
-    position: relative;
-  }
-  .friends-box-label {
-    position: absolute;
-    top: -10px;
-    left: 14px;
-    background: white;
-    padding: 2px 10px;
-    border-radius: var(--radius-pill);
-    font-size: 11px;
-    font-weight: 800;
-    color: var(--friend-green-dark);
-    border: 1px solid var(--friend-green);
-  }
-  .friends-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-  }
-
-  .ff-box {
-    background: var(--container-ff);
-    border: 2px dashed var(--container-ff-border);
-    border-radius: var(--radius-md);
-    padding: 16px 12px 12px;
-    margin-bottom: 14px;
-    position: relative;
-  }
-  .ff-box-label {
-    position: absolute;
-    top: -10px;
-    left: 14px;
-    background: white;
-    padding: 2px 10px;
-    border-radius: var(--radius-pill);
-    font-size: 11px;
-    font-weight: 800;
-    color: var(--friend-green-dark);
-    border: 1px dashed var(--friend-green);
-  }
-
-  .person-node {
-    background: white;
-    border: 2px solid #CBD5E1;
-    border-radius: 10px;
-    padding: 8px 10px;
-    text-align: center;
-    cursor: pointer;
-    position: relative;
-    transition: all 0.15s;
-    min-width: 0;
-  }
-  .person-node:active { transform: scale(0.97); }
-  .person-node.male { background: var(--node-male); border-color: var(--node-male-border); }
-  .person-node.female { background: var(--node-female); border-color: var(--node-female-border); }
-  .person-node.self {
-    background: var(--node-self-bg);
-    border-color: var(--node-self-border);
-    border-width: 2.5px;
-    box-shadow: 0 0 0 3px rgba(247, 147, 30, 0.15);
-  }
-  .person-node.friend {
-    background: var(--node-friend-bg);
-    border-color: var(--node-friend-border);
-  }
-  .person-node.ff {
-    background: var(--node-ff-bg);
-    border-color: var(--node-ff-border);
-    border-style: dashed;
-  }
-  .person-node.selected {
-    box-shadow: 0 0 0 3px rgba(91, 186, 111, 0.35);
-    border-color: var(--friend-green);
-  }
-  .person-node-name {
+  .gen-name {
     font-size: 13px;
     font-weight: 800;
     color: var(--text-primary);
-    line-height: 1.2;
   }
-  .person-node.self .person-node-name { color: var(--chon-orange); }
-  .person-node-meta {
-    font-size: 9px;
-    color: rgba(0,0,0,0.4);
+  .person-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .auto-rec-hint {
+    margin: 10px 2px 0;
+    padding: 8px 12px;
+    background: #F1F5F9;
+    border: 1px dashed var(--text-tertiary);
+    border-radius: var(--radius-sm);
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-weight: 600;
+    text-align: center;
+  }
+  .person-card {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: white;
+    border: 2px solid var(--node-male-border);
+    border-radius: var(--radius-md);
+    padding: 8px 12px 8px 8px;
+    cursor: pointer;
+    font-family: inherit;
+    min-width: 130px;
+    text-align: left;
+    transition: all 0.12s;
+  }
+  .person-card.female { border-color: var(--node-female-border); }
+  .person-card.rec { border-color: var(--node-rec-border); border-style: dashed; }
+  .person-card.self {
+    border-color: var(--club-blue);
+    border-width: 2.5px;
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+  }
+  .person-card:active { transform: scale(0.97); }
+  .person-card.confirmed { background: rgba(16,185,129,0.06); }
+  .pc-avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--node-male);
+    color: var(--node-male-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .person-card.female .pc-avatar {
+    background: var(--node-female);
+    color: var(--node-female-border);
+  }
+  .person-card.self .pc-avatar {
+    background: #DBEAFE;
+    color: var(--club-blue-dark);
+  }
+  .pc-info { min-width: 0; flex: 1; }
+  .pc-name {
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1.2;
+    color: var(--text-primary);
+  }
+  .pc-rel {
+    font-size: 11px;
+    color: var(--text-tertiary);
     margin-top: 2px;
     font-weight: 600;
   }
-  .person-confirm-badge {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    width: 16px; height: 16px;
-    background: var(--status-confirmed);
-    color: white;
-    border-radius: 50%;
-    font-size: 9px;
-    font-weight: 900;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1.5px solid white;
-  }
-  .person-confirm-badge.pending {
-    background: var(--status-pending);
-  }
-  .empty-slot {
-    background: white;
-    border: 2px dashed #CBD5E1;
-    border-radius: 10px;
-    padding: 12px 10px;
-    text-align: center;
-    cursor: pointer;
+  /* + 추가 카드 */
+  .person-card.add-card {
+    border: 2px dashed var(--text-tertiary);
+    background: transparent;
     color: var(--text-tertiary);
-    font-size: 11px;
-    font-weight: 800;
-    display: flex;
-    align-items: center;
+    min-width: 110px;
     justify-content: center;
-    min-height: 48px;
+    padding: 12px 16px;
   }
-  .empty-slot:active {
-    background: var(--friend-green-light);
-    border-color: var(--friend-green);
-    color: var(--friend-green-dark);
-  }
+  .person-card.add-card:active { background: rgba(59,130,246,0.06); border-color: var(--club-blue); color: var(--club-blue-dark); }
+  .pc-add-icon { font-size: 18px; font-weight: 900; }
+  .pc-add-label { font-size: 12px; font-weight: 800; }
 
-  /* ============================================
-     Action Panel
-     ============================================ */
+  /* Stage CTA */
+  .stage-cta {
+    padding: 20px 0 4px;
+    text-align: center;
+  }
+  .cta-hint {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    margin: 0 0 10px;
+  }
+  .next-step-btn {
+    background: var(--club-blue);
+    color: white;
+    border: none;
+    padding: 12px 22px;
+    border-radius: var(--radius-pill);
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+    box-shadow: var(--shadow-md);
+  }
+  .next-step-btn:active { transform: scale(0.97); background: var(--club-blue-dark); }
+
+  /* Action panel */
   .action-panel {
-    position: absolute;
+    position: fixed;
     background: white;
-    border: 2px solid var(--friend-green);
+    border: 2px solid var(--club-blue);
     border-radius: var(--radius-md);
-    padding: 8px;
-    box-shadow: var(--shadow-lg);
-    z-index: 50;
+    padding: 6px;
+    box-shadow: var(--shadow-md);
+    z-index: 80;
     display: flex;
     flex-direction: column;
     gap: 4px;
-    min-width: 160px;
-    animation: panelPop 0.2s ease;
+    min-width: 170px;
+    max-width: 240px;
+    animation: panelPop 0.16s ease;
   }
   @keyframes panelPop {
-    from { transform: scale(0.85); opacity: 0; }
+    from { transform: scale(0.92); opacity: 0; }
     to { transform: scale(1); opacity: 1; }
-  }
-  .action-panel::before {
-    content: '';
-    position: absolute;
-    top: -8px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 0; height: 0;
-    border-left: 8px solid transparent;
-    border-right: 8px solid transparent;
-    border-bottom: 8px solid var(--friend-green);
   }
   .ap-btn {
     background: white;
-    border: 1.5px solid #E2E8F0;
+    border: 1.5px solid var(--border-light);
     border-radius: var(--radius-sm);
     padding: 9px 12px;
-    font-size: 12px;
+    font-size: 12.5px;
     font-weight: 700;
     cursor: pointer;
     font-family: inherit;
     text-align: left;
+    color: var(--text-primary);
   }
   .ap-btn:active { transform: scale(0.97); }
-  .ap-btn.confirm { border-color: var(--status-confirmed); color: var(--status-confirmed); }
-  .ap-btn.promote { border-color: var(--friend-green); color: var(--friend-green-dark); }
-  .ap-btn.delete { border-color: #FCA5A5; color: #DC2626; }
+  .ap-btn.add { border-color: var(--club-blue); color: var(--club-blue-dark); }
+  .ap-btn.edit { border-color: #94A3B8; color: #475569; }
+  .ap-btn.danger { border-color: #FCA5A5; color: #DC2626; }
 
   /* ============================================
-     Graph View
+     Stage 2 — 인증
      ============================================ */
-  .graph-canvas-wrap {
-    margin: 0 16px;
-    background: var(--bg-empty);
-    border: 1px solid #E2E8F0;
+  .summary-cards {
+    display: flex;
+    gap: 6px;
+    margin: 6px 0 14px;
+  }
+  .summary-card {
+    flex: 1;
+    background: white;
+    border: 1.5px solid var(--border-light);
+    border-radius: var(--radius-md);
+    padding: 10px 6px;
+    text-align: center;
+  }
+  .summary-card.confirmed {
+    border-color: rgba(16,185,129,0.4);
+    background: rgba(16,185,129,0.06);
+  }
+  .summary-card.pending {
+    border-color: rgba(245,158,11,0.4);
+    background: rgba(245,158,11,0.06);
+  }
+  .sc-num {
+    font-size: 22px;
+    font-weight: 900;
+    line-height: 1;
+    color: var(--text-primary);
+  }
+  .sc-num.confirmed { color: var(--status-confirmed); }
+  .sc-num.pending { color: var(--status-pending); }
+  .sc-label {
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--text-tertiary);
+    margin-top: 6px;
+    letter-spacing: 0.3px;
+  }
+  .verify-group { margin-bottom: 14px; }
+  .vg-title {
+    margin: 0 0 8px;
+    font-size: 13px;
+    font-weight: 900;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .vg-count {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    font-weight: 600;
+  }
+  .verify-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: white;
+    border: 1.5px solid var(--border-light);
+    border-radius: var(--radius-md);
+    padding: 10px 12px;
+    margin-bottom: 6px;
+  }
+  .verify-row.confirmed {
+    background: rgba(16,185,129,0.05);
+    border-color: rgba(16,185,129,0.3);
+  }
+  .verify-row.pending {
+    background: rgba(245,158,11,0.05);
+    border-color: rgba(245,158,11,0.3);
+  }
+  .vrow-avatar {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: var(--node-male);
+    color: var(--node-male-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    font-weight: 900;
+    flex-shrink: 0;
+  }
+  .vrow-avatar.female {
+    background: var(--node-female);
+    color: var(--node-female-border);
+  }
+  .vrow-info { flex: 1; min-width: 0; }
+  .vrow-name {
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1.2;
+    color: var(--text-primary);
+  }
+  .vrow-rel {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    font-weight: 600;
+    margin-left: 4px;
+  }
+  .vrow-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+  }
+  .vb {
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--text-secondary);
+    padding: 2px 6px;
+    border-radius: var(--radius-pill);
+    background: #F1F5F9;
+  }
+  .vb.confirmed {
+    color: var(--status-confirmed);
+    background: rgba(16,185,129,0.12);
+  }
+  .vb.pending {
+    color: var(--status-pending);
+    background: rgba(245,158,11,0.12);
+  }
+  .vrow-phone {
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .vrow-actions { flex-shrink: 0; }
+  .vrow-btn {
+    border: 1.5px solid var(--border-light);
+    background: white;
+    padding: 7px 10px;
+    border-radius: var(--radius-sm);
+    font-size: 11px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--text-primary);
+    white-space: nowrap;
+  }
+  .vrow-btn.primary {
+    background: var(--club-blue);
+    color: white;
+    border-color: var(--club-blue);
+  }
+  .vrow-btn:active { transform: scale(0.95); }
+  .empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-tertiary);
+    font-size: 13px;
+  }
+
+  /* ============================================
+     Stage 3 — 전체보기
+     ============================================ */
+  .graph-wrap {
+    margin: 6px 0;
+    background: white;
+    border: 1.5px solid var(--border-light);
     border-radius: var(--radius-md);
     overflow: hidden;
   }
   #graphSvg {
     width: 100%;
-    height: 480px;
+    height: 560px;
     display: block;
-  }
-  .graph-node-group { cursor: pointer; transition: filter 0.15s; }
-  .graph-node-group:hover .graph-node-rect { filter: brightness(1.05); }
-  .graph-node-group.me-glow .graph-node-rect {
-    filter: drop-shadow(0 0 6px rgba(247, 147, 30, 0.4));
-  }
-  .graph-node-label {
-    font-family: 'Noto Sans KR', sans-serif;
-    font-size: 10px;
-    font-weight: 700;
-    fill: var(--text-primary);
-    pointer-events: none;
-    text-anchor: middle;
-  }
-  .graph-node-rel {
-    font-family: 'Noto Sans KR', sans-serif;
-    font-size: 8.5px;
-    font-weight: 500;
-    fill: var(--text-tertiary);
-    pointer-events: none;
-    text-anchor: middle;
-  }
-  .graph-node-avatar {
-    font-size: 26px;
-    pointer-events: none;
-    text-anchor: middle;
-    dominant-baseline: central;
-  }
-  .graph-tier-label {
-    font-family: 'Noto Sans KR', sans-serif;
-    font-size: 9px;
-    font-weight: 700;
-    fill: var(--text-tertiary);
-    pointer-events: none;
-    text-anchor: start;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
+    background: #FAFBFC;
   }
   .graph-legend {
-    margin: 12px 16px 0;
     display: flex;
     gap: 12px;
     flex-wrap: wrap;
     justify-content: center;
+    padding: 10px 8px 0;
     font-size: 11px;
     color: var(--text-secondary);
   }
   .gl-item {
     display: flex;
     align-items: center;
-    gap: 6px;
-    font-weight: 600;
-  }
-  .gl-dot {
-    width: 12px; height: 12px;
-    border-radius: 50%;
-    border: 2px solid;
-    display: inline-block;
+    gap: 5px;
+    font-weight: 700;
   }
   .gl-line {
-    width: 18px;
-    height: 2px;
+    width: 16px;
+    height: 2.5px;
     border-radius: 1px;
     display: inline-block;
   }
+  .gl-dash {
+    width: 16px;
+    height: 2.5px;
+    background-image: linear-gradient(to right, currentColor 50%, transparent 50%);
+    background-size: 5px 100%;
+    display: inline-block;
+  }
+  .gl-line--confirmed { background: var(--status-confirmed); }
+  .gl-item--pending   { color: var(--status-pending); }
+  .gl-item--rec       { color: #8B5CF6; }
 
   /* ============================================
-     List View (인증현황)
+     Stage 4 — 발급
      ============================================ */
-  .section-header {
-    padding: 8px 16px 8px;
-    display: flex;
-    align-items: center;
-  }
-  .section-header h2 {
-    margin: 0;
-    font-size: 14px;
-    font-weight: 800;
-    color: var(--text-secondary);
-  }
-  .list-section { padding: 0 16px 30px; }
-  .list-tier { margin-bottom: 16px; }
-  .list-tier-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 6px 4px;
-    margin-bottom: 6px;
-  }
-  .tier-badge {
-    background: var(--friend-green-light);
-    color: var(--friend-green-dark);
-    padding: 3px 10px;
-    border-radius: var(--radius-pill);
-    font-size: 11px;
-    font-weight: 800;
-    border: 1px solid var(--friend-green);
-  }
-  .tier-badge.ff {
+  /* 발급 폼 — 증명서 이름 + 대표 이미지 */
+  .issue-form {
     background: white;
-    color: var(--friend-green-dark);
-    border-style: dashed;
-  }
-  .tier-count { color: var(--text-tertiary); font-size: 11px; font-weight: 700; }
-  .list-item {
-    background: white;
-    border: 1px solid #E2E8F0;
+    border: 1.5px solid var(--border-light);
     border-radius: var(--radius-md);
-    padding: 10px 12px;
-    margin-bottom: 6px;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+  }
+  .issue-form .m-section { margin-bottom: 14px; }
+  .issue-form .m-section:last-child { margin-bottom: 0; }
+  .image-picker {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .img-preview-thumb {
+    width: 64px; height: 64px;
+    border-radius: 10px;
+    object-fit: cover;
+    border: 1.5px solid var(--border-light);
+    flex-shrink: 0;
+  }
+  .img-preview-empty {
+    width: 64px; height: 64px;
+    border-radius: 10px;
+    background: #F1F5F9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    border: 1.5px dashed var(--text-tertiary);
+    flex-shrink: 0;
+  }
+  .image-picker-actions {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .img-pick-btn {
+    background: var(--club-blue);
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: var(--radius-pill);
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .img-pick-btn:active { transform: scale(0.96); background: var(--club-blue-dark); }
+  .img-clear-btn {
+    background: white;
+    color: var(--text-secondary);
+    border: 1.5px solid var(--border-light);
+    padding: 8px 14px;
+    border-radius: var(--radius-pill);
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .cp-image {
+    width: 100%;
+    max-height: 160px;
+    object-fit: cover;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    position: relative;
+  }
+  .ir-thumb {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 1px solid var(--border-light);
+  }
+
+  .cert-preview {
+    background: linear-gradient(165deg, #93C5FD 0%, #3B82F6 55%, #1E40AF 100%);
+    border-radius: var(--radius-lg);
+    padding: 22px 18px 18px;
+    color: white;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow-md);
+    position: relative;
+    overflow: hidden;
+  }
+  .cert-preview::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top right, rgba(255,255,255,0.18), transparent 70%);
+    pointer-events: none;
+  }
+  .cp-title {
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    margin-bottom: 4px;
+    position: relative;
+  }
+  .cp-subtitle {
+    font-size: 12px;
+    opacity: 0.92;
+    margin-bottom: 14px;
+    position: relative;
+  }
+  .cp-members {
+    background: rgba(255, 255, 255, 0.18);
+    border-radius: var(--radius-md);
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    position: relative;
+    -webkit-backdrop-filter: blur(3px);
+    backdrop-filter: blur(3px);
+  }
+  .cp-member {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    color: white;
+  }
+  .cp-avatar {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 900;
+    flex-shrink: 0;
+  }
+  .cp-member small {
+    opacity: 0.85;
+    font-weight: 500;
+    margin-left: 4px;
+  }
+
+  .issue-btn {
+    width: 100%;
+    background: var(--club-blue);
+    color: white;
+    border: none;
+    padding: 14px;
+    border-radius: var(--radius-pill);
+    font-size: 15px;
+    font-weight: 900;
+    cursor: pointer;
+    font-family: inherit;
+    box-shadow: var(--shadow-md);
+    transition: transform 0.12s, background 0.15s;
+  }
+  .issue-btn:active:not(:disabled) {
+    transform: scale(0.98);
+    background: var(--club-blue-dark);
+  }
+  .issue-btn:disabled {
+    background: #CBD5E1;
+    color: #64748B;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+  .issue-hint {
+    margin: 8px 0 18px;
+    font-size: 11px;
+    color: var(--text-tertiary);
+    text-align: center;
+  }
+  .issued-title {
+    margin: 14px 0 8px;
+    font-size: 13px;
+    font-weight: 900;
+    color: var(--text-primary);
+  }
+  .issued-row {
     display: flex;
     align-items: center;
     gap: 10px;
-    cursor: pointer;
-    transition: all 0.15s;
+    background: white;
+    border: 1.5px solid var(--border-light);
+    border-radius: var(--radius-md);
+    padding: 10px 12px;
+    margin-bottom: 6px;
   }
-  .list-item:active { transform: scale(0.98); }
-  .list-item.friend { border-left: 4px solid var(--friend-green); }
-  .list-item.ff { border-left: 4px dashed var(--friend-green); }
-  .list-item.self { border-left: 4px solid var(--chon-orange); }
-  .list-item-avatar {
-    width: 36px; height: 36px;
-    border-radius: 10px;
-    background: var(--friend-green);
-    color: white;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 14px;
-    font-weight: 800;
-    flex-shrink: 0;
-  }
-  .list-item.self .list-item-avatar { background: var(--chon-orange); }
-  .list-item.ff .list-item-avatar { background: var(--text-tertiary); }
-  .list-item-info { flex: 1; min-width: 0; }
-  .list-item-name {
-    font-size: 13px;
-    font-weight: 800;
-    margin-bottom: 2px;
-  }
-  .list-item-meta {
-    font-size: 11px;
-    color: var(--text-tertiary);
-  }
-  .list-item-status {
-    font-size: 18px;
-    font-weight: 900;
-  }
+  .ir-info { flex: 1; min-width: 0; }
+  .ir-title { font-size: 13px; font-weight: 800; color: var(--text-primary); }
+  .ir-meta { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; font-weight: 600; }
 
   /* ============================================
-     Modal
+     Modal — 모임원 추가/편집
      ============================================ */
-  .modal-fs {
-    position: absolute;
+  .modal {
+    position: fixed;
     inset: 0;
-    background: var(--bg-app);
+    background: rgba(15,23,42,0.45);
     z-index: 100;
     display: none;
-    flex-direction: column;
-    border-radius: 38px;
-    overflow: hidden;
+    align-items: flex-end;
+    justify-content: center;
   }
-  .modal-fs.visible {
+  .modal.visible { display: flex; animation: fadeIn 0.2s ease; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .modal-sheet {
+    background: var(--bg-app);
+    width: 100%;
+    max-width: 480px;
+    max-height: 92dvh;
+    border-radius: 22px 22px 0 0;
     display: flex;
-    animation: slideUp 0.3s ease;
+    flex-direction: column;
+    animation: slideUp 0.26s ease;
+    overflow: hidden;
   }
   @keyframes slideUp {
     from { transform: translateY(100%); }
     to { transform: translateY(0); }
   }
-  .modal-fs-header {
-    padding: 12px 16px;
-    background: white;
-    border-bottom: 1px solid #E2E8F0;
+  .modal-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    padding: 14px 16px;
+    background: white;
+    border-bottom: 1px solid var(--border-light);
+    flex-shrink: 0;
   }
-  .modal-fs-close {
+  .modal-header h2 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 900;
+    flex: 1;
+    text-align: center;
+  }
+  .modal-close {
     background: none;
     border: none;
     font-size: 22px;
     color: var(--text-secondary);
     cursor: pointer;
     width: 32px; height: 32px;
+    font-family: inherit;
   }
-  .modal-fs-title { font-size: 16px; font-weight: 900; text-align: center; flex: 1; }
-  .modal-fs-save {
-    background: var(--friend-green);
+  .modal-save {
+    background: var(--club-blue);
     color: white;
     border: none;
-    padding: 6px 16px;
+    padding: 7px 16px;
     border-radius: var(--radius-pill);
     font-size: 13px;
     font-weight: 800;
     cursor: pointer;
     font-family: inherit;
   }
-  .modal-fs-body { flex: 1; overflow-y: auto; padding: 20px; }
-  .modal-section { margin-bottom: 22px; }
-  .modal-section-label {
+  .modal-save:active { transform: scale(0.97); background: var(--club-blue-dark); }
+  .modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 18px 24px;
+  }
+  .modal-intro {
+    background: #EFF6FF;
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    margin-bottom: 18px;
     font-size: 12px;
+    line-height: 1.5;
+    color: var(--club-blue-dark);
+  }
+  .m-section { margin-bottom: 18px; }
+  .m-label {
+    font-size: 11px;
     font-weight: 800;
     color: var(--text-secondary);
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.4px;
   }
-  .modal-input {
+  .m-label .hint {
+    font-weight: 500;
+    color: #6b7280;
+    font-size: 11px;
+    text-transform: none;
+    letter-spacing: 0;
+    margin-left: 4px;
+  }
+  .m-input, .m-select {
     width: 100%;
-    padding: 14px 16px;
-    border: 2px solid #E2E8F0;
+    padding: 12px 14px;
+    border: 2px solid var(--border-light);
     border-radius: var(--radius-md);
-    font-size: 16px;
+    font-size: 15px;
     font-family: inherit;
     background: white;
   }
-  .modal-input:focus { outline: none; border-color: var(--friend-green); }
+  .m-input:focus, .m-select:focus { outline: none; border-color: var(--club-blue); }
   .gender-toggle {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 8px;
   }
-  .gender-option {
+  .g-opt {
     padding: 14px;
     text-align: center;
     border-radius: var(--radius-md);
-    border: 2px solid #E2E8F0;
-    cursor: pointer;
-    font-weight: 700;
+    border: 2px solid var(--border-light);
     background: white;
-    font-size: 13px;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    font-family: inherit;
   }
-  .gender-option.selected.male {
+  .g-opt[data-gender="male"].selected {
     background: var(--node-male);
     border-color: var(--node-male-border);
-    color: #1E3A8A;
   }
-  .gender-option.selected.female {
+  .g-opt[data-gender="female"].selected {
     background: var(--node-female);
     border-color: var(--node-female-border);
-    color: #831843;
   }
 
-  /* ============================================
-     Toast
-     ============================================ */
+  /* Toast */
   .toast {
-    position: absolute;
+    position: fixed;
     bottom: 30px;
     left: 50%;
     transform: translateX(-50%) translateY(40px);
     background: var(--text-primary);
     color: white;
-    padding: 12px 20px;
+    padding: 11px 18px;
     border-radius: var(--radius-pill);
     font-size: 13px;
     font-weight: 700;
     opacity: 0;
-    transition: all 0.3s;
+    transition: all 0.25s;
     z-index: 200;
-    display: flex;
-    gap: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 90vw;
   }
   .toast.visible {
     transform: translateX(-50%) translateY(0);
     opacity: 1;
   }
-
-  /* ============================================
-     Description Panel
-     ============================================ */
-  .desc-panel {
-    background: white;
-    border-radius: var(--radius-lg);
-    padding: 20px;
-    box-shadow: var(--shadow-md);
-    width: 360px;
-  }
-  .desc-panel h3 {
-    margin: 0 0 12px;
-    font-size: 16px;
-    color: var(--friend-green-dark);
-    font-weight: 900;
-  }
-  .desc-section {
-    margin-bottom: 16px;
-    padding-bottom: 14px;
-    border-bottom: 1px solid #F1F5F9;
-  }
-  .desc-section:last-child { border-bottom: none; }
-  .desc-section h4 {
-    margin: 0 0 8px;
-    font-size: 13px;
-    font-weight: 800;
-  }
-  .desc-section ul, .desc-section p {
-    font-size: 12px;
-    color: var(--text-secondary);
-    line-height: 1.6;
-    margin: 4px 0;
-  }
-  .desc-section ul { padding-left: 18px; }
-
-  /* ============================================
-     Single-screen mode — 데모 베젤·래퍼 제거 후 phone-screen이 메인
-     반응형: 모바일은 edge-to-edge, 데스크톱은 중앙 정렬 + 외곽 배경
-     ============================================ */
-  body {
-    background: var(--bg-app);
-    min-height: 100vh;
-  }
-  .phone-screen {
-    border-radius: 0;
-    min-height: 100vh;
-    height: auto;
-    max-width: 480px;
-    margin: 0 auto;
-    box-shadow: none;
-  }
-  @media (min-width: 768px) {
-    body { background: #F5F7FB; padding: 32px 0; }
-    .phone-screen {
-      min-height: calc(100vh - 64px);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-lg);
-      overflow: hidden;
-    }
-  }
-  .add-actions {
-    display: flex;
-    gap: 8px;
-    padding: 12px 16px 0;
-  }
-  .add-btn {
-    flex: 1;
-    background: white;
-    border: 1.5px solid var(--node-friend-border);
-    color: var(--friend-green-dark);
-    padding: 10px 12px;
-    border-radius: var(--radius-md);
-    font-size: 13px;
-    font-weight: 800;
-    cursor: pointer;
-    font-family: inherit;
-  }
-  .add-btn.ff {
-    border-style: dashed;
-    color: var(--text-secondary);
-  }
-  .add-btn:active { transform: scale(0.97); }
-
-  /* ============================================
-     Utility classes — inline style 대체
-     ============================================ */
-  .spacer-30 { height: 30px; }
-  .self-tag { font-size: 9px; }
-  .name-self { color: var(--chon-orange); }
-  .gl-dot--friend { background: var(--node-friend-bg); border-color: var(--node-friend-border); }
-  .gl-dot--ff { background: var(--node-ff-bg); border-color: var(--node-ff-border); border-style: dashed; }
-  .list-item-status.confirmed { color: var(--status-confirmed); }
-  .list-item-status.pending { color: var(--status-pending); }
-  .tier-badge--me {
-    background: rgba(247,147,30,0.15);
-    border-color: var(--chon-orange);
-    color: var(--chon-orange-dark);
-  }
-
-  /* ============================================
-     Unified Header (모든 페이지 공통)
-     ============================================ */
-  .unified-header {
-    position: sticky;
-    top: 0;
-    z-index: 30;
-    background: var(--bg-app, #FFFBF0);
-    padding: calc(14px + env(safe-area-inset-top, 0px)) 20px 12px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-shrink: 0;
-  }
-  .uh-brand { display: flex; align-items: center; gap: 10px; }
-  .uh-brand-button {
-    background: transparent;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    font-family: inherit;
-    color: inherit;
-    text-align: left;
-    transition: opacity 0.15s;
-  }
-  .uh-brand-button:hover { opacity: 0.85; }
-  .uh-brand-button:active { transform: scale(0.97); }
-
-  .uh-brand-mark {
-    width: 36px; height: 36px;
-    border-radius: 11px;
-    background: linear-gradient(135deg, var(--chon-orange), #5BBA6F);
-    color: white;
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 900; font-size: 16px; letter-spacing: -0.5px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-  }
-  .uh-brand-name { font-size: 20px; font-weight: 900; letter-spacing: -0.5px; color: var(--text-primary); }
-  .uh-brand-sub { font-size: 11px; color: var(--text-secondary); font-weight: 700; margin-top: -2px; }
-  .uh-brand-text { line-height: 1.1; }
-  .uh-actions { display: flex; align-items: center; gap: 8px; }
-  .uh-icon-btn {
-    width: 40px; height: 40px;
-    border-radius: 50%;
-    background: white;
-    border: 1px solid #F1F5F9;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; font-size: 18px; position: relative;
-    font-family: inherit; transition: background 0.15s;
-  }
-  .uh-icon-btn:active { background: var(--bg-app); }
-  .uh-icon-dot {
-    position: absolute; top: 8px; right: 10px;
-    width: 8px; height: 8px;
-    background: #DC2626;
-    border-radius: 50%;
-    border: 2px solid white;
-  }
-  .welcome-bar {
-    background: linear-gradient(90deg, #FFF3D6, white);
-    border-bottom: 1px solid #F1F5F9;
-    padding: 10px 20px;
-    display: flex; align-items: center; gap: 8px;
-    font-size: 13px; font-weight: 700; color: var(--text-primary);
-    flex-shrink: 0;
-  }
-  .welcome-emoji { font-size: 16px; line-height: 1; }
-  .welcome-msg { flex: 1; }
-  .welcome-msg strong { color: var(--chon-orange-dark); font-weight: 900; }
-  .welcome-user {
-    background: transparent;
-    border: none;
-    padding: 0;
-    margin: 0;
-    font: inherit;
-    color: var(--chon-orange-dark);
-    font-weight: 900;
-    cursor: pointer;
-    text-decoration: underline;
-    text-underline-offset: 3px;
-    text-decoration-color: rgba(247, 147, 30, 0.35);
-    text-decoration-thickness: 1.5px;
-    transition: text-decoration-color 0.15s, transform 0.12s;
-  }
-  .welcome-user:hover { text-decoration-color: var(--chon-orange-dark); }
-  .welcome-user:active { transform: scale(0.97); }
-  .welcome-reset {
-    background: white;
-    border: 1px solid #F1F5F9;
-    color: var(--text-secondary);
-    padding: 4px 10px;
-    border-radius: 999px;
-    font-size: 11px; font-weight: 800;
-    cursor: pointer; font-family: inherit;
-    flex-shrink: 0;
-  }
-  .welcome-reset:active { transform: scale(0.96); }
-
-  /* ============================================
-     Unified Bottom Nav (전체 페이지 통일)
-     ============================================ */
-  .bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100%;
-    max-width: 480px;
-    background: white;
-    border-top: 1px solid #E2E8F0;
-    padding: 8px 8px calc(8px + env(safe-area-inset-bottom, 0px));
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    align-items: end;
-    z-index: 40;
-    box-shadow: 0 -6px 24px rgba(0,0,0,0.05);
-  }
-  .nav-btn {
-    background: none;
-    border: none;
-    padding: 8px 4px 4px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 3px;
-    cursor: pointer;
-    font-family: inherit;
-    color: var(--text-tertiary);
-    border-radius: 12px;
-    transition: color 0.15s;
-  }
-  .nav-btn-icon { font-size: 22px; line-height: 1; }
-  .nav-btn-label { font-size: 10px; font-weight: 800; }
-  .nav-btn.active { color: var(--chon-orange-dark); }
-  .nav-btn.center { position: relative; padding-top: 0; }
-  .nav-btn.center .nav-circle {
-    width: 56px; height: 56px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #FFC300, var(--chon-orange));
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    box-shadow: 0 6px 16px rgba(247,147,30,0.4), 0 0 0 4px white;
-    margin-top: -20px;
-    transition: transform 0.18s;
-  }
-  .nav-btn.center:active .nav-circle { transform: scale(0.94); }
-  .nav-btn.center .nav-btn-label {
-    color: var(--chon-orange-dark);
-    margin-top: 4px;
-  }
-  /* 하단 nav가 콘텐츠를 가리지 않도록 여백 */
-  .content { padding-bottom: 96px; }
+  .t-emoji { font-size: 16px; }
 </style>
 </head>
 <body>
 
-<div class="phone-screen">
-  <header class="unified-header">
-    <button class="uh-brand uh-brand-button" onclick="window.location.href='../main/home.html'" aria-label="홈으로 이동">
-      <div class="uh-brand-mark">P</div>
-      <div class="uh-brand-text">
-        <div class="uh-brand-name">PASS</div>
-        <div class="uh-brand-sub">관계형 SNS</div>
-      </div>
+<div class="app">
+  <header class="topbar">
+    <button class="icon-btn" type="button" onclick="goBack()" aria-label="뒤로">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
     </button>
-    <div class="uh-actions">
-      <button type="button" class="uh-icon-btn" onclick="openScanner()" aria-label="QR 스캔" title="QR 스캔"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7" y="7" width="10" height="10" rx="1.5"/></svg></button>
-      <button class="uh-icon-btn" onclick="window.location.href='../main/home.html?page=auth'" aria-label="알림">🔔<span class="uh-icon-dot"></span></button>
-    </div>
+    <h1>동호회증 — 모임 네트워크</h1>
+    <span class="topbar-spacer" aria-hidden="true"></span>
   </header>
-  <div class="welcome-bar">
-    <span class="welcome-emoji">👋</span>
-    <span class="welcome-msg"><button type="button" class="welcome-user" onclick="location.href='../main/cert.html'">사용자</button>님 환영합니다 · 오늘도 즐거운 하루되세요</span>
-    <button class="welcome-reset" onclick="resetAll()">처음부터</button>
-  </div>
 
-  <div class="content">
-    <div class="summary-card">
-      <div class="summary-avatar">🌐</div>
-      <div class="summary-info">
-        <div class="summary-name" id="summaryName">내 모임 네트워크</div>
-        <div class="summary-stats">
-          <span>👥 <strong id="statTotal">5</strong>명</span>
-          <span>✓ <strong id="statConfirmed">3</strong>명</span>
-          <span>🔗 <strong id="statFf">2</strong>명(2-hop)</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="graph-canvas-wrap">
-      <svg id="graphSvg" viewBox="0 0 360 500" preserveAspectRatio="xMidYMid meet">
-        <g id="graphEdges"></g>
-        <g id="graphNodes"></g>
-      </svg>
-    </div>
-    <div class="graph-legend">
-      <div class="gl-item"><span class="gl-dot gl-dot--friend"></span> 모임원 (1-hop)</div>
-      <div class="gl-item"><span class="gl-dot gl-dot--ff"></span> 모임원 추천 (2-hop)</div>
-    </div>
-    <div class="add-actions">
-      <button class="add-btn" onclick="openAddRoot('friend')">＋ 모임원</button>
-      <button class="add-btn ff" onclick="openAddRoot('ff')">＋ 추천받은 사람</button>
-    </div>
-    <div class="spacer-30"></div>
-  </div>
-
-  <div class="modal-fs" id="modalFs">
-    <div class="modal-fs-header">
-      <button class="modal-fs-close" onclick="closeFsModal()">✕</button>
-      <div class="modal-fs-title" id="modalFsTitle">새 모임원 추가</div>
-      <button class="modal-fs-save" onclick="confirmFsAdd()">완료</button>
-    </div>
-    <div class="modal-fs-body">
-      <div class="modal-section">
-        <div class="modal-section-label">이름</div>
-        <input type="text" class="modal-input" id="modalFsName" placeholder="홍길동" autocomplete="off"/>
-      </div>
-      <div class="modal-section">
-        <div class="modal-section-label">성별</div>
-        <div class="gender-toggle">
-          <div class="gender-option male selected" onclick="selectGender('male')">남성</div>
-          <div class="gender-option female" onclick="selectGender('female')">여성</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="toast" id="toast">
-    <span id="toastEmoji">✓</span><span id="toastText"></span>
-  </div>
-
-  <nav class="bottom-nav">
-    <button class="nav-btn" onclick="window.location.href='../main/home.html'">
-      <div class="nav-btn-icon">🏠</div>
-      <div class="nav-btn-label">홈</div>
+  <nav class="stepper" role="tablist">
+    <button type="button" class="step active" data-step="1" onclick="goToStep(1)" role="tab">
+      <span class="step-num">1</span><span class="step-label">만들기</span>
     </button>
-    <button class="nav-btn" onclick="window.location.href='../main/contact.html'">
-      <div class="nav-btn-icon">📰</div>
-      <div class="nav-btn-label">연락처</div>
+    <button type="button" class="step" data-step="2" onclick="goToStep(2)" role="tab">
+      <span class="step-num">2</span><span class="step-label">인증</span>
     </button>
-    <button class="nav-btn center" onclick="window.location.href='../main/cert.html'">
-      <div class="nav-circle">🆔</div>
-      <div class="nav-btn-label">증명서</div>
+    <button type="button" class="step" data-step="3" onclick="goToStep(3)" role="tab">
+      <span class="step-num">3</span><span class="step-label">전체보기</span>
     </button>
-    <button class="nav-btn" onclick="window.location.href='../main/home.html?page=auth'">
-      <div class="nav-btn-icon">🤝</div>
-      <div class="nav-btn-label">인증</div>
-    </button>
-    <button type="button" class="nav-btn" onclick="location.href='../main/all.html'">
-      <div class="nav-btn-icon">☰</div>
-      <div class="nav-btn-label">전체</div>
+    <button type="button" class="step" data-step="4" onclick="goToStep(4)" role="tab">
+      <span class="step-num">4</span><span class="step-label">발급</span>
     </button>
   </nav>
+
+  <main class="content">
+
+    <!-- Stage 1 — 만들기 -->
+    <section class="stage" id="stageBuild" hidden>
+      <div class="hint">
+        ＋ 카드를 눌러 <strong>모임원</strong>을 추가하세요. 카드를 탭하면 편집/제거 옵션이 나타납니다.
+      </div>
+      <div id="treeView"></div>
+    </section>
+
+    <!-- Stage 2 — 인증 -->
+    <section class="stage" id="stageVerify" hidden>
+      <div class="summary-cards" id="verifySummary"></div>
+      <div id="verifyList"></div>
+    </section>
+
+    <!-- Stage 3 — 전체보기 (가족증의 관계도 보기와 동일 패턴) -->
+    <section class="stage" id="stageView" hidden>
+      <div class="summary-cards" id="viewSummary"></div>
+      <div class="graph-wrap">
+        <svg id="graphSvg" viewBox="0 0 360 560" preserveAspectRatio="xMidYMid meet">
+          <g id="graphEdges"></g>
+          <g id="graphNodes"></g>
+        </svg>
+      </div>
+      <div class="graph-legend">
+        <div class="gl-item"><span class="gl-line gl-line--confirmed"></span> 인증됨</div>
+        <div class="gl-item gl-item--pending"><span class="gl-dash"></span> 응답 대기</div>
+        <div class="gl-item gl-item--rec"><span class="gl-dash"></span> 추천 (2-hop)</div>
+      </div>
+      <div class="stage-cta">
+        <button class="next-step-btn" type="button" onclick="goToStep(4)">다음: 증명서 발급 →</button>
+      </div>
+    </section>
+
+    <!-- Stage 4 — 발급 -->
+    <section class="stage" id="stageIssue" hidden>
+      <div class="summary-cards" id="issueSummary"></div>
+      <div class="issue-form" id="issueForm"></div>
+      <div id="issuePreview"></div>
+      <button class="issue-btn" id="issueBtn" type="button" onclick="issueCertificate()">동호회증 발급하기</button>
+      <p class="issue-hint" id="issueHint"></p>
+      <div id="issuedList"></div>
+    </section>
+
+  </main>
+
+  <!-- Modal: 모임원 추가 / 편집 -->
+  <div class="modal" id="memberModal" role="dialog" aria-modal="true">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <button class="modal-close" type="button" onclick="closeModal()" aria-label="닫기">✕</button>
+        <h2 id="modalTitle">모임원 추가</h2>
+        <button class="modal-save" type="button" onclick="confirmModal()">완료</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-intro" id="modalIntro">새 모임원을 등록합니다.</div>
+
+        <div class="m-section">
+          <div class="m-label">이름</div>
+          <input type="text" class="m-input" id="modalName" placeholder="홍길동" autocomplete="off"/>
+        </div>
+
+        <div class="m-section">
+          <div class="m-label">연락처 <span class="hint">(선택 — 입력 시 인증 초대가 발송됩니다)</span></div>
+          <input type="tel" class="m-input" id="modalPhone" placeholder="010-1234-5678" autocomplete="off" inputmode="tel"/>
+        </div>
+
+        <div class="m-section">
+          <div class="m-label">성별</div>
+          <div class="gender-toggle" id="modalGender">
+            <button type="button" class="g-opt selected" data-gender="male" onclick="selectGender('male')">♂ 남성</button>
+            <button type="button" class="g-opt" data-gender="female" onclick="selectGender('female')">♀ 여성</button>
+          </div>
+        </div>
+
+        <div class="m-section" id="modalIntroducerSection" hidden>
+          <div class="m-label">소개한 모임원</div>
+          <select class="m-select" id="modalIntroducer"></select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
 </div>
 
 <script>
 // ============================================================
-// Data
+// State & Persistence — 동호회 네트워크 JSON 저장
 // ============================================================
-const initialMe = {
-  id: 'me', name: '홍길순', gender: 'female', isSelf: true, confirmed: true
-};
-const initialPeople = [
-  { id: 'f1', name: '김민수', gender: 'male', hopLevel: 1, confirmed: true, knows: ['f2'] },
-  { id: 'f2', name: '박지영', gender: 'female', hopLevel: 1, confirmed: true, knows: ['f3'] },
-  { id: 'f3', name: '이상호', gender: 'male', hopLevel: 1, confirmed: true },
-  { id: 'ff1', name: '최서연', gender: 'female', hopLevel: 2, confirmed: false, viaFriend: 'f1' },
-  { id: 'ff2', name: '정태우', gender: 'male', hopLevel: 2, confirmed: false, viaFriends: ['f2', 'f1'] },
-  { id: 'ff3', name: '강하늘', gender: 'male', hopLevel: 2, confirmed: false, viaFriends: ['f1', 'f2', 'f3'] }
-];
+const STORAGE_KEY = 'pass_club_network';
+const CERT_STORAGE_KEY = 'pass_club_certificates';
 
-let state = {
-  me: { ...initialMe },
-  people: JSON.parse(JSON.stringify(initialPeople))
-};
-let selectedNodeId = null;
-let pendingGender = 'male';
-let pendingAction = null;
-let currentView = 'graph';
+function defaultData() {
+  const now = Date.now();
+  return {
+    meta: { version: 1, createdAt: now, updatedAt: now },
+    me: { id: 'me', name: '나', gender: 'female' },
+    people: {
+      f1: { id: 'f1', name: '모임원1', gender: 'male', hopLevel: 1, introducedBy: null, phone: null, invitedAt: null, confirmed: false, addedAt: now },
+      f2: { id: 'f2', name: '모임원2', gender: 'female', hopLevel: 1, introducedBy: null, phone: null, invitedAt: null, confirmed: false, addedAt: now + 1 }
+    }
+  };
+}
+
+let data = loadData();
+let currentStep = 1;
+let pendingModal = null; // { mode: 'add'|'edit', addType?: 'friend'|'recommendation', targetId? }
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && parsed.me && parsed.people) return parsed;
+    }
+  } catch (e) {}
+  return defaultData();
+}
+
+function saveData() {
+  data.meta.updatedAt = Date.now();
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+  catch (e) { console.warn('saveData failed', e); }
+}
+
+function newId() {
+  return 'p_' + Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-4);
+}
+
+// ============================================================
+// Helpers
+// ============================================================
+function isMe(id) { return id === 'me'; }
 
 function getPerson(id) {
-  if (id === 'me' || id === state.me.id) return state.me;
-  return state.people.find(x => x.id === id);
-}
-
-// viaFriend(단수) 또는 viaFriends(배열) → 배열로 정규화
-function getViaList(p) {
-  if (Array.isArray(p.viaFriends)) return p.viaFriends.slice();
-  if (p.viaFriend) return [p.viaFriend];
-  return [];
-}
-
-// ============================================================
-// View switch (단일 화면: 그래프 뷰만 존재)
-// ============================================================
-function switchView(_view) {
-  renderGraph();
-  document.querySelectorAll('.action-panel').forEach(p => p.remove());
-}
-
-// ============================================================
-// Tree View (추가하기 - 박스 포함 디자인)
-// ============================================================
-function renderTree() {
-  const canvas = document.getElementById('treeCanvas');
-  if (!canvas) return;
-  canvas.innerHTML = '';
-
-  // 나 박스
-  const meBlock = document.createElement('div');
-  meBlock.className = 'me-block';
-  meBlock.innerHTML = '<div class="me-block-label">🏠 나</div>';
-  const meRow = document.createElement('div');
-  meRow.className = 'me-block-row';
-  meRow.appendChild(makePersonNode(state.me));
-  meBlock.appendChild(meRow);
-  canvas.appendChild(meBlock);
-
-  // 친구 박스 (1-hop)
-  const friends = state.people.filter(p => p.hopLevel === 1);
-  const fBox = document.createElement('div');
-  fBox.className = 'friends-box';
-  fBox.innerHTML = `<div class="friends-box-label">👫 모임원 (${friends.length}명, 1-hop)</div>`;
-  const fGrid = document.createElement('div');
-  fGrid.className = 'friends-grid';
-  friends.forEach(p => fGrid.appendChild(makePersonNode(p)));
-  // 빈 슬롯
-  const fSlot = document.createElement('div');
-  fSlot.className = 'empty-slot';
-  fSlot.textContent = '+ 모임원';
-  fSlot.onclick = (e) => { e.stopPropagation(); openAddRoot('friend'); };
-  fGrid.appendChild(fSlot);
-  fBox.appendChild(fGrid);
-  canvas.appendChild(fBox);
-
-  // 모임원 추천 박스 (2-hop)
-  const ffs = state.people.filter(p => p.hopLevel === 2);
-  const ffBox = document.createElement('div');
-  ffBox.className = 'ff-box';
-  ffBox.innerHTML = `<div class="ff-box-label">🔗 모임원 추천 (${ffs.length}명, 2-hop)</div>`;
-  const ffGrid = document.createElement('div');
-  ffGrid.className = 'friends-grid';
-  ffs.forEach(p => ffGrid.appendChild(makePersonNode(p)));
-  const ffSlot = document.createElement('div');
-  ffSlot.className = 'empty-slot';
-  ffSlot.textContent = '+ 추천받은 사람';
-  ffSlot.onclick = (e) => { e.stopPropagation(); openAddRoot('ff'); };
-  ffGrid.appendChild(ffSlot);
-  ffBox.appendChild(ffGrid);
-  canvas.appendChild(ffBox);
-}
-
-function makePersonNode(person) {
-  const node = document.createElement('div');
-  let classes = ['person-node'];
-  if (person.isSelf) classes.push('self');
-  else if (person.hopLevel === 1) classes.push('friend');
-  else if (person.hopLevel === 2) classes.push('ff');
-  if (person.id === selectedNodeId) classes.push('selected');
-  node.className = classes.join(' ');
-
-  let meta = '';
-  if (person.hopLevel === 1) meta = '모임원';
-  else if (person.hopLevel === 2) {
-    const vias = getViaList(person).map(id => getPerson(id)).filter(Boolean);
-    if (vias.length === 0) meta = '소개';
-    else if (vias.length === 1) meta = `via ${vias[0].name}`;
-    else meta = `via ${vias[0].name} 외 ${vias.length - 1}명`;
+  if (isMe(id)) {
+    return {
+      id: 'me',
+      name: data.me.name || '나',
+      gender: data.me.gender || 'female',
+      hopLevel: 0,
+      addedAt: 0,
+      isSelf: true,
+      confirmed: true
+    };
   }
+  return data.people[id] || null;
+}
 
-  node.innerHTML = `
-    <div class="person-node-name">${person.name}${person.isSelf ? ' <span class="self-tag">(나)</span>' : ''}</div>
-    ${meta ? `<div class="person-node-meta">${meta}</div>` : ''}
-    ${!person.isSelf ? `<div class="person-confirm-badge ${person.confirmed ? '' : 'pending'}">${person.confirmed ? '✓' : '!'}</div>` : ''}
+function getAllPeople() {
+  return [getPerson('me'), ...Object.values(data.people)];
+}
+
+function getFriends() {
+  return Object.values(data.people).filter(p => p.hopLevel === 1);
+}
+
+function getRecommendations() {
+  return Object.values(data.people).filter(p => p.hopLevel === 2);
+}
+
+// ============================================================
+// Navigation
+// ============================================================
+function goBack() {
+  if (history.length > 1) history.back();
+  else location.href = '../main/cert.html';
+}
+
+function goToStep(n) {
+  currentStep = n;
+  document.querySelectorAll('.step').forEach(b =>
+    b.classList.toggle('active', Number(b.dataset.step) === n)
+  );
+  document.querySelectorAll('.stage').forEach(s => s.hidden = true);
+  const map = { 1: 'stageBuild', 2: 'stageVerify', 3: 'stageView', 4: 'stageIssue' };
+  document.getElementById(map[n]).hidden = false;
+  closeActionPanel();
+  rerender();
+}
+
+function rerender() {
+  if (currentStep === 1) renderBuild();
+  else if (currentStep === 2) renderVerify();
+  else if (currentStep === 3) renderView();
+  else if (currentStep === 4) renderIssue();
+}
+
+// ============================================================
+// Stage 1 — 만들기
+// ============================================================
+function renderBuild() {
+  const root = document.getElementById('treeView');
+  root.innerHTML = '';
+
+  // 나
+  const meSection = document.createElement('div');
+  meSection.className = 'gen-row';
+  meSection.innerHTML = `
+    <div class="gen-header">
+      <span class="gen-num">0</span>
+      <span class="gen-name">나</span>
+    </div>
+    <div class="person-row"></div>
   `;
+  meSection.querySelector('.person-row').appendChild(makeBuildCard('me'));
+  root.appendChild(meSection);
 
-  node.onclick = (e) => {
+  // 모임원 (1-hop)
+  const friends = getFriends().sort((a, b) => (a.addedAt || 0) - (b.addedAt || 0));
+  const friendsSection = document.createElement('div');
+  friendsSection.className = 'gen-row';
+  friendsSection.innerHTML = `
+    <div class="gen-header">
+      <span class="gen-num">+1</span>
+      <span class="gen-name">모임원</span>
+    </div>
+    <div class="person-row"></div>
+  `;
+  const fRow = friendsSection.querySelector('.person-row');
+  friends.forEach(p => fRow.appendChild(makeBuildCard(p.id)));
+  fRow.appendChild(makeAddCard('friend', '+ 모임원'));
+  root.appendChild(friendsSection);
+
+  // 추천 (2-hop) — 수동 추가 비활성. 친구의 친구는 자동으로 모임원에 표시되는 영역.
+  // 기존 데이터는 그대로 표시하고, 추가 버튼 대신 안내 문구를 노출.
+  const recs = getRecommendations().sort((a, b) => (a.addedAt || 0) - (b.addedAt || 0));
+  const recsSection = document.createElement('div');
+  recsSection.className = 'gen-row';
+  recsSection.innerHTML = `
+    <div class="gen-header">
+      <span class="gen-num">+2</span>
+      <span class="gen-name">추천 (2-hop)</span>
+    </div>
+    <div class="person-row"></div>
+    <p class="auto-rec-hint">💡 친구의 친구들은 자동으로 모임원에 보여집니다.</p>
+  `;
+  const rRow = recsSection.querySelector('.person-row');
+  recs.forEach(p => rRow.appendChild(makeBuildCard(p.id)));
+  root.appendChild(recsSection);
+
+  // CTA
+  const cta = document.createElement('div');
+  cta.className = 'stage-cta';
+  cta.innerHTML = `
+    <p class="cta-hint">모임원을 다 추가했다면 다음 단계로 이동하세요.</p>
+    <button class="next-step-btn" type="button" onclick="goToStep(2)">다음: 연락처 인증 →</button>
+  `;
+  root.appendChild(cta);
+}
+
+function makeBuildCard(id) {
+  const p = getPerson(id);
+  const card = document.createElement('button');
+  card.type = 'button';
+  card.className = 'person-card';
+  card.dataset.id = id;
+  card.classList.add(p.gender === 'female' ? 'female' : 'male');
+  if (p.isSelf) card.classList.add('self');
+  if (p.hopLevel === 2) card.classList.add('rec');
+  if (p.confirmed && !p.isSelf) card.classList.add('confirmed');
+  let rel = '본인';
+  if (!p.isSelf) {
+    if (p.hopLevel === 1) rel = '모임원';
+    else if (p.hopLevel === 2) {
+      const via = p.introducedBy ? getPerson(p.introducedBy) : null;
+      rel = via ? `${via.name} 소개` : '추천';
+    }
+  }
+  card.innerHTML = `
+    <span class="pc-avatar">${escapeHtml((p.name || '?').charAt(0))}</span>
+    <span class="pc-info">
+      <span class="pc-name">${escapeHtml(p.name || '?')}</span>
+      <span class="pc-rel">${escapeHtml(rel)}</span>
+    </span>
+  `;
+  card.onclick = (e) => {
     e.stopPropagation();
-    selectNode(person.id);
+    showActionPanel(id, card);
   };
-
-  return node;
+  return card;
 }
 
-function selectNode(id) {
-  if (selectedNodeId === id) selectedNodeId = null;
-  else selectedNodeId = id;
-  renderTree();
-  if (selectedNodeId) setTimeout(showActionPanelForSelected, 50);
+function makeAddCard(type, label) {
+  const card = document.createElement('button');
+  card.type = 'button';
+  card.className = 'person-card add-card';
+  card.innerHTML = `<span class="pc-add-icon">＋</span><span class="pc-add-label">${escapeHtml(label)}</span>`;
+  card.onclick = (e) => {
+    e.stopPropagation();
+    openAddModal(type);
+  };
+  return card;
 }
 
-function showActionPanelForSelected() {
-  if (!selectedNodeId) return;
-  const person = getPerson(selectedNodeId);
-  if (!person) return;
-
-  const nodes = document.querySelectorAll('.person-node.selected');
-  if (nodes.length === 0) return;
-  const node = nodes[0];
-  const canvas = document.getElementById('treeCanvas');
-  const nodeRect = node.getBoundingClientRect();
-  const canvasRect = canvas.getBoundingClientRect();
-
-  document.querySelectorAll('.action-panel').forEach(p => p.remove());
+// ============================================================
+// Action panel
+// ============================================================
+function showActionPanel(personId, anchorEl) {
+  closeActionPanel();
+  const p = getPerson(personId);
+  if (!p) return;
 
   const panel = document.createElement('div');
   panel.className = 'action-panel';
-
   const buttons = [];
-  if (!person.isSelf) {
-    if (person.hopLevel === 2 && !person.confirmed) {
-      buttons.push({ label: '🤝 모임원으로 인증 (승격)', className: 'promote', onClick: () => promoteToFriend(person.id) });
-    } else {
-      buttons.push({ label: person.confirmed ? '⏱ 대기로' : '✓ 인증', className: 'confirm', onClick: () => toggleConfirm(person.id) });
+
+  if (p.isSelf) {
+    buttons.push({ label: '✏ 내 이름 편집', cls: 'edit', click: () => openEditModal('me') });
+  } else {
+    if (p.hopLevel === 2) {
+      buttons.push({ label: '⬆ 모임원으로 승격', cls: 'add', click: () => promoteToFriend(personId) });
     }
-    buttons.push({ label: '🗑 삭제', className: 'delete', onClick: () => deletePerson(person.id) });
+    buttons.push({ label: '✏ 이름·연락처 편집', cls: 'edit', click: () => openEditModal(personId) });
+    buttons.push({ label: '🗑 제거', cls: 'danger', click: () => deletePerson(personId) });
   }
 
-  buttons.forEach(b => {
-    const btn = document.createElement('button');
-    btn.className = `ap-btn ${b.className || ''}`;
-    btn.innerHTML = b.label;
-    btn.onclick = b.onClick;
-    panel.appendChild(btn);
-  });
+  for (const b of buttons) {
+    const el = document.createElement('button');
+    el.type = 'button';
+    el.className = `ap-btn ${b.cls || ''}`;
+    el.textContent = b.label;
+    el.onclick = () => { closeActionPanel(); b.click(); };
+    panel.appendChild(el);
+  }
 
-  const cx = nodeRect.left + nodeRect.width / 2 - canvasRect.left;
-  const by = nodeRect.bottom - canvasRect.top + 12;
-  panel.style.position = 'absolute';
-  panel.style.left = `${cx - 80}px`;
-  panel.style.top = `${by}px`;
-  canvas.style.position = 'relative';
-  canvas.appendChild(panel);
+  document.body.appendChild(panel);
+  positionPanel(panel, anchorEl);
+}
+
+function positionPanel(panel, anchor) {
+  const r = anchor.getBoundingClientRect();
+  const pw = panel.offsetWidth;
+  const ph = panel.offsetHeight;
+  let left = r.left + r.width / 2 - pw / 2;
+  let top = r.bottom + 8;
+  const maxLeft = window.innerWidth - pw - 8;
+  if (left < 8) left = 8;
+  if (left > maxLeft) left = maxLeft;
+  if (top + ph > window.innerHeight - 12) {
+    top = r.top - ph - 8;
+    if (top < 8) top = 8;
+  }
+  panel.style.left = `${left}px`;
+  panel.style.top = `${top}px`;
+}
+
+function closeActionPanel() {
+  document.querySelectorAll('.action-panel').forEach(p => p.remove());
+}
+
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.action-panel') && !e.target.closest('.person-card')) {
+    closeActionPanel();
+  }
+});
+
+// ============================================================
+// Modal — 모임원 추가/편집
+// ============================================================
+function openAddModal(addType) {
+  pendingModal = { mode: 'add', addType };
+  const isFriend = addType === 'friend';
+
+  document.getElementById('modalTitle').textContent = isFriend ? '모임원 추가' : '추천(2-hop) 추가';
+  document.getElementById('modalIntro').textContent = isFriend
+    ? '직접 알고 있는 모임원을 등록합니다.'
+    : '모임원이 소개한 사람을 등록합니다.';
+  document.getElementById('modalName').value = '';
+  document.getElementById('modalPhone').value = '';
+  selectGender('male');
+
+  // 추천일 때만 소개자 선택 표시
+  const introSec = document.getElementById('modalIntroducerSection');
+  const introSel = document.getElementById('modalIntroducer');
+  if (!isFriend) {
+    const friends = getFriends();
+    introSel.innerHTML = friends.map(f => `<option value="${escapeHtml(f.id)}">${escapeHtml(f.name)}</option>`).join('');
+    introSec.hidden = friends.length === 0;
+    if (friends.length === 0) {
+      showToast('⚠️', '먼저 모임원을 추가하세요');
+      pendingModal = null;
+      return;
+    }
+  } else {
+    introSec.hidden = true;
+  }
+
+  document.getElementById('memberModal').classList.add('visible');
+  setTimeout(() => document.getElementById('modalName').focus(), 250);
+}
+
+function openEditModal(targetId) {
+  pendingModal = { mode: 'edit', targetId };
+  const target = getPerson(targetId);
+
+  document.getElementById('modalTitle').textContent = '이름 / 연락처 편집';
+  document.getElementById('modalIntro').textContent = target.isSelf ? '내 정보를 수정합니다.' : `${target.name}님 정보를 수정합니다.`;
+  document.getElementById('modalName').value = target.name || '';
+  document.getElementById('modalPhone').value = target.phone || '';
+  selectGender(target.gender || 'male');
+
+  // 편집에서는 소개자 변경 안 함 (단순화)
+  document.getElementById('modalIntroducerSection').hidden = true;
+
+  document.getElementById('memberModal').classList.add('visible');
+  setTimeout(() => document.getElementById('modalName').focus(), 250);
+}
+
+function selectGender(g) {
+  document.querySelectorAll('#modalGender .g-opt').forEach(opt => {
+    opt.classList.toggle('selected', opt.dataset.gender === g);
+  });
+}
+
+function closeModal() {
+  document.getElementById('memberModal').classList.remove('visible');
+  pendingModal = null;
+}
+
+function confirmModal() {
+  if (!pendingModal) return;
+  const name = document.getElementById('modalName').value.trim();
+  const phoneRaw = document.getElementById('modalPhone').value.trim();
+  const phone = phoneRaw ? phoneRaw.replace(/[^0-9+\-]/g, '') : '';
+  const gender = document.querySelector('#modalGender .g-opt.selected')?.dataset.gender || 'male';
+
+  if (!name) { showToast('⚠️', '이름을 입력하세요'); return; }
+
+  // ----- Edit -----
+  if (pendingModal.mode === 'edit') {
+    const id = pendingModal.targetId;
+    if (id === 'me') {
+      data.me.name = name;
+      data.me.gender = gender;
+    } else {
+      const p = data.people[id];
+      if (p) {
+        p.name = name;
+        p.gender = gender;
+        const oldPhone = p.phone || '';
+        if (phoneRaw === '') {
+          p.phone = null; p.invitedAt = null; p.confirmed = false;
+        } else if (phone !== oldPhone) {
+          p.phone = phone; p.invitedAt = Date.now(); p.confirmed = false;
+        }
+      }
+    }
+    saveData(); closeModal(); rerender();
+    showToast('✓', '저장됨');
+    return;
+  }
+
+  // ----- Add -----
+  const { addType } = pendingModal;
+  const id = newId();
+  const now = Date.now();
+  const person = {
+    id, name, gender,
+    hopLevel: addType === 'friend' ? 1 : 2,
+    introducedBy: null,
+    phone: phone || null,
+    invitedAt: phone ? now : null,
+    confirmed: false,
+    addedAt: now,
+  };
+  if (addType === 'recommendation') {
+    person.introducedBy = document.getElementById('modalIntroducer').value || null;
+  }
+  data.people[id] = person;
+
+  saveData(); closeModal(); rerender();
+  showToast(phone ? '✉' : '✓', phone ? `${name}님에게 인증 초대 발송` : `${name}님 추가됨`);
 }
 
 // ============================================================
-// Graph View (친구)
+// Delete / Promote
 // ============================================================
-function renderGraph() {
+function deletePerson(id) {
+  if (id === 'me') { showToast('⚠️', '본인은 삭제할 수 없어요'); return; }
+  const p = getPerson(id);
+  if (!p) return;
+  if (!confirm(`${p.name}님을 모임에서 제거할까요?`)) return;
+
+  // 이 사람을 introducer로 가진 추천이 있다면 introducedBy 끊기
+  for (const other of Object.values(data.people)) {
+    if (other.introducedBy === id) other.introducedBy = null;
+  }
+  delete data.people[id];
+  saveData(); rerender();
+  showToast('🗑', '제거됨');
+}
+
+function promoteToFriend(id) {
+  const p = data.people[id];
+  if (!p) return;
+  p.hopLevel = 1;
+  p.introducedBy = null;
+  saveData(); rerender();
+  showToast('⬆', `${p.name}님이 모임원으로 승격`);
+}
+
+// ============================================================
+// Stage 2 — 인증
+// ============================================================
+function renderVerify() {
+  const root = document.getElementById('verifyList');
+  const sum = document.getElementById('verifySummary');
+  root.innerHTML = '';
+
+  const all = Object.values(data.people);
+  const total = all.length;
+  const confirmedCount = all.filter(p => p.confirmed).length;
+  const pendingCount = all.filter(p => !p.confirmed && p.invitedAt).length;
+  const notStartedCount = total - confirmedCount - pendingCount;
+
+  sum.innerHTML = `
+    <div class="summary-card"><div class="sc-num">${total}</div><div class="sc-label">전체</div></div>
+    <div class="summary-card confirmed"><div class="sc-num confirmed">${confirmedCount}</div><div class="sc-label">✓ 인증</div></div>
+    <div class="summary-card pending"><div class="sc-num pending">${pendingCount}</div><div class="sc-label">⏱ 대기</div></div>
+    <div class="summary-card"><div class="sc-num">${notStartedCount}</div><div class="sc-label">미시작</div></div>
+  `;
+
+  if (total === 0) {
+    root.innerHTML = `<div class="empty">먼저 [1 만들기]에서 모임원을 추가하세요.</div>`;
+    return;
+  }
+
+  // 모임원 그룹 + 추천 그룹
+  const friends = getFriends().sort((a, b) => (a.addedAt || 0) - (b.addedAt || 0));
+  const recs = getRecommendations().sort((a, b) => (a.addedAt || 0) - (b.addedAt || 0));
+
+  if (friends.length > 0) {
+    const g = document.createElement('div');
+    g.className = 'verify-group';
+    g.innerHTML = `<h3 class="vg-title">모임원 <span class="vg-count">${friends.length}명</span></h3>`;
+    friends.forEach(p => g.appendChild(makeVerifyRow(p.id, '모임원')));
+    root.appendChild(g);
+  }
+  if (recs.length > 0) {
+    const g = document.createElement('div');
+    g.className = 'verify-group';
+    g.innerHTML = `<h3 class="vg-title">추천 <span class="vg-count">${recs.length}명</span></h3>`;
+    recs.forEach(p => {
+      const via = p.introducedBy ? getPerson(p.introducedBy) : null;
+      g.appendChild(makeVerifyRow(p.id, via ? `${via.name} 소개` : '추천'));
+    });
+    root.appendChild(g);
+  }
+
+  const cta = document.createElement('div');
+  cta.className = 'stage-cta';
+  cta.innerHTML = `<button class="next-step-btn" type="button" onclick="goToStep(3)">다음: 전체보기 →</button>`;
+  root.appendChild(cta);
+}
+
+function makeVerifyRow(id, relLabel) {
+  const p = getPerson(id);
+  const row = document.createElement('div');
+  row.className = 'verify-row';
+  if (p.confirmed) row.classList.add('confirmed');
+  else if (p.invitedAt) row.classList.add('pending');
+
+  let statusBadge, actionBtn;
+  if (p.confirmed) {
+    statusBadge = `<span class="vb confirmed">✓ 인증 완료</span>`;
+    actionBtn = `<button class="vrow-btn" type="button" onclick="revertConfirm('${id}')">↩ 해제</button>`;
+  } else if (p.invitedAt) {
+    statusBadge = `<span class="vb pending">⏱ 응답 대기</span>`;
+    actionBtn = `<button class="vrow-btn primary" type="button" onclick="markConfirmed('${id}')">✓ 완료 처리</button>`;
+  } else if (p.phone) {
+    statusBadge = `<span class="vb">📱 연락처 등록됨</span>`;
+    actionBtn = `<button class="vrow-btn primary" type="button" onclick="sendInvite('${id}')">✉ 초대 발송</button>`;
+  } else {
+    statusBadge = `<span class="vb">⚪ 연락처 미등록</span>`;
+    actionBtn = `<button class="vrow-btn primary" type="button" onclick="openContactPrompt('${id}')">📱 연락처</button>`;
+  }
+  const phoneText = p.phone ? `<span class="vrow-phone">${escapeHtml(p.phone)}</span>` : '';
+
+  row.innerHTML = `
+    <div class="vrow-avatar ${p.gender === 'female' ? 'female' : 'male'}">${escapeHtml((p.name || '?').charAt(0))}</div>
+    <div class="vrow-info">
+      <div class="vrow-name">${escapeHtml(p.name)} <span class="vrow-rel">${escapeHtml(relLabel)}</span></div>
+      <div class="vrow-meta">${statusBadge}${phoneText}</div>
+    </div>
+    <div class="vrow-actions">${actionBtn}</div>
+  `;
+  return row;
+}
+
+function openContactPrompt(id) {
+  const p = getPerson(id);
+  if (!p) return;
+  const input = prompt(`${p.name}님의 전화번호를 입력하세요 (예: 010-1234-5678):`, p.phone || '');
+  if (input === null) return;
+  const phone = input.trim().replace(/[^0-9+\-]/g, '');
+  const target = data.people[id];
+  if (!target) return;
+  if (!phone) {
+    target.phone = null; target.invitedAt = null; target.confirmed = false;
+    saveData(); rerender();
+    showToast('📱', '연락처 제거됨');
+    return;
+  }
+  target.phone = phone;
+  target.invitedAt = Date.now();
+  target.confirmed = false;
+  saveData(); rerender();
+  showToast('✉', `${p.name}님에게 인증 초대 발송`);
+}
+
+function sendInvite(id) {
+  const p = data.people[id];
+  if (!p) return;
+  if (!p.phone) { showToast('⚠️', '연락처 먼저 추가'); return; }
+  p.invitedAt = Date.now();
+  saveData(); rerender();
+  showToast('✉', `${p.name}님에게 인증 초대 발송`);
+}
+
+function markConfirmed(id) {
+  const p = data.people[id];
+  if (!p) return;
+  p.confirmed = true;
+  saveData(); rerender();
+  showToast('✓', `${p.name}님 인증 완료`);
+}
+
+function revertConfirm(id) {
+  const p = data.people[id];
+  if (!p) return;
+  p.confirmed = false;
+  saveData(); rerender();
+  showToast('⏱', '대기 상태로 되돌림');
+}
+
+// ============================================================
+// Stage 3 — 전체보기 (SVG 그래프)
+// ============================================================
+function renderView() {
+  const sum = document.getElementById('viewSummary');
+  const all = getAllPeople();
+  const confirmedCount = all.filter(p => p.confirmed).length;
+  const pendingCount = all.filter(p => !p.confirmed && p.invitedAt).length;
+  sum.innerHTML = `
+    <div class="summary-card"><div class="sc-num">${all.length}</div><div class="sc-label">전체</div></div>
+    <div class="summary-card confirmed"><div class="sc-num confirmed">${confirmedCount}</div><div class="sc-label">✓ 인증</div></div>
+    <div class="summary-card pending"><div class="sc-num pending">${pendingCount}</div><div class="sc-label">⏱ 대기</div></div>
+  `;
+  renderGraphSvg();
+}
+
+function renderGraphSvg() {
   const svg = document.getElementById('graphSvg');
-  if (!svg) return;
   const edgesG = document.getElementById('graphEdges');
   const nodesG = document.getElementById('graphNodes');
   edgesG.innerHTML = '';
   nodesG.innerHTML = '';
 
-  const friends = state.people.filter(p => p.hopLevel === 1);
-  const ffs = state.people.filter(p => p.hopLevel === 2);
-
+  // 방사형(radial) 노드 레이아웃 — 가운데 나, 안쪽 원 = 1-hop, 바깥쪽 원 = 2-hop
+  const NS = 'http://www.w3.org/2000/svg';
   const W = 360;
+  const H = 480;
   const cx = W / 2;
-  const cy = 240;
+  const cy = H / 2;
+  const r1 = 90;  // 1-hop 반지름
+  const r2 = 175; // 2-hop 반지름
   const positions = {};
+  const friendAngles = {};
 
-  // 나: 중심
-  positions[state.me.id] = { x: cx, y: cy };
+  positions['me'] = { x: cx, y: cy };
 
-  // 모임원 (1-hop): 안쪽 원
-  const fRadius = 85;
-  const fCount = friends.length;
-  friends.forEach((f, i) => {
-    const angle = (-Math.PI / 2) + (i / Math.max(fCount, 1)) * Math.PI * 2;
-    positions[f.id] = {
-      x: cx + Math.cos(angle) * fRadius,
-      y: cy + Math.sin(angle) * fRadius
-    };
+  // 1-hop 모임원 — 12시 방향(-π/2)부터 시계방향으로 균등 분포
+  const friends = getFriends().sort((a, b) => (a.addedAt || 0) - (b.addedAt || 0));
+  const step1 = friends.length > 0 ? (2 * Math.PI) / friends.length : 0;
+  friends.forEach((p, i) => {
+    const angle = -Math.PI / 2 + i * step1;
+    positions[p.id] = { x: cx + r1 * Math.cos(angle), y: cy + r1 * Math.sin(angle) };
+    friendAngles[p.id] = angle;
   });
 
-  // 모임원 추천 (2-hop): 바깥쪽 원
-  const ffRadius = 150;
-  const ffCount = ffs.length;
-  ffs.forEach((ff, i) => {
-    const viaList = getViaList(ff).filter(id => positions[id]);
-    let ffAngle;
-    if (viaList.length > 0) {
-      // 여러 via의 평균 위치 → angle
-      const avgX = viaList.reduce((s, id) => s + positions[id].x, 0) / viaList.length;
-      const avgY = viaList.reduce((s, id) => s + positions[id].y, 0) / viaList.length;
-      const dist = Math.hypot(avgX - cx, avgY - cy);
-      if (dist >= 15) {
-        ffAngle = Math.atan2(avgY - cy, avgX - cx);
-        const offset = (i / Math.max(ffCount, 1)) * 0.3 - 0.15;
-        ffAngle += offset;
-      } else {
-        // centroid가 중앙 근처 → 각 via 친구 각도의 원형 평균
-        const sumCos = viaList.reduce((s, id) => s + Math.cos(Math.atan2(positions[id].y - cy, positions[id].x - cx)), 0);
-        const sumSin = viaList.reduce((s, id) => s + Math.sin(Math.atan2(positions[id].y - cy, positions[id].x - cx)), 0);
-        if (Math.hypot(sumCos, sumSin) >= 0.1) {
-          ffAngle = Math.atan2(sumSin, sumCos);
-        } else {
-          // 모든 via가 360도 균등 분산 → 인덱스 기반 빈 자리
-          ffAngle = (i / Math.max(ffCount, 1)) * Math.PI * 2 + Math.PI / 4;
-        }
-      }
-    } else {
-      // 무작위 외곽 배치
-      ffAngle = (i / Math.max(ffCount, 1)) * Math.PI * 2 + Math.PI / 4;
-    }
-    positions[ff.id] = {
-      x: cx + Math.cos(ffAngle) * ffRadius,
-      y: cy + Math.sin(ffAngle) * ffRadius
-    };
-  });
-
-  // Tier 라벨
-  const lblMe = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-  lblMe.classList.add('graph-tier-label');
-  lblMe.setAttribute('x', 8); lblMe.setAttribute('y', 18);
-  lblMe.textContent = '🌐 모임 네트워크';
-  nodesG.appendChild(lblMe);
-
-  // ----- Edges -----
-  const edges = [];
-
-  // 나 → 친구 (1-hop, 실선)
-  friends.forEach(f => {
-    edges.push({ from: state.me.id, to: f.id, hop: 1, status: f.confirmed ? 'confirmed' : 'pending' });
-  });
-
-  // 친구 → 모임원 추천 (각 via 친구마다 엣지 — 여러 명일 수 있음)
-  ffs.forEach(ff => {
-    getViaList(ff).forEach(vid => {
-      if (positions[vid]) {
-        edges.push({ from: vid, to: ff.id, hop: 2, status: 'confirmed' });
-      }
+  // 2-hop 추천 — 소개자의 각도 근처에 작은 부채꼴로 분산
+  const recs = getRecommendations().sort((a, b) => (a.addedAt || 0) - (b.addedAt || 0));
+  const recsByIntro = new Map();
+  for (const r of recs) {
+    const introId = (r.introducedBy && friendAngles[r.introducedBy] !== undefined)
+      ? r.introducedBy
+      : (friends[0] && friends[0].id);
+    if (!introId) continue;
+    if (!recsByIntro.has(introId)) recsByIntro.set(introId, []);
+    recsByIntro.get(introId).push(r);
+  }
+  for (const [introId, list] of recsByIntro) {
+    const baseAngle = friendAngles[introId];
+    const span = Math.min(Math.PI / 4, 0.22 * Math.max(list.length - 1, 0) + 0.1);
+    const start = list.length > 1 ? baseAngle - span / 2 : baseAngle;
+    const stride = list.length > 1 ? span / (list.length - 1) : 0;
+    list.forEach((r, i) => {
+      const angle = list.length === 1 ? baseAngle : start + i * stride;
+      positions[r.id] = { x: cx + r2 * Math.cos(angle), y: cy + r2 * Math.sin(angle) };
     });
-  });
+  }
 
-  // 모임원 ↔ 모임원 (knows, 1-hop 간 친분)
-  const seenLateral = new Set();
-  friends.forEach(f => {
-    (f.knows || []).forEach(otherId => {
-      const key = [f.id, otherId].sort().join('|');
-      if (seenLateral.has(key)) return;
-      seenLateral.add(key);
-      if (positions[otherId]) {
-        edges.push({ from: f.id, to: otherId, hop: 'lateral', status: 'confirmed' });
-      }
-    });
-  });
-
-  // 노드 박스(50x50) + 라벨 영역까지 라인이 침범하지 않도록 endpoint 트림
-  // halfW=25 (박스 절반), topOff=25 (박스 상단), bottomOff=51 (박스+이름+관계)
-  const trimToBox = (fx, fy, tx, ty) => {
-    const dx = tx - fx, dy = ty - fy;
-    if (dx === 0 && dy === 0) return [fx, fy];
-    const halfW = 25, topOff = 25, bottomOff = 51;
-    let bestT = Infinity;
-    if (dy < 0) {
-      const t = -topOff / dy;
-      if (t > 0 && t < bestT) bestT = t;
-    } else if (dy > 0) {
-      const t = bottomOff / dy;
-      if (t > 0 && t < bestT) bestT = t;
-    }
-    if (dx > 0) {
-      const t = halfW / dx;
-      if (t > 0 && t < bestT) bestT = t;
-    } else if (dx < 0) {
-      const t = -halfW / dx;
-      if (t > 0 && t < bestT) bestT = t;
-    }
-    if (!isFinite(bestT)) return [fx, fy];
-    return [fx + dx * bestT, fy + dy * bestT];
+  // 배경 가이드 링 (faint 점선) — 1-hop / 2-hop 범위 시각화
+  const drawRing = (radius) => {
+    const c = document.createElementNS(NS, 'circle');
+    c.setAttribute('cx', cx);
+    c.setAttribute('cy', cy);
+    c.setAttribute('r', radius);
+    c.setAttribute('fill', 'none');
+    c.setAttribute('stroke', '#E2E8F0');
+    c.setAttribute('stroke-width', '1');
+    c.setAttribute('stroke-dasharray', '2 4');
+    edgesG.appendChild(c);
   };
+  if (friends.length > 0) drawRing(r1);
+  if (recs.length > 0)    drawRing(r2);
 
-  // Render edges
-  edges.forEach(e => {
-    const from = positions[e.from];
-    const to = positions[e.to];
-    if (!from || !to) return;
-
-    const [x1, y1] = trimToBox(from.x, from.y, to.x, to.y);
-    const [x2, y2] = trimToBox(to.x, to.y, from.x, from.y);
-
-    // lateral: 중앙 노드 라벨과 겹치지 않도록 곡선 (바깥쪽으로 휨)
-    if (e.hop === 'lateral') {
-      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      const mx = (x1 + x2) / 2;
-      const my = (y1 + y2) / 2;
-      const ox = mx - cx;
-      const oy = my - cy;
-      const olen = Math.hypot(ox, oy) || 1;
-      const curv = 30;
-      const cpX = mx + (ox / olen) * curv;
-      const cpY = my + (oy / olen) * curv;
-      path.setAttribute('d', `M ${x1} ${y1} Q ${cpX} ${cpY} ${x2} ${y2}`);
-      path.setAttribute('stroke', '#34D399');
-      path.setAttribute('stroke-width', '1.8');
-      path.setAttribute('stroke-dasharray', '6 4');
-      path.setAttribute('stroke-linecap', 'round');
-      path.setAttribute('fill', 'none');
-      edgesG.appendChild(path);
-      return;
+  // 엣지: me → 1-hop (스포크)
+  for (const f of friends) {
+    const status = f.confirmed ? 'confirmed' : (f.invitedAt ? 'pending' : 'inactive');
+    edgesG.appendChild(makeRadialEdge(positions['me'], positions[f.id], status));
+  }
+  // 엣지: 1-hop → 2-hop (introducer 기준)
+  for (const r of recs) {
+    if (r.introducedBy && positions[r.introducedBy] && positions[r.id]) {
+      edgesG.appendChild(makeRadialEdge(positions[r.introducedBy], positions[r.id], 'rec'));
     }
+  }
 
-    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    line.setAttribute('x1', x1);
-    line.setAttribute('y1', y1);
-    line.setAttribute('x2', x2);
-    line.setAttribute('y2', y2);
+  // 노드
+  for (const p of getAllPeople()) {
+    const pos = positions[p.id];
+    if (!pos) continue;
+    nodesG.appendChild(makeGraphNode(p, pos));
+  }
 
-    if (e.hop === 1) {
-      line.setAttribute('stroke', e.status === 'confirmed' ? '#5BBA6F' : '#F59E0B');
-      line.setAttribute('stroke-width', e.status === 'confirmed' ? 2 : 1.5);
-      if (e.status !== 'confirmed') line.setAttribute('stroke-dasharray', '4 3');
-    } else if (e.hop === 'lateral') {
-      // 모임원 간 친분: 중간 톤 녹색 점선 (hub-spoke와 구분)
-      line.setAttribute('stroke', '#34D399');
-      line.setAttribute('stroke-width', '1.8');
-      line.setAttribute('stroke-dasharray', '6 4');
-    } else {
-      // 2-hop: 옅고 얇게
-      line.setAttribute('stroke', '#BBF7D0');
-      line.setAttribute('stroke-width', '1.5');
-      line.setAttribute('stroke-dasharray', '3 3');
-    }
-    line.setAttribute('stroke-linecap', 'round');
-    edgesG.appendChild(line);
-  });
-
-  // ----- Nodes -----
-  // 관계 라벨 (친구 토폴로지): 본인 / 모임원 / 추천
-  const getRelLabel = (p) => {
-    if (p.isSelf) return '본인';
-    if (p.hopLevel === 1) return '모임원';
-    if (p.hopLevel === 2) return '추천 (2-hop)';
-    return '';
-  };
-  // 아바타 이모지 (성별 기반)
-  const getAvatar = (p) => {
-    if (p.gender === 'female') return '👩';
-    if (p.gender === 'male') return '👨';
-    return '👤';
-  };
-
-  Object.entries(positions).forEach(([id, pos]) => {
-    const person = getPerson(id);
-    if (!person) return;
-
-    const grp = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    grp.classList.add('graph-node-group');
-    if (person.isSelf) grp.classList.add('me-glow');
-
-    const w = 50, h = 50;
-    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-    rect.classList.add('graph-node-rect');
-    rect.setAttribute('x', pos.x - w/2);
-    rect.setAttribute('y', pos.y - h/2);
-    rect.setAttribute('width', w);
-    rect.setAttribute('height', h);
-    rect.setAttribute('rx', 10);
-
-    let fill, stroke, sw = 1.5;
-    if (person.isSelf) {
-      fill = '#FFFFFF'; stroke = '#F7931E'; sw = 2.5;
-    } else if (person.hopLevel === 1) {
-      fill = '#DCFCE7'; stroke = '#5BBA6F'; sw = 2;
-    } else {
-      fill = '#F0FDF4'; stroke = '#BBF7D0';
-      rect.setAttribute('stroke-dasharray', '3 2');
-    }
-    if (!person.confirmed && !person.isSelf && person.hopLevel === 1) {
-      rect.setAttribute('stroke-dasharray', '3 2');
-    }
-    rect.setAttribute('fill', fill);
-    rect.setAttribute('stroke', stroke);
-    rect.setAttribute('stroke-width', sw);
-    grp.appendChild(rect);
-
-    // 아바타 이모지 (박스 내부 중앙)
-    const avatar = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    avatar.classList.add('graph-node-avatar');
-    avatar.setAttribute('x', pos.x);
-    avatar.setAttribute('y', pos.y);
-    avatar.textContent = getAvatar(person);
-    grp.appendChild(avatar);
-
-    // 이름 (박스 아래 1행)
-    const nameT = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    nameT.classList.add('graph-node-label');
-    nameT.setAttribute('x', pos.x);
-    nameT.setAttribute('y', pos.y + 37);
-    nameT.textContent = person.name;
-    grp.appendChild(nameT);
-
-    // 관계 (박스 아래 2행)
-    const relLabel = getRelLabel(person);
-    if (relLabel) {
-      const relT = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      relT.classList.add('graph-node-rel');
-      relT.setAttribute('x', pos.x);
-      relT.setAttribute('y', pos.y + 48);
-      relT.textContent = relLabel;
-      grp.appendChild(relT);
-    }
-
-    // 단일 클릭: 액션 패널 / 더블클릭: 추가하기 탭
-    let clickTimer = null;
-    grp.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (clickTimer) return;
-      clickTimer = setTimeout(() => {
-        clickTimer = null;
-        selectedNodeId = id;
-        showGraphActionPanel(id, e);
-      }, 250);
-    });
-    grp.addEventListener('dblclick', (e) => {
-      e.stopPropagation();
-      if (clickTimer) { clearTimeout(clickTimer); clickTimer = null; }
-      selectedNodeId = id;
-      const person = getPerson(id);
-      if (person && !person.isSelf) openAddRoot(person.hopLevel === 2 ? 'ff' : 'friend');
-    });
-
-    nodesG.appendChild(grp);
-  });
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
 }
 
-function showGraphActionPanel(personId, evt) {
-  const person = getPerson(personId);
-  if (!person) return;
-
-  document.querySelectorAll('.action-panel').forEach(p => p.remove());
-
-  const panel = document.createElement('div');
-  panel.className = 'action-panel';
-
-  const buttons = [];
-  if (!person.isSelf) {
-    if (person.hopLevel === 2 && !person.confirmed) {
-      buttons.push({ label: '🤝 모임원으로 인증', className: 'promote', onClick: () => { promoteToFriend(person.id); closeGraphPanel(); } });
-    } else {
-      buttons.push({ label: person.confirmed ? '⏱ 대기로' : '✓ 인증', className: 'confirm', onClick: () => { toggleConfirm(person.id); closeGraphPanel(); } });
-    }
-  }
-  if (!person.isSelf) {
-    buttons.push({ label: '➕ 옆에 추가', className: 'promote', onClick: () => { openAddRoot(person.hopLevel === 2 ? 'ff' : 'friend'); closeGraphPanel(); } });
-  }
-  if (!person.isSelf) {
-    buttons.push({ label: '🗑 삭제', className: 'delete', onClick: () => { deletePerson(person.id); closeGraphPanel(); } });
-  }
-
-  buttons.forEach(b => {
-    const btn = document.createElement('button');
-    btn.className = `ap-btn ${b.className || ''}`;
-    btn.innerHTML = b.label;
-    btn.onclick = b.onClick;
-    panel.appendChild(btn);
-  });
-
-  const svgEl = document.getElementById('graphSvg');
-  const wrap = svgEl.closest('.graph-canvas-wrap');
-  if (!wrap) return;
-  const wrapRect = wrap.getBoundingClientRect();
-  const targetRect = evt.target.getBoundingClientRect();
-  const x = targetRect.left + targetRect.width / 2 - wrapRect.left;
-  const y = targetRect.bottom - wrapRect.top + 12;
-
-  panel.style.position = 'absolute';
-  panel.style.left = `${x - 75}px`;
-  panel.style.top = `${y}px`;
-  wrap.style.position = 'relative';
-  wrap.appendChild(panel);
+// 방사형 직선 엣지 — 노드 가장자리 약간 안쪽으로 들여서 노드 박스와 겹치지 않게
+function makeRadialEdge(from, to, status) {
+  const NS = 'http://www.w3.org/2000/svg';
+  const line = document.createElementNS(NS, 'line');
+  const dx = to.x - from.x;
+  const dy = to.y - from.y;
+  const len = Math.sqrt(dx * dx + dy * dy);
+  const inset = 16;
+  const ux = len > 0 ? dx / len : 0;
+  const uy = len > 0 ? dy / len : 0;
+  line.setAttribute('x1', from.x + ux * inset);
+  line.setAttribute('y1', from.y + uy * inset);
+  line.setAttribute('x2', to.x - ux * inset);
+  line.setAttribute('y2', to.y - uy * inset);
+  let stroke = '#94A3B8', dasharray = null, width = 1.5;
+  if (status === 'confirmed') { stroke = '#10B981'; width = 2; }
+  else if (status === 'pending') { stroke = '#F59E0B'; dasharray = '4 3'; }
+  else if (status === 'rec')     { stroke = '#8B5CF6'; dasharray = '3 3'; }
+  line.setAttribute('stroke', stroke);
+  line.setAttribute('stroke-width', width);
+  line.setAttribute('stroke-linecap', 'round');
+  if (dasharray) line.setAttribute('stroke-dasharray', dasharray);
+  return line;
 }
 
-function closeGraphPanel() {
-  document.querySelectorAll('.action-panel').forEach(p => p.remove());
+function makeGraphNode(p, pos) {
+  const NS = 'http://www.w3.org/2000/svg';
+  const g = document.createElementNS(NS, 'g');
+  const w = 58, h = 28;
+  const rect = document.createElementNS(NS, 'rect');
+  rect.setAttribute('x', pos.x - w / 2);
+  rect.setAttribute('y', pos.y - h / 2);
+  rect.setAttribute('width', w);
+  rect.setAttribute('height', h);
+  rect.setAttribute('rx', 7);
+  let fill = '#DBEAFE', stroke = '#6FA8DC', sw = 1.5;
+  if (p.isSelf) { fill = '#FFFFFF'; stroke = '#3B82F6'; sw = 2.5; }
+  else if (p.gender === 'female') { fill = '#FCE7F3'; stroke = '#E89BAA'; }
+  if (p.hopLevel === 2) { stroke = '#8B5CF6'; rect.setAttribute('stroke-dasharray', '3 2'); }
+  else if (!p.confirmed && !p.isSelf) rect.setAttribute('stroke-dasharray', '3 2');
+  rect.setAttribute('fill', fill);
+  rect.setAttribute('stroke', stroke);
+  rect.setAttribute('stroke-width', sw);
+  g.appendChild(rect);
+
+  const text = document.createElementNS(NS, 'text');
+  text.setAttribute('x', pos.x);
+  text.setAttribute('y', pos.y + 4);
+  text.setAttribute('text-anchor', 'middle');
+  text.setAttribute('font-size', '10.5');
+  text.setAttribute('font-weight', '800');
+  text.setAttribute('fill', '#1F1F1F');
+  text.textContent = (p.name || '?').slice(0, 4);
+  g.appendChild(text);
+
+  // status dot
+  const dot = document.createElementNS(NS, 'circle');
+  dot.setAttribute('cx', pos.x + w / 2 - 5);
+  dot.setAttribute('cy', pos.y - h / 2 + 5);
+  dot.setAttribute('r', 3.5);
+  dot.setAttribute('fill', p.confirmed ? '#10B981' : (p.invitedAt ? '#F59E0B' : '#CBD5E1'));
+  g.appendChild(dot);
+
+  return g;
 }
 
 // ============================================================
-// List View (인증현황)
+// Stage 4 — 발급
+// 활성 조건: 인증된 모임원(hopLevel:1, confirmed) ≥3명
 // ============================================================
-function renderList() {
-  const container = document.getElementById('resultList');
-  const summaryEl = document.getElementById('verifySummary');
-  if (!container) return;
-  container.innerHTML = '';
+function loadCertificates() {
+  try {
+    const raw = localStorage.getItem(CERT_STORAGE_KEY);
+    if (raw) {
+      const arr = JSON.parse(raw);
+      if (Array.isArray(arr)) return arr;
+    }
+  } catch (e) {}
+  return [];
+}
 
-  // 인증 카운트
-  const allPeople = [state.me, ...state.people];
-  const confirmedCount = allPeople.filter(p => p.confirmed || p.isSelf).length;
-  const pendingCount = allPeople.length - confirmedCount;
-  summaryEl.innerHTML = `
-    <div class="verify-stat-card">
-      <div class="verify-stat-value total">${allPeople.length}</div>
-      <div class="verify-stat-label">전체</div>
+function saveCertificates(certs) {
+  localStorage.setItem(CERT_STORAGE_KEY, JSON.stringify(certs));
+}
+
+// 발급 폼 임시 상태
+let pendingCertTitle = null;
+let pendingCertImage = null;
+
+function defaultCertTitle() {
+  return `${data.me.name || '나'}의 동호회증`;
+}
+
+function resizeImageToDataUrl(file, maxDim = 240) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        let w = img.width, h = img.height;
+        if (w > h) { if (w > maxDim) { h = (h * maxDim) / w; w = maxDim; } }
+        else      { if (h > maxDim) { w = (w * maxDim) / h; h = maxDim; } }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', 0.75));
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function handleImageUpload(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+  if (!/^image\//.test(file.type)) { showToast('⚠️', '이미지 파일을 선택하세요'); return; }
+  try {
+    pendingCertImage = await resizeImageToDataUrl(file, 240);
+    renderIssueForm();
+    renderIssuePreview();
+  } catch (err) {
+    console.warn('image upload failed', err);
+    showToast('⚠️', '이미지를 불러오지 못했어요');
+  }
+}
+
+function clearCustomImage() {
+  pendingCertImage = null;
+  const f = document.getElementById('customImageFile');
+  if (f) f.value = '';
+  renderIssueForm();
+  renderIssuePreview();
+}
+
+function renderIssue() {
+  if (pendingCertTitle === null) pendingCertTitle = defaultCertTitle();
+  renderIssueSummary();
+  renderIssueForm();
+  renderIssuePreview();
+  renderIssueButtonState();
+  renderIssuedList();
+}
+
+function renderIssueSummary() {
+  const sum = document.getElementById('issueSummary');
+  const confirmedFriends = getFriends().filter(p => p.confirmed);
+  const includedMembers = [getPerson('me'), ...confirmedFriends];
+  sum.innerHTML = `
+    <div class="summary-card"><div class="sc-num">${Object.values(data.people).length}</div><div class="sc-label">전체</div></div>
+    <div class="summary-card confirmed"><div class="sc-num confirmed">${confirmedFriends.length}</div><div class="sc-label">✓ 인증 모임원</div></div>
+    <div class="summary-card"><div class="sc-num">${includedMembers.length}</div><div class="sc-label">증명서 포함</div></div>
+  `;
+}
+
+function renderIssueForm() {
+  const formEl = document.getElementById('issueForm');
+  const imgHtml = pendingCertImage
+    ? `<img class="img-preview-thumb" src="${pendingCertImage}" alt="">`
+    : '<div class="img-preview-empty">📷</div>';
+  formEl.innerHTML = `
+    <div class="m-section">
+      <div class="m-label">증명서 이름</div>
+      <input type="text" class="m-input" id="customTitleInput" value="${escapeHtml(pendingCertTitle || '')}" placeholder="${escapeHtml(defaultCertTitle())}">
     </div>
-    <div class="verify-stat-card confirmed">
-      <div class="verify-stat-value confirmed">${confirmedCount}</div>
-      <div class="verify-stat-label">✓ 인증</div>
-    </div>
-    <div class="verify-stat-card pending">
-      <div class="verify-stat-value pending">${pendingCount}</div>
-      <div class="verify-stat-label">⏱ 미인증</div>
+    <div class="m-section">
+      <div class="m-label">대표 이미지 <span class="hint">(선택 — 미선택 시 본인 사진 사용)</span></div>
+      <div class="image-picker">
+        ${imgHtml}
+        <div class="image-picker-actions">
+          <button class="img-pick-btn" type="button" onclick="document.getElementById('customImageFile').click()">${pendingCertImage ? '변경' : '사진 선택'}</button>
+          ${pendingCertImage ? '<button class="img-clear-btn" type="button" onclick="clearCustomImage()">제거</button>' : ''}
+        </div>
+      </div>
+      <input type="file" id="customImageFile" accept="image/*" hidden onchange="handleImageUpload(event)">
     </div>
   `;
-
-  // 나
-  const meDiv = document.createElement('div');
-  meDiv.className = 'list-tier';
-  meDiv.innerHTML = `<div class="list-tier-header"><span class="tier-badge tier-badge--me">🏠 나</span><span class="tier-count">1명</span></div>`;
-  meDiv.appendChild(makeListItem(state.me));
-  container.appendChild(meDiv);
-
-  // 모임원 (1-hop)
-  const friends = state.people.filter(p => p.hopLevel === 1);
-  if (friends.length > 0) {
-    const fd = document.createElement('div');
-    fd.className = 'list-tier';
-    fd.innerHTML = `<div class="list-tier-header"><span class="tier-badge">👫 모임원 (1-hop)</span><span class="tier-count">${friends.length}명</span></div>`;
-    friends.forEach(p => fd.appendChild(makeListItem(p)));
-    container.appendChild(fd);
-  }
-
-  // 모임원 추천 (2-hop)
-  const ffs = state.people.filter(p => p.hopLevel === 2);
-  if (ffs.length > 0) {
-    const ffd = document.createElement('div');
-    ffd.className = 'list-tier';
-    ffd.innerHTML = `<div class="list-tier-header"><span class="tier-badge ff">🔗 모임원 추천 (2-hop)</span><span class="tier-count">${ffs.length}명</span></div>`;
-    ffs.forEach(p => ffd.appendChild(makeListItem(p)));
-    container.appendChild(ffd);
+  const titleInput = document.getElementById('customTitleInput');
+  if (titleInput) {
+    titleInput.oninput = (e) => {
+      pendingCertTitle = e.target.value;
+      renderIssuePreview();
+    };
   }
 }
 
-function makeListItem(p) {
-  const item = document.createElement('div');
-  let classes = ['list-item'];
-  if (p.isSelf) classes.push('self');
-  else if (p.hopLevel === 1) classes.push('friend');
-  else if (p.hopLevel === 2) classes.push('ff');
-  item.className = classes.join(' ');
-  item.onclick = () => { selectedNodeId = p.id; switchView('tree'); };
-
-  let meta = '';
-  if (p.isSelf) meta = '본인';
-  else if (p.hopLevel === 1) meta = '모임원';
-  else {
-    const vias = getViaList(p).map(id => getPerson(id)).filter(Boolean);
-    if (vias.length === 0) meta = '소개';
-    else if (vias.length === 1) meta = `소개: ${vias[0].name}`;
-    else meta = `소개: ${vias[0].name} 외 ${vias.length - 1}명`;
-  }
-
-  // 미인증 + 모임원 추천은 "모임원으로 인증" 빠른 버튼
-  let quickBtn = '';
-  if (!p.confirmed && !p.isSelf) {
-    if (p.hopLevel === 2) {
-      quickBtn = `<button class="verify-quick-btn" onclick="event.stopPropagation(); quickPromote('${p.id}')">🤝 모임원으로</button>`;
-    } else {
-      quickBtn = `<button class="verify-quick-btn" onclick="event.stopPropagation(); quickConfirmList('${p.id}')">✓ 인증</button>`;
-    }
-  }
-
-  item.innerHTML = `
-    <div class="list-item-avatar">${p.name.charAt(0)}</div>
-    <div class="list-item-info">
-      <div class="list-item-name">${p.name}${p.isSelf ? ' <span class="name-self">(나)</span>' : ''}</div>
-      <div class="list-item-meta">${meta}</div>
-    </div>
-    ${quickBtn}
-    <div class="list-item-status ${p.confirmed || p.isSelf ? 'confirmed' : 'pending'}">
-      ${p.confirmed || p.isSelf ? '✓' : '⏱'}
+function renderIssuePreview() {
+  const preview = document.getElementById('issuePreview');
+  const confirmedFriends = getFriends().filter(p => p.confirmed);
+  const includedMembers = [getPerson('me'), ...confirmedFriends];
+  const title = (pendingCertTitle || '').trim() || defaultCertTitle();
+  preview.innerHTML = `
+    <div class="cert-preview">
+      ${pendingCertImage ? `<img class="cp-image" src="${pendingCertImage}" alt="">` : ''}
+      <div class="cp-title">${escapeHtml(title)}</div>
+      <div class="cp-subtitle">${escapeHtml(data.me.name || '나')}님의 인증된 모임 (${includedMembers.length}명)</div>
+      <div class="cp-members">
+        ${includedMembers.map(m => `<div class="cp-member">
+          <span class="cp-avatar">${escapeHtml((m.name || '?').charAt(0))}</span>
+          <span>${escapeHtml(m.name || '?')} <small>${m.isSelf ? '본인' : '모임원'}</small></span>
+        </div>`).join('')}
+      </div>
     </div>
   `;
-  return item;
 }
 
-function quickConfirmList(id) {
-  const p = getPerson(id);
-  if (!p) return;
-  p.confirmed = true;
-  renderAll();
-  showToast('✓', `${p.name} 인증됨`);
+function renderIssueButtonState() {
+  const btn = document.getElementById('issueBtn');
+  const hint = document.getElementById('issueHint');
+  const confirmedFriends = getFriends().filter(p => p.confirmed);
+  const includedMembers = [getPerson('me'), ...confirmedFriends];
+  if (confirmedFriends.length >= 3) {
+    btn.disabled = false;
+    btn.textContent = `동호회증 발급하기 (${includedMembers.length}명 포함)`;
+    hint.textContent = '발급된 증명서는 증명서 화면(동호회증 슬라이드)에 추가됩니다.';
+  } else {
+    btn.disabled = true;
+    const need = 3 - confirmedFriends.length;
+    btn.textContent = `모임원 ${need}명 더 인증 필요`;
+    hint.textContent = '인증 단계에서 모임원을 ✓ 완료 처리하면 활성화됩니다.';
+  }
 }
 
-function quickPromote(id) {
-  promoteToFriend(id);
+function renderIssuedList() {
+  const listEl = document.getElementById('issuedList');
+  const certs = loadCertificates();
+  if (certs.length === 0) { listEl.innerHTML = ''; return; }
+  const rows = certs.slice().reverse().map(c => {
+    const d = new Date(c.issuedAt);
+    const ds = `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+    const thumb = c.customImage ? `<img class="ir-thumb" src="${c.customImage}" alt="">` : '';
+    const displayTitle = c.customTitle || c.title || '동호회증';
+    return `
+      <div class="issued-row">
+        ${thumb}
+        <div class="ir-info">
+          <div class="ir-title">${escapeHtml(displayTitle)}</div>
+          <div class="ir-meta">${ds} · ${(c.members || []).length}명</div>
+        </div>
+        <button class="vrow-btn" type="button" onclick="deleteCertificate('${c.id}')">🗑 삭제</button>
+      </div>
+    `;
+  }).join('');
+  listEl.innerHTML = `<h3 class="issued-title">발급 내역 (${certs.length})</h3>${rows}`;
 }
 
-// ============================================================
-// Modal & Actions
-// ============================================================
-function openAddRoot(type) {
-  pendingAction = { type };
-  document.getElementById('modalFsName').value = '';
-  pendingGender = 'male';
-  document.querySelectorAll('.gender-option').forEach(o => o.classList.remove('selected'));
-  document.querySelector('.gender-option.male').classList.add('selected');
-  document.getElementById('modalFsTitle').textContent = type === 'ff' ? '🔗 추천받은 사람 추가' : '👫 새 모임원 추가';
-  document.getElementById('modalFs').classList.add('visible');
-  setTimeout(() => document.getElementById('modalFsName').focus(), 350);
-}
-
-function selectGender(g) {
-  pendingGender = g;
-  document.querySelectorAll('.gender-option').forEach(o => o.classList.remove('selected'));
-  document.querySelector(`.gender-option.${g}`).classList.add('selected');
-}
-
-function closeFsModal() {
-  document.getElementById('modalFs').classList.remove('visible');
-  pendingAction = null;
-}
-
-function confirmFsAdd() {
-  const name = document.getElementById('modalFsName').value.trim();
-  if (!name) { showToast('⚠️', '이름을 입력'); return; }
-  if (!pendingAction) return;
-
-  const newId = 'p' + Date.now();
-  const newPerson = {
-    id: newId, name, gender: pendingGender,
-    hopLevel: pendingAction.type === 'ff' ? 2 : 1,
-    confirmed: false
+function issueCertificate() {
+  const confirmedFriends = getFriends().filter(p => p.confirmed);
+  if (confirmedFriends.length < 3) {
+    showToast('⚠️', '모임원 3명 이상 인증 필요');
+    return;
+  }
+  const me = getPerson('me');
+  const members = [
+    { id: me.id, name: me.name, gender: me.gender, relation: '본인', confirmed: true },
+    ...confirmedFriends.map(p => ({
+      id: p.id, name: p.name, gender: p.gender, relation: '모임원', confirmed: true,
+    })),
+  ];
+  const customTitle = (pendingCertTitle || '').trim() || defaultCertTitle();
+  const cert = {
+    id: 'club_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+    kind: 'club',
+    title: '동호회증',
+    customTitle,
+    customImage: pendingCertImage || null,
+    issuedAt: Date.now(),
+    issuedFor: { id: 'me', name: me.name, gender: me.gender },
+    members,
   };
-  if (pendingAction.type === 'ff') {
-    // 첫 친구를 via로 (없으면 그냥)
-    const firstFriend = state.people.find(p => p.hopLevel === 1);
-    if (firstFriend) newPerson.viaFriend = firstFriend.id;
+  const certs = loadCertificates();
+  certs.push(cert);
+  try {
+    saveCertificates(certs);
+  } catch (err) {
+    showToast('⚠️', '저장 공간 부족 — 이미지를 작게 하거나 제거 후 다시 시도');
+    return;
   }
-  state.people.push(newPerson);
-  closeFsModal();
-  renderAll();
-  showToast('➕', `${name} 추가됨`);
+  pendingCertTitle = null;
+  pendingCertImage = null;
+  renderIssue();
+  showToast('🎉', `${customTitle} 발급 완료 (${members.length}명)`);
 }
 
-function toggleConfirm(id) {
-  const p = getPerson(id);
-  if (!p || p.isSelf) return;
-  p.confirmed = !p.confirmed;
-  selectedNodeId = null;
-  renderAll();
-  showToast(p.confirmed ? '✓' : '⏱', `${p.name} ${p.confirmed ? '인증됨' : '대기로'}`);
-}
-
-// 모임원 추천 → 모임원으로 승격 (인증 + hopLevel=1)
-function promoteToFriend(id) {
-  const p = getPerson(id);
-  if (!p) return;
-  p.confirmed = true;
-  if (p.hopLevel === 2) {
-    p.hopLevel = 1;
-    delete p.viaFriend;
-  }
-  selectedNodeId = null;
-  renderAll();
-  showToast('🤝', `${p.name} 모임원으로 인증됨!`);
-}
-
-function deletePerson(id) {
-  const p = getPerson(id);
-  if (!p || p.isSelf) return;
-  if (!confirm(`${p.name}님을 삭제할까요?`)) return;
-  state.people = state.people.filter(x => x.id !== id);
-  // viaFriend가 이 사람이면 다른 친구로 변경
-  state.people.forEach(x => {
-    if (x.viaFriend === id) delete x.viaFriend;
-  });
-  selectedNodeId = null;
-  renderAll();
+function deleteCertificate(id) {
+  if (!confirm('이 증명서를 삭제할까요? 증명서 화면에서도 사라집니다.')) return;
+  let certs = loadCertificates();
+  certs = certs.filter(c => c.id !== id);
+  try { saveCertificates(certs); } catch (e) {}
+  renderIssue();
   showToast('🗑', '삭제됨');
 }
 
-function resetAll() {
-  if (!confirm('초기화할까요?')) return;
-  state = {
-    me: { ...initialMe },
-    people: JSON.parse(JSON.stringify(initialPeople))
-  };
-  selectedNodeId = null;
-  renderAll();
-  showToast('🔄', '초기화됨');
-}
-
 // ============================================================
-// Summary + Render All
-// ============================================================
-function updateSummary() {
-  const total = state.people.length + 1;
-  const confirmed = state.people.filter(p => p.confirmed).length + 1;
-  const ffCount = state.people.filter(p => p.hopLevel === 2).length;
-  document.getElementById('statTotal').textContent = total;
-  document.getElementById('statConfirmed').textContent = confirmed;
-  document.getElementById('statFf').textContent = ffCount;
-}
-
-function renderAll() {
-  updateSummary();
-  renderGraph();
-}
-
-// ============================================================
-// Toast
+// Toast / utils
 // ============================================================
 function showToast(emoji, text) {
-  document.getElementById('toastEmoji').textContent = emoji;
-  document.getElementById('toastText').textContent = text;
   const t = document.getElementById('toast');
+  t.innerHTML = `<span class="t-emoji">${emoji}</span><span>${escapeHtml(text)}</span>`;
   t.classList.add('visible');
   clearTimeout(window._toastT);
-  window._toastT = setTimeout(() => t.classList.remove('visible'), 2400);
+  window._toastT = setTimeout(() => t.classList.remove('visible'), 2200);
+}
+
+function escapeHtml(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
 }
 
 // ============================================================
-// Event listeners
+// Modal: 바깥 클릭 / Enter 키
 // ============================================================
-document.getElementById('graphSvg').addEventListener('click', e => {
-  if (e.target.tagName === 'svg' || e.target.id === 'graphEdges' || e.target.id === 'graphNodes') {
-    closeGraphPanel();
-    selectedNodeId = null;
+document.getElementById('memberModal').addEventListener('click', (e) => {
+  if (e.target.id === 'memberModal') closeModal();
+});
+document.getElementById('modalName').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    document.getElementById('modalPhone').focus();
+  }
+});
+document.getElementById('modalPhone').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    confirmModal();
   }
 });
 
-document.getElementById('modalFs').addEventListener('click', e => {
-  if (e.target.id === 'modalFs') closeFsModal();
-});
-
-document.getElementById('modalFsName').addEventListener('keypress', e => {
-  if (e.key === 'Enter') confirmFsAdd();
-});
-
-renderAll();
-
-// 환영 메시지: sessionStorage의 이름 표시
-(function applyWelcomeName() {
+// ============================================================
+// Init — ?step=N (1~4) 지원: cert.html의 "모임 전체 보기"에서 진입
+// ============================================================
+function getInitialStep() {
   try {
-    const u = JSON.parse(localStorage.getItem('passUser') || '{}');
-    const nick = u.name || (u.email ? u.email.split('@')[0] : '데모 사용자');
-    const wn = document.getElementById('welcomeName');
-    if (wn) wn.textContent = nick;
+    const params = new URLSearchParams(location.search);
+    const s = parseInt(params.get('step') || '', 10);
+    if (Number.isFinite(s) && s >= 1 && s <= 4) return s;
   } catch (e) {}
-})();
+  return 1;
+}
+goToStep(getInitialStep());
 </script>
 
-<!-- 백엔드 그래프 영속 연동 (CHON graphs API) — 비로그인 시 데모로 동작 -->
-<script>
-(function () {
-  if (!window.PassAPI || !PassAPI.isLoggedIn()) return;
-  var KIND = 'group';
-  function getGraph() { return state; }
-  function setGraph(d) { state = d; }
-  var saveTimer = null, ready = false;
-  function scheduleSave() {
-    if (!ready) return;
-    clearTimeout(saveTimer);
-    saveTimer = setTimeout(function () {
-      PassAPI.graphs.save(KIND, getGraph()).catch(function () {});
-    }, 800);
-  }
-  var _origRender = renderAll;
-  renderAll = function () { _origRender.apply(this, arguments); scheduleSave(); };
-  PassAPI.graphs.get(KIND).then(function (res) {
-    if (res && res.data) setGraph(res.data);
-    renderAll();
-    ready = true;
-  }).catch(function () { ready = true; });
-})();
-</script>
-<script src="../lib/welcome-name.js"></script>
 </body>
 </html>

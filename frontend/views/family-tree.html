@@ -2,964 +2,866 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PASS 가계도 — 박스 디자인 + 관계도 시각화</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#FFFBF0">
+<title>PASS — 가족증 (가계도)</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/static/pretendard.min.css" rel="stylesheet">
 <script src="../lib/auth-guard.js" data-require="login"></script>
-<script src="../lib/pass-api.js"></script>
-<script src="../lib/scanner.js"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800;900&display=swap" rel="stylesheet">
 <style>
   :root {
     --chon-orange: #F7931E;
     --chon-orange-dark: #E87F0A;
     --chon-yellow-soft: #FFF3D6;
     --bg-app: #FFFBF0;
-    --bg-empty: #F8FAFC;
+    --bg-card: #FFFFFF;
     --text-primary: #1F1F1F;
     --text-secondary: #64748B;
     --text-tertiary: #94A3B8;
-
-    /* Node colors */
+    --border-light: #E2E8F0;
+    --status-confirmed: #10B981;
+    --status-pending: #F59E0B;
     --node-male: #DBEAFE;
     --node-male-border: #6FA8DC;
     --node-female: #FCE7F3;
     --node-female-border: #E89BAA;
-    --node-self-bg: #FFFFFF;
-    --node-self-border: #F7931E;
-
-    /* Container colors — different depths for visual hierarchy */
-    --container-gen0: rgba(248, 250, 252, 0.6);   /* outermost - very light */
-    --container-gen0-border: #CBD5E1;
-    --container-gen1: rgba(254, 243, 199, 0.5);   /* light yellow */
-    --container-gen1-border: rgba(217, 119, 6, 0.4);
-    --container-gen2: rgba(254, 215, 170, 0.5);   /* light orange */
-    --container-gen2-border: rgba(247, 147, 30, 0.4);
-    --container-self: rgba(255, 230, 200, 0.7);   /* my family */
-    --container-self-border: rgba(247, 147, 30, 0.6);
-    --container-sibling: rgba(229, 231, 235, 0.6); /* sibling family */
-    --container-sibling-border: rgba(156, 163, 175, 0.5);
-
-    --status-confirmed: #10B981;
-    --status-pending: #F59E0B;
-    --drill-color: #8B5CF6;
-    --drill-bg: #F5F3FF;
-
     --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
-    --shadow-md: 0 4px 14px rgba(0,0,0,0.08);
-    --shadow-lg: 0 10px 30px rgba(0,0,0,0.14);
-
+    --shadow-md: 0 6px 18px rgba(0,0,0,0.10);
     --radius-sm: 8px;
     --radius-md: 14px;
     --radius-lg: 20px;
     --radius-pill: 999px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
   }
 
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
+  html, body { margin: 0; padding: 0; }
   body {
-    margin: 0;
-    font-family: 'Noto Sans KR', -apple-system, sans-serif;
-    background: linear-gradient(135deg, #FFF7E6 0%, #FFE6D0 100%);
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg-app);
     color: var(--text-primary);
     min-height: 100vh;
-  }
-  
-  
-  
-  
-  
-  
-  
-  
-  .phone {
-    width: 380px;
-    max-width: 100%;
-    height: 800px;
-    background: #C8C2BC;
-    border-radius: 48px;
-    padding: 12px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
-  }
-  .phone-screen {
-    width: 100%;
-    height: 100%;
-    background: var(--bg-app);
-    border-radius: 38px;
-    overflow: hidden;
-    position: relative;
-    display: flex;
-    flex-direction: column;
+    -webkit-font-smoothing: antialiased;
   }
 
-  .status-bar {
-    height: 40px;
+  .app {
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+    background: var(--bg-app);
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 24px 0;
-    font-size: 13px;
-    font-weight: 700;
+    flex-direction: column;
     position: relative;
   }
-  .status-bar .camera-dot {
-    width: 14px; height: 14px; border-radius: 50%;
-    background: #1F1F1F; border: 2px solid #2A2A2A;
-    position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
+  @media (min-width: 768px) {
+    body { padding: 32px 0; background: #F5F7FB; }
+    .app {
+      border-radius: 28px;
+      overflow: hidden;
+      min-height: calc(100dvh - 64px);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.12);
+    }
   }
-  .app-header {
-    padding: 8px 16px 12px;
+
+  /* Topbar */
+  .topbar {
+    padding: calc(14px + var(--safe-top)) 14px 10px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
     gap: 8px;
-  }
-  .header-back-btn {
-    display: block;
-    margin: 8px 16px 0;
-    background: var(--drill-bg);
-    border: 1.5px solid var(--drill-color);
-    color: #6D28D9;
-    padding: 6px 14px;
-    border-radius: var(--radius-pill);
-    font-size: 12px;
-    font-weight: 800;
-    cursor: pointer;
-    font-family: inherit;
-    align-self: flex-start;
-  }
-  .header-back-btn.hidden { display: none; }
-  .app-header h1 {
-    margin: 0;
-    font-size: 17px;
-    font-weight: 900;
-    flex: 1;
-    text-align: center;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .header-action {
     background: var(--bg-app);
-    border: 1.5px solid var(--chon-orange);
-    color: var(--chon-orange);
-    padding: 5px 12px;
-    border-radius: var(--radius-pill);
-    font-size: 12px;
-    font-weight: 800;
-    cursor: pointer;
-    font-family: inherit;
+    border-bottom: 1px solid #F1F5F9;
     flex-shrink: 0;
   }
-  .breadcrumb {
-    padding: 0 16px 8px;
-    font-size: 11px;
-    color: var(--text-secondary);
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    flex-wrap: wrap;
-  }
-  .breadcrumb-item {
-    padding: 2px 8px;
-    background: white;
-    border-radius: var(--radius-pill);
-    border: 1px solid #E2E8F0;
-    font-weight: 700;
-    cursor: pointer;
-  }
-  .breadcrumb-item.current {
-    background: var(--drill-color);
-    color: white;
-    border-color: var(--drill-color);
-  }
-  .view-toggle {
-    display: flex;
-    gap: 4px;
-    padding: 0 16px 12px;
-  }
-  .view-toggle-btn {
-    flex: 1;
-    background: white;
-    border: 1.5px solid #E2E8F0;
-    color: var(--text-secondary);
-    padding: 9px 6px;
-    border-radius: var(--radius-md);
-    font-size: 12px;
-    font-weight: 800;
-    cursor: pointer;
-    font-family: inherit;
+  .icon-btn {
+    width: 36px; height: 36px;
+    border: none;
+    background: transparent;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 4px;
+    cursor: pointer;
+    color: var(--text-primary);
+    font-family: inherit;
   }
-  .view-toggle-btn.active {
+  .icon-btn:active { background: rgba(0,0,0,0.06); }
+  .icon-btn svg { width: 22px; height: 22px; }
+  .topbar h1 {
+    flex: 1;
+    margin: 0;
+    font-size: 17px;
+    font-weight: 900;
+    text-align: center;
+    letter-spacing: -0.4px;
+  }
+  /* 타이틀 중앙 정렬용 placeholder — back 버튼과 동일한 폭 */
+  .topbar-spacer { width: 36px; height: 36px; flex-shrink: 0; }
+
+  /* Stepper — 3단계 탭 */
+  .stepper {
+    display: flex;
+    gap: 6px;
+    padding: 12px 14px;
+    background: var(--bg-app);
+    flex-shrink: 0;
+  }
+  .step {
+    flex: 1;
+    background: white;
+    border: 1.5px solid var(--border-light);
+    border-radius: var(--radius-md);
+    padding: 10px 4px;
+    font-family: inherit;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    transition: all 0.15s;
+  }
+  .step:active { transform: scale(0.97); }
+  .step-num {
+    font-size: 11px;
+    font-weight: 900;
+    color: var(--text-tertiary);
+    background: #F1F5F9;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .step-label {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--text-secondary);
+  }
+  .step.active {
+    background: var(--chon-orange);
+    border-color: var(--chon-orange);
+  }
+  .step.active .step-num {
+    background: white;
+    color: var(--chon-orange-dark);
+  }
+  .step.active .step-label { color: white; }
+
+  /* Content area */
+  .content {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: calc(20px + var(--safe-bottom));
+  }
+  .stage { padding: 8px 14px 24px; }
+
+  /* Hint banner */
+  .hint {
+    background: var(--chon-yellow-soft);
+    border: 1px solid rgba(247, 147, 30, 0.25);
+    border-radius: var(--radius-md);
+    padding: 10px 12px;
+    margin: 6px 0 14px;
+    font-size: 12px;
+    color: var(--chon-orange-dark);
+    line-height: 1.5;
+  }
+
+  /* ============================================
+     Stage 1 — 만들기: 세대별 그리드
+     ============================================ */
+  .gen-row { margin-bottom: 18px; }
+  .gen-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    padding: 0 2px;
+  }
+  .gen-num {
+    background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+    color: white;
+    padding: 2px 8px;
+    border-radius: var(--radius-pill);
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0.3px;
+  }
+  .gen-name {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--text-primary);
+  }
+  .person-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .person-card {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: white;
+    border: 2px solid var(--node-male-border);
+    border-radius: var(--radius-md);
+    padding: 8px 12px 8px 8px;
+    cursor: pointer;
+    font-family: inherit;
+    min-width: 130px;
+    text-align: left;
+    transition: all 0.12s;
+  }
+  .person-card.female { border-color: var(--node-female-border); }
+  .person-card.self {
+    border-color: var(--chon-orange);
+    border-width: 2.5px;
+    box-shadow: 0 0 0 3px rgba(247,147,30,0.15);
+  }
+  .person-card:active { transform: scale(0.97); }
+  .person-card.confirmed { background: rgba(16,185,129,0.06); }
+  .pc-avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--node-male);
+    color: var(--node-male-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .person-card.female .pc-avatar {
+    background: var(--node-female);
+    color: var(--node-female-border);
+  }
+  .person-card.self .pc-avatar {
+    background: var(--chon-yellow-soft);
+    color: var(--chon-orange-dark);
+  }
+  .pc-info { min-width: 0; flex: 1; }
+  .pc-name {
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1.2;
+    color: var(--text-primary);
+  }
+  .pc-rel {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    margin-top: 2px;
+    font-weight: 600;
+  }
+
+  /* Stage CTA — 다음 단계 */
+  .stage-cta {
+    padding: 20px 0 4px;
+    text-align: center;
+  }
+  .cta-hint {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    margin: 0 0 10px;
+  }
+  .next-step-btn {
+    background: var(--chon-orange);
+    color: white;
+    border: none;
+    padding: 12px 22px;
+    border-radius: var(--radius-pill);
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+    box-shadow: var(--shadow-md);
+  }
+  .next-step-btn:active { transform: scale(0.97); background: var(--chon-orange-dark); }
+
+  /* Action panel (popover) */
+  .action-panel {
+    position: fixed;
+    background: white;
+    border: 2px solid var(--chon-orange);
+    border-radius: var(--radius-md);
+    padding: 6px;
+    box-shadow: var(--shadow-md);
+    z-index: 80;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 170px;
+    max-width: 240px;
+    animation: panelPop 0.16s ease;
+  }
+  @keyframes panelPop {
+    from { transform: scale(0.92); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  .ap-btn {
+    background: white;
+    border: 1.5px solid var(--border-light);
+    border-radius: var(--radius-sm);
+    padding: 9px 12px;
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
+    color: var(--text-primary);
+  }
+  .ap-btn:active { transform: scale(0.97); }
+  .ap-btn.add { border-color: var(--chon-orange); color: var(--chon-orange-dark); }
+  .ap-btn.edit { border-color: #94A3B8; color: #475569; }
+  .ap-btn.danger { border-color: #FCA5A5; color: #DC2626; }
+
+  /* ============================================
+     Stage 2 — 인증: 요약 + 행 리스트
+     ============================================ */
+  .summary-cards {
+    display: flex;
+    gap: 6px;
+    margin: 6px 0 14px;
+  }
+  .summary-card {
+    flex: 1;
+    background: white;
+    border: 1.5px solid var(--border-light);
+    border-radius: var(--radius-md);
+    padding: 10px 6px;
+    text-align: center;
+  }
+  .summary-card.confirmed {
+    border-color: rgba(16,185,129,0.4);
+    background: rgba(16,185,129,0.06);
+  }
+  .summary-card.pending {
+    border-color: rgba(245,158,11,0.4);
+    background: rgba(245,158,11,0.06);
+  }
+  .sc-num {
+    font-size: 22px;
+    font-weight: 900;
+    line-height: 1;
+    color: var(--text-primary);
+  }
+  .sc-num.confirmed { color: var(--status-confirmed); }
+  .sc-num.pending { color: var(--status-pending); }
+  .sc-label {
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--text-tertiary);
+    margin-top: 6px;
+    letter-spacing: 0.3px;
+  }
+  .verify-group { margin-bottom: 14px; }
+  .vg-title {
+    margin: 0 0 8px;
+    font-size: 13px;
+    font-weight: 900;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .vg-count {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    font-weight: 600;
+  }
+  .verify-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: white;
+    border: 1.5px solid var(--border-light);
+    border-radius: var(--radius-md);
+    padding: 10px 12px;
+    margin-bottom: 6px;
+  }
+  .verify-row.confirmed {
+    background: rgba(16,185,129,0.05);
+    border-color: rgba(16,185,129,0.3);
+  }
+  .verify-row.pending {
+    background: rgba(245,158,11,0.05);
+    border-color: rgba(245,158,11,0.3);
+  }
+  .vrow-avatar {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: var(--node-male);
+    color: var(--node-male-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    font-weight: 900;
+    flex-shrink: 0;
+  }
+  .vrow-avatar.female {
+    background: var(--node-female);
+    color: var(--node-female-border);
+  }
+  .vrow-info { flex: 1; min-width: 0; }
+  .vrow-name {
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1.2;
+    color: var(--text-primary);
+  }
+  .vrow-rel {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    font-weight: 600;
+    margin-left: 4px;
+  }
+  .vrow-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+  }
+  .vb {
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--text-secondary);
+    padding: 2px 6px;
+    border-radius: var(--radius-pill);
+    background: #F1F5F9;
+  }
+  .vb.confirmed {
+    color: var(--status-confirmed);
+    background: rgba(16,185,129,0.12);
+  }
+  .vb.pending {
+    color: var(--status-pending);
+    background: rgba(245,158,11,0.12);
+  }
+  .vrow-phone {
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .vrow-actions { flex-shrink: 0; }
+  .vrow-btn {
+    border: 1.5px solid var(--border-light);
+    background: white;
+    padding: 7px 10px;
+    border-radius: var(--radius-sm);
+    font-size: 11px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--text-primary);
+    white-space: nowrap;
+  }
+  .vrow-btn.primary {
     background: var(--chon-orange);
     color: white;
     border-color: var(--chon-orange);
   }
-  .content {
-    flex: 1;
-    background: white;
-    overflow-y: auto;
-  }
-  .view-panel { display: none; }
-  .view-panel.active { display: block; }
-
-  /* ============================================
-     Verify Summary Card (인증현황 카운트)
-     ============================================ */
-  .verify-summary {
-    display: flex;
-    gap: 8px;
-    padding: 12px 16px 16px;
-  }
-  .verify-stat-card {
-    flex: 1;
-    background: white;
-    border: 1.5px solid #E2E8F0;
-    border-radius: var(--radius-md);
-    padding: 12px 8px;
+  .vrow-btn.ghost { color: var(--text-secondary); }
+  .vrow-btn:active { transform: scale(0.95); }
+  .empty {
     text-align: center;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-  .verify-stat-card.confirmed {
-    border-color: rgba(16, 185, 129, 0.4);
-    background: rgba(16, 185, 129, 0.06);
-  }
-  .verify-stat-card.pending {
-    border-color: rgba(245, 158, 11, 0.4);
-    background: rgba(245, 158, 11, 0.06);
-  }
-  .verify-stat-card:active { transform: scale(0.97); }
-  .verify-stat-value {
-    font-size: 22px;
-    font-weight: 900;
-    line-height: 1;
-  }
-  .verify-stat-value.confirmed { color: var(--status-confirmed); }
-  .verify-stat-value.pending { color: var(--status-pending); }
-  .verify-stat-value.total { color: var(--text-primary); }
-  .verify-stat-label {
-    font-size: 10px;
+    padding: 40px 20px;
     color: var(--text-tertiary);
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-    margin-top: 6px;
+    font-size: 13px;
   }
-  .verify-quick-btn {
-    background: var(--chon-orange);
-    color: white;
-    border: none;
-    padding: 4px 10px;
-    border-radius: var(--radius-pill);
-    font-size: 11px;
-    font-weight: 800;
-    cursor: pointer;
-    font-family: inherit;
-    margin-left: 4px;
-  }
-  .verify-quick-btn:active { transform: scale(0.95); }
 
   /* ============================================
-     Graph View (관계도)
+     Stage 3 — 전체보기: 그래프 SVG
      ============================================ */
-  .graph-info-banner {
-    margin: 12px 16px 8px;
-    padding: 10px 12px;
-    background: var(--chon-yellow-soft);
-    border: 1px solid rgba(247, 147, 30, 0.3);
-    border-radius: var(--radius-md);
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    font-size: 11px;
-    color: var(--chon-orange-dark);
-    line-height: 1.5;
-  }
-  .graph-info-banner .gb-icon { font-size: 16px; flex-shrink: 0; }
-  .graph-info-banner strong {
-    display: block;
-    font-size: 12px;
-    margin-bottom: 2px;
-  }
-  .graph-canvas-wrap {
-    margin: 0 16px;
-    background: var(--bg-empty);
-    border: 1px solid #E2E8F0;
+  .graph-wrap {
+    margin: 6px 0;
+    background: white;
+    border: 1.5px solid var(--border-light);
     border-radius: var(--radius-md);
     overflow: hidden;
   }
   #graphSvg {
     width: 100%;
-    height: 480px;
+    height: 560px;
     display: block;
-  }
-  .graph-node-group { cursor: pointer; transition: filter 0.15s; }
-  .graph-node-group:hover .graph-node-rect { filter: brightness(1.05); }
-  .graph-node-group.me-glow .graph-node-rect {
-    filter: drop-shadow(0 0 6px rgba(247, 147, 30, 0.4));
-  }
-  .graph-node-label {
-    font-family: 'Noto Sans KR', sans-serif;
-    font-size: 10px;
-    font-weight: 700;
-    fill: var(--text-primary);
-    pointer-events: none;
-    text-anchor: middle;
-  }
-  .graph-node-name-below {
-    font-family: 'Noto Sans KR', sans-serif;
-    pointer-events: none;
-    -webkit-user-select: none;
-    user-select: none;
-  }
-  .graph-node-rel-below {
-    font-family: 'Noto Sans KR', sans-serif;
-    pointer-events: none;
-    -webkit-user-select: none;
-    user-select: none;
-  }
-  .graph-node-avatar { pointer-events: none; }
-  .graph-node-gen-label {
-    font-family: 'Noto Sans KR', sans-serif;
-    font-size: 9px;
-    font-weight: 700;
-    fill: var(--text-tertiary);
-    pointer-events: none;
-    text-anchor: start;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
+    background: #FAFBFC;
   }
   .graph-legend {
-    margin: 12px 16px 0;
     display: flex;
     gap: 12px;
     flex-wrap: wrap;
     justify-content: center;
+    padding: 10px 8px 0;
     font-size: 11px;
     color: var(--text-secondary);
   }
   .gl-item {
     display: flex;
     align-items: center;
-    gap: 6px;
-    font-weight: 600;
+    gap: 5px;
+    font-weight: 700;
   }
   .gl-line {
-    width: 18px;
-    height: 2px;
+    width: 16px;
+    height: 2.5px;
     border-radius: 1px;
     display: inline-block;
   }
-  .gl-line.dashed {
-    background: repeating-linear-gradient(90deg,
-      currentColor 0, currentColor 3px,
-      transparent 3px, transparent 6px) !important;
-    background-color: transparent !important;
-    height: 2px;
+  .gl-dash {
+    width: 16px;
+    height: 2.5px;
+    background-image: linear-gradient(to right, currentColor 50%, transparent 50%);
+    background-size: 5px 100%;
+    display: inline-block;
   }
-  .summary-card {
-    background: linear-gradient(135deg, #FFF7ED 0%, #FED7AA 100%);
-    margin: 12px 16px 8px;
-    padding: 14px 16px;
+  .gl-line--confirmed { background: var(--status-confirmed); }
+  .gl-item--pending   { color: var(--status-pending); }
+  .gl-item--spouse    { color: #DC2626; }
+
+  /* ============================================
+     Stage 4 — 증명서 발급
+     ============================================ */
+  /* 발급 폼 — 증명서 이름 + 대표 이미지 */
+  .issue-form {
+    background: white;
+    border: 1.5px solid var(--border-light);
     border-radius: var(--radius-md);
+    padding: 14px 16px;
+    margin-bottom: 14px;
+  }
+  .issue-form .m-section { margin-bottom: 14px; }
+  .issue-form .m-section:last-child { margin-bottom: 0; }
+  .image-picker {
     display: flex;
     align-items: center;
     gap: 12px;
   }
-  .summary-card.drill-mode {
-    background: linear-gradient(135deg, #F5F3FF 0%, #DDD6FE 100%);
+  .img-preview-thumb {
+    width: 64px; height: 64px;
+    border-radius: 10px;
+    object-fit: cover;
+    border: 1.5px solid var(--border-light);
+    flex-shrink: 0;
   }
-  .summary-avatar {
-    width: 44px; height: 44px;
-    border-radius: 12px;
-    background: white;
-    border: 2.5px solid var(--chon-orange);
+  .img-preview-empty {
+    width: 64px; height: 64px;
+    border-radius: 10px;
+    background: #F1F5F9;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
-    font-weight: 900;
-    color: var(--chon-orange);
+    font-size: 24px;
+    border: 1.5px dashed var(--text-tertiary);
     flex-shrink: 0;
   }
-  .summary-info { flex: 1; min-width: 0; }
-  .summary-name {
-    font-size: 15px;
-    font-weight: 900;
-    margin-bottom: 2px;
-  }
-  .summary-stats {
-    font-size: 11px;
-    color: var(--chon-orange-dark);
-    font-weight: 700;
-    display: flex;
-    gap: 10px;
-  }
-  .scope-info {
-    background: #EFF6FF;
-    border: 1px solid #BFDBFE;
-    border-radius: var(--radius-md);
-    margin: 0 16px 8px;
-    padding: 10px 12px;
-    font-size: 11px;
-    color: #1E40AF;
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    line-height: 1.5;
-  }
-  .scope-info strong {
-    display: block;
-    color: #1E3A8A;
-    margin-bottom: 2px;
-  }
-  .section-header {
-    padding: 16px 16px 8px;
-  }
-  .section-header h2 {
-    margin: 0;
-    font-size: 14px;
-    font-weight: 800;
-  }
-  .family-legend {
-    padding: 0 16px 8px;
-  }
-  .family-legend-row {
+  .image-picker-actions {
     display: flex;
     gap: 6px;
     flex-wrap: wrap;
-    font-size: 10px;
   }
-  .family-legend-chip {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    background: white;
-    padding: 3px 8px;
+  .img-pick-btn {
+    background: var(--chon-orange);
+    color: white;
+    border: none;
+    padding: 8px 14px;
     border-radius: var(--radius-pill);
-    border: 1px solid #E2E8F0;
-    color: var(--text-secondary);
-    font-weight: 700;
-  }
-  .family-legend-chip .lc-swatch {
-    width: 12px; height: 8px;
-    border-radius: 3px;
-    border: 1.5px solid;
-  }
-
-  /* ============================================
-     BOX-CONTAINMENT TREE (NEW in v11)
-     ============================================ */
-  .tree-canvas {
-    padding: 16px;
-    background: var(--bg-empty);
-    margin: 0 16px;
-    border-radius: var(--radius-md);
-    overflow-x: auto;
-  }
-
-  /* Container = a family unit (couple + their children) */
-  .family-box {
-    background: var(--container-gen0);
-    border: 1.5px solid var(--container-gen0-border);
-    border-radius: 14px;
-    padding: 12px;
-    margin-bottom: 12px;
-    position: relative;
-    min-width: 280px;
-  }
-  .family-box.gen-1 {
-    background: var(--container-gen1);
-    border-color: var(--container-gen1-border);
-  }
-  .family-box.gen-2 {
-    background: var(--container-gen2);
-    border-color: var(--container-gen2-border);
-  }
-  .family-box.self-fam {
-    background: var(--container-self);
-    border-color: var(--container-self-border);
-    border-width: 2px;
-  }
-  .family-box.sibling-fam {
-    background: var(--container-sibling);
-    border-color: var(--container-sibling-border);
-  }
-
-  /* Family box label (top-left badge) */
-  .family-box-label {
-    position: absolute;
-    top: -10px;
-    left: 14px;
-    background: white;
-    padding: 2px 10px;
-    border-radius: var(--radius-pill);
-    font-size: 10px;
-    font-weight: 800;
-    color: var(--text-secondary);
-    border: 1px solid currentColor;
-    opacity: 0.85;
-  }
-  .family-box.gen-1 .family-box-label { color: #B45309; }
-  .family-box.gen-2 .family-box-label { color: #C2700E; }
-  .family-box.self-fam .family-box-label { color: var(--chon-orange-dark); }
-  .family-box.sibling-fam .family-box-label { color: #475569; }
-
-  /* Couple row — parents side by side */
-  .couple-row {
-    display: flex;
-    gap: 8px;
-    justify-content: center;
-    align-items: center;
-    flex-wrap: wrap;
-    margin-bottom: 8px;
-  }
-
-  /* Children box — contains all children of the couple */
-  .children-box {
-    background: rgba(255, 255, 255, 0.55);
-    border: 1px dashed rgba(100, 116, 139, 0.4);
-    border-radius: 10px;
-    padding: 10px 8px;
-    margin-top: 4px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    justify-content: center;
-    min-height: 50px;
-  }
-  .children-box-empty {
-    color: var(--text-tertiary);
-    font-size: 11px;
-    font-style: italic;
-    text-align: center;
-    padding: 8px;
-    width: 100%;
-  }
-
-  /* Sub-family box (married child's family inside parent's family) */
-  .sub-family-wrap {
-    width: 100%;
-    margin-top: 8px;
-  }
-
-  /* Person node — pure box, no lines */
-  .person-node {
-    background: var(--node-male);
-    border: 2px solid var(--node-male-border);
-    border-radius: 10px;
-    padding: 8px 10px;
-    min-width: 70px;
-    text-align: center;
-    cursor: pointer;
-    position: relative;
-    transition: all 0.15s;
-  }
-  .person-node:active { transform: scale(0.97); }
-  .person-node.female {
-    background: var(--node-female);
-    border-color: var(--node-female-border);
-  }
-  .person-node.self {
-    background: var(--node-self-bg);
-    border-color: var(--node-self-border);
-    border-width: 2.5px;
-    box-shadow: 0 0 0 3px rgba(247, 147, 30, 0.15);
-  }
-  .person-node.in-law {
-    border-color: var(--drill-color);
-    border-style: dashed;
-  }
-  .person-node.pending {
-    border-style: dashed;
-  }
-  .person-node.selected {
-    box-shadow: 0 0 0 3px rgba(247, 147, 30, 0.3);
-    border-color: var(--chon-orange);
-  }
-  .person-node-name {
     font-size: 12px;
     font-weight: 800;
-    color: var(--text-primary);
-    line-height: 1.2;
-  }
-  .person-node.self .person-node-name {
-    color: var(--chon-orange);
-  }
-  .person-node-rel {
-    font-size: 9px;
-    color: var(--text-tertiary);
-    margin-top: 2px;
-  }
-
-  /* Person node badges */
-  .person-confirm-badge {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    width: 16px; height: 16px;
-    background: var(--status-confirmed);
-    color: white;
-    border-radius: 50%;
-    font-size: 9px;
-    font-weight: 900;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1.5px solid white;
-  }
-  .person-confirm-badge.pending {
-    background: var(--status-pending);
-  }
-  .person-drill-badge {
-    position: absolute;
-    bottom: -5px;
-    left: -5px;
-    width: 18px; height: 18px;
-    background: var(--drill-color);
-    color: white;
-    border-radius: 50%;
-    font-size: 10px;
-    font-weight: 900;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1.5px solid white;
-  }
-  .marriage-symbol {
-    color: #DC2626;
-    font-size: 16px;
-    margin: 0 2px;
-    -webkit-user-select: none;
-    user-select: none;
-  }
-
-  /* Empty slot */
-  .empty-slot-node {
-    background: white;
-    border: 2px dashed #94A3B8;
-    border-radius: 10px;
-    padding: 8px 10px;
-    min-width: 60px;
-    text-align: center;
-    cursor: pointer;
-    color: #94A3B8;
-    font-size: 11px;
-    font-weight: 700;
-    transition: all 0.15s;
-  }
-  .empty-slot-node:active {
-    background: var(--chon-yellow-soft);
-    border-color: var(--chon-orange);
-    color: var(--chon-orange-dark);
-  }
-
-  /* Generation label */
-  .gen-section {
-    margin-bottom: 10px;
-  }
-  .gen-section-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 6px;
-    padding-left: 4px;
-  }
-  .gen-section-header .gen-name {
-    font-size: 10px;
-    font-weight: 900;
-    color: #8B5CF6;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-  .gen-section-header .gen-divider {
-    flex: 1;
-    height: 1px;
-    background: linear-gradient(to right, #8B5CF6 0%, transparent 100%);
-    opacity: 0.3;
-  }
-
-  /* Action Panel */
-  .action-panel {
-    position: absolute;
-    background: white;
-    border: 2px solid var(--chon-orange);
-    border-radius: var(--radius-md);
-    padding: 8px;
-    box-shadow: var(--shadow-lg);
-    z-index: 10;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    min-width: 150px;
-    animation: panelPop 0.2s ease;
-  }
-  @keyframes panelPop {
-    from { transform: scale(0.85); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-  }
-  .action-panel::before {
-    content: '';
-    position: absolute;
-    top: -8px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 0; height: 0;
-    border-left: 8px solid transparent;
-    border-right: 8px solid transparent;
-    border-bottom: 8px solid var(--chon-orange);
-  }
-  .ap-btn {
-    background: white;
-    border: 1.5px solid #E2E8F0;
-    border-radius: var(--radius-sm);
-    padding: 9px 12px;
-    font-size: 12px;
-    font-weight: 700;
     cursor: pointer;
     font-family: inherit;
-    text-align: left;
   }
-  .ap-btn:active { transform: scale(0.97); }
-  .ap-btn.drill { border-color: var(--drill-color); color: #6D28D9; font-weight: 800; }
-  .ap-btn.marriage { border-color: #FCA5A5; color: #DC2626; }
-  .ap-btn.child { border-color: var(--chon-orange); color: var(--chon-orange-dark); }
-  .ap-btn.order { border-color: #6366F1; color: #3730A3; }
-  .ap-btn.confirm { border-color: var(--status-confirmed); color: var(--status-confirmed); }
-  .ap-btn.delete { border-color: #FCA5A5; color: #DC2626; }
-  .ap-btn:disabled { opacity: 0.4; cursor: not-allowed; background: #F8FAFC; }
+  .img-pick-btn:active { transform: scale(0.96); background: var(--chon-orange-dark); }
+  .img-clear-btn {
+    background: white;
+    color: var(--text-secondary);
+    border: 1.5px solid var(--border-light);
+    padding: 8px 14px;
+    border-radius: var(--radius-pill);
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  /* 미리보기 카드 상단 이미지 */
+  .cp-image {
+    width: 100%;
+    max-height: 160px;
+    object-fit: cover;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    position: relative;
+  }
+  /* 발급 내역의 작은 썸네일 */
+  .ir-thumb {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 1px solid var(--border-light);
+  }
 
-  /* Inline list */
-  .list-section { padding: 0 16px 24px; margin-top: 8px; }
-  .list-tier { margin-bottom: 16px; }
-  .list-tier-header {
+  .cert-preview {
+    background: linear-gradient(165deg, #FFD580 0%, #FFA000 60%, #E87F0A 100%);
+    border-radius: var(--radius-lg);
+    padding: 22px 18px 18px;
+    color: white;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow-md);
+    position: relative;
+    overflow: hidden;
+  }
+  .cert-preview::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top right, rgba(255,255,255,0.18), transparent 70%);
+    pointer-events: none;
+  }
+  .cp-title {
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    margin-bottom: 4px;
+    position: relative;
+  }
+  .cp-subtitle {
+    font-size: 12px;
+    opacity: 0.92;
+    margin-bottom: 14px;
+    position: relative;
+  }
+  .cp-members {
+    background: rgba(255, 255, 255, 0.18);
+    border-radius: var(--radius-md);
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    position: relative;
+    -webkit-backdrop-filter: blur(3px);
+    backdrop-filter: blur(3px);
+  }
+  .cp-member {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-bottom: 8px;
-  }
-  .tier-badge {
-    background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+    font-size: 13px;
+    font-weight: 700;
     color: white;
-    padding: 4px 12px;
-    border-radius: var(--radius-pill);
-    font-size: 11px;
-    font-weight: 800;
   }
-  .tier-count { color: var(--text-tertiary); font-size: 11px; font-weight: 600; }
-  .list-item {
-    background: white;
-    border-radius: var(--radius-sm);
-    padding: 10px 12px;
-    margin-bottom: 4px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    border: 1px solid #F1F5F9;
-    cursor: pointer;
-  }
-  .list-item.drill-target {
-    border: 1.5px dashed var(--drill-color);
-    background: var(--drill-bg);
-  }
-  .list-item.male .list-item-avatar { background: var(--node-male); color: var(--node-male-border); }
-  .list-item.female .list-item-avatar { background: var(--node-female); color: var(--node-female-border); }
-  .list-item.self .list-item-avatar {
-    background: white;
-    border: 2px solid var(--chon-orange);
-    color: var(--chon-orange);
-  }
-  .list-item-avatar {
-    width: 32px; height: 32px;
-    border-radius: 6px;
-    color: var(--text-primary);
+  .cp-avatar {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.35);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 14px;
-    font-weight: 800;
+    font-size: 12px;
+    font-weight: 900;
     flex-shrink: 0;
   }
-  .list-item-info { flex: 1; min-width: 0; }
-  .list-item-name {
-    font-size: 13px;
-    font-weight: 800;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-wrap: wrap;
-  }
-  .list-item-rel { font-size: 11px; color: var(--text-tertiary); }
-  .list-item-status { font-size: 10px; font-weight: 700; }
-  .drill-pill {
-    background: var(--drill-bg);
-    color: #6D28D9;
-    padding: 2px 8px;
-    border-radius: var(--radius-pill);
-    font-size: 9px;
-    font-weight: 800;
-    border: 1px solid #DDD6FE;
-  }
-  .order-hint-pill {
-    background: #EEF2FF;
-    color: #4338CA;
-    padding: 2px 8px;
-    border-radius: var(--radius-pill);
-    font-size: 9px;
-    font-weight: 800;
+  .cp-member small {
+    opacity: 0.85;
+    font-weight: 500;
+    margin-left: 4px;
   }
 
-  /* Modal */
-  .modal-fs {
-    position: absolute;
+  .issue-btn {
+    width: 100%;
+    background: var(--chon-orange);
+    color: white;
+    border: none;
+    padding: 14px;
+    border-radius: var(--radius-pill);
+    font-size: 15px;
+    font-weight: 900;
+    cursor: pointer;
+    font-family: inherit;
+    box-shadow: var(--shadow-md);
+    transition: transform 0.12s, background 0.15s;
+  }
+  .issue-btn:active:not(:disabled) {
+    transform: scale(0.98);
+    background: var(--chon-orange-dark);
+  }
+  .issue-btn:disabled {
+    background: #CBD5E1;
+    color: #64748B;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+  .issue-hint {
+    margin: 8px 0 18px;
+    font-size: 11px;
+    color: var(--text-tertiary);
+    text-align: center;
+  }
+  .issued-title {
+    margin: 14px 0 8px;
+    font-size: 13px;
+    font-weight: 900;
+    color: var(--text-primary);
+  }
+  .issued-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: white;
+    border: 1.5px solid var(--border-light);
+    border-radius: var(--radius-md);
+    padding: 10px 12px;
+    margin-bottom: 6px;
+  }
+  .ir-info { flex: 1; min-width: 0; }
+  .ir-title { font-size: 13px; font-weight: 800; color: var(--text-primary); }
+  .ir-meta { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; font-weight: 600; }
+
+  /* ============================================
+     Modal (가족 추가/편집)
+     ============================================ */
+  .modal {
+    position: fixed;
     inset: 0;
-    background: var(--bg-app);
+    background: rgba(15,23,42,0.45);
     z-index: 100;
     display: none;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .modal.visible { display: flex; animation: fadeIn 0.2s ease; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .modal-sheet {
+    background: var(--bg-app);
+    width: 100%;
+    max-width: 480px;
+    max-height: 92dvh;
+    border-radius: 22px 22px 0 0;
+    display: flex;
     flex-direction: column;
-    border-radius: 38px;
+    animation: slideUp 0.26s ease;
     overflow: hidden;
   }
-  .modal-fs.visible {
-    display: flex;
-    animation: slideUpFs 0.3s ease;
-  }
-  @keyframes slideUpFs {
+  @keyframes slideUp {
     from { transform: translateY(100%); }
     to { transform: translateY(0); }
   }
-  .modal-fs-header {
-    padding: 12px 16px;
-    background: white;
-    border-bottom: 1px solid #E2E8F0;
+  .modal-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    padding: 14px 16px;
+    background: white;
+    border-bottom: 1px solid var(--border-light);
+    flex-shrink: 0;
   }
-  .modal-fs-close {
+  .modal-header h2 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 900;
+    flex: 1;
+    text-align: center;
+  }
+  .modal-close {
     background: none;
     border: none;
     font-size: 22px;
     color: var(--text-secondary);
     cursor: pointer;
     width: 32px; height: 32px;
+    font-family: inherit;
   }
-  .modal-fs-title { font-size: 16px; font-weight: 900; text-align: center; flex: 1; }
-  .modal-fs-save {
+  .modal-save {
     background: var(--chon-orange);
     color: white;
     border: none;
-    padding: 6px 16px;
+    padding: 7px 16px;
     border-radius: var(--radius-pill);
     font-size: 13px;
     font-weight: 800;
     cursor: pointer;
     font-family: inherit;
   }
-  .modal-fs-body { flex: 1; overflow-y: auto; padding: 20px; }
+  .modal-save:active { transform: scale(0.97); background: var(--chon-orange-dark); }
+  .modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 18px 24px;
+  }
   .modal-intro {
     background: linear-gradient(135deg, #FEF3C7 0%, #FED7AA 100%);
     border-radius: var(--radius-md);
     padding: 12px 14px;
-    margin-bottom: 20px;
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
+    margin-bottom: 18px;
     font-size: 12px;
     line-height: 1.5;
+    color: var(--chon-orange-dark);
   }
-  .modal-intro .intro-emoji { font-size: 24px; }
-  .modal-intro strong { color: var(--chon-orange-dark); display: block; margin-bottom: 2px; }
-  .modal-section { margin-bottom: 22px; }
-  .modal-section-label {
-    font-size: 12px;
+  .m-section { margin-bottom: 18px; }
+  .m-label {
+    font-size: 11px;
     font-weight: 800;
     color: var(--text-secondary);
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.4px;
   }
-  .modal-input {
-    width: 100%;
-    padding: 14px 16px;
-    border: 2px solid #E2E8F0;
-    border-radius: var(--radius-md);
-    font-size: 16px;
-    font-family: inherit;
-    background: white;
-  }
-  .modal-input:focus { outline: none; border-color: var(--chon-orange); }
-  .gender-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .gender-option {
-    padding: 16px;
-    text-align: center;
-    border-radius: var(--radius-md);
-    border: 2px solid #E2E8F0;
-    cursor: pointer;
-    font-weight: 700;
-    background: white;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-  }
-  .gender-option.selected.male {
-    background: var(--node-male);
-    border-color: var(--node-male-border);
-  }
-  .gender-option.selected.female {
-    background: var(--node-female);
-    border-color: var(--node-female-border);
-  }
-  .order-stepper {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: white;
-    border: 2px solid #E2E8F0;
-    border-radius: var(--radius-md);
-    padding: 8px 12px;
-  }
-  .order-stepper-btn {
-    width: 36px; height: 36px;
-    border-radius: 10px;
-    border: none;
-    background: #EEF2FF;
-    color: #3730A3;
-    font-size: 20px;
-    font-weight: 900;
-    cursor: pointer;
-    font-family: inherit;
-  }
-  .order-stepper-btn:active { background: #C7D2FE; transform: scale(0.92); }
-  .order-stepper-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-  .order-stepper-value {
-    flex: 1;
-    text-align: center;
-    font-size: 20px;
-    font-weight: 900;
-    color: #3730A3;
-  }
-  .order-hint {
+  .m-label .hint {
+    font-weight: 500;
+    color: #6b7280;
     font-size: 11px;
-    color: var(--text-tertiary);
-    margin-top: 8px;
+    text-transform: none;
+    letter-spacing: 0;
+    margin-left: 4px;
   }
-  .relation-grid {
+  .m-input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 2px solid var(--border-light);
+    border-radius: var(--radius-md);
+    font-size: 15px;
+    font-family: inherit;
+    background: white;
+  }
+  .m-input:focus { outline: none; border-color: var(--chon-orange); }
+  .m-input.mt8 { margin-top: 8px; }
+  .gender-toggle {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 8px;
   }
-  .relation-chip {
-    padding: 12px 8px;
+  .g-opt {
+    padding: 14px;
+    text-align: center;
+    border-radius: var(--radius-md);
+    border: 2px solid var(--border-light);
+    background: white;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .g-opt[data-gender="male"].selected {
+    background: var(--node-male);
+    border-color: var(--node-male-border);
+  }
+  .g-opt[data-gender="female"].selected {
+    background: var(--node-female);
+    border-color: var(--node-female-border);
+  }
+  .rel-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  .rel-chip {
+    padding: 10px 8px;
     border-radius: var(--radius-sm);
-    border: 1.5px solid #E2E8F0;
+    border: 1.5px solid var(--border-light);
     background: white;
     font-size: 12px;
     font-weight: 700;
@@ -968,1732 +870,1246 @@
     font-family: inherit;
     color: var(--text-secondary);
   }
-  .relation-chip.selected {
+  .rel-chip.selected {
     background: var(--chon-yellow-soft);
     border-color: var(--chon-orange);
     color: var(--chon-orange-dark);
   }
+
+  /* Toast */
   .toast {
-    position: absolute;
+    position: fixed;
     bottom: 30px;
     left: 50%;
     transform: translateX(-50%) translateY(40px);
     background: var(--text-primary);
     color: white;
-    padding: 12px 20px;
+    padding: 11px 18px;
     border-radius: var(--radius-pill);
     font-size: 13px;
     font-weight: 700;
     opacity: 0;
-    transition: all 0.3s;
+    transition: all 0.25s;
     z-index: 200;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 90vw;
   }
   .toast.visible {
     transform: translateX(-50%) translateY(0);
     opacity: 1;
   }
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  /* ============================================
-     Single-screen mode — 데모 베젤·래퍼 제거 후 phone-screen이 메인
-     반응형: 모바일은 edge-to-edge, 데스크톱은 중앙 정렬 + 외곽 배경
-     ============================================ */
-  body {
-    background: var(--bg-app);
-    min-height: 100vh;
-  }
-  .phone-screen {
-    border-radius: 0;
-    min-height: 100vh;
-    height: auto;
-    max-width: 480px;
-    margin: 0 auto;
-    box-shadow: none;
-  }
-  @media (min-width: 768px) {
-    body { background: #F5F7FB; padding: 32px 0; }
-    .phone-screen {
-      min-height: calc(100vh - 64px);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-lg);
-      overflow: hidden;
-    }
-  }
-
-  /* ============================================
-     Utility classes — inline style 대체
-     ============================================ */
-  .spacer-30 { height: 30px; }
-  .self-tag { font-size: 9px; }
-  .name-self { color: var(--chon-orange); }
-  .gl-line--confirmed { background: var(--status-confirmed); }
-  .gl-line--pending { background: var(--status-pending); }
-  .gl-line--drill { background: var(--drill-color); }
-  .gender-icon { font-size: 20px; }
-  .modal-input--mt8 { margin-top: 8px; }
-  .list-item-status.confirmed { color: var(--status-confirmed); }
-  .list-item-status.pending { color: var(--status-pending); }
-
-  /* ============================================
-     Unified Header (모든 페이지 공통)
-     ============================================ */
-  .unified-header {
-    position: sticky;
-    top: 0;
-    z-index: 30;
-    background: var(--bg-app, #FFFBF0);
-    padding: calc(14px + env(safe-area-inset-top, 0px)) 20px 12px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-shrink: 0;
-  }
-  .uh-brand { display: flex; align-items: center; gap: 10px; }
-  .uh-brand-button {
-    background: transparent;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    font-family: inherit;
-    color: inherit;
-    text-align: left;
-    transition: opacity 0.15s;
-  }
-  .uh-brand-button:hover { opacity: 0.85; }
-  .uh-brand-button:active { transform: scale(0.97); }
-
-  .uh-brand-mark {
-    width: 36px; height: 36px;
-    border-radius: 11px;
-    background: linear-gradient(135deg, var(--chon-orange), #5BBA6F);
-    color: white;
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 900; font-size: 16px; letter-spacing: -0.5px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-  }
-  .uh-brand-name { font-size: 20px; font-weight: 900; letter-spacing: -0.5px; color: var(--text-primary); }
-  .uh-brand-sub { font-size: 11px; color: var(--text-secondary); font-weight: 700; margin-top: -2px; }
-  .uh-brand-text { line-height: 1.1; }
-  .uh-actions { display: flex; align-items: center; gap: 8px; }
-  .uh-icon-btn {
-    width: 40px; height: 40px;
-    border-radius: 50%;
-    background: white;
-    border: 1px solid #F1F5F9;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; font-size: 18px; position: relative;
-    font-family: inherit; transition: background 0.15s;
-  }
-  .uh-icon-btn:active { background: var(--bg-app); }
-  .uh-icon-dot {
-    position: absolute; top: 8px; right: 10px;
-    width: 8px; height: 8px;
-    background: #DC2626;
-    border-radius: 50%;
-    border: 2px solid white;
-  }
-  .welcome-bar {
-    background: linear-gradient(90deg, #FFF3D6, white);
-    border-bottom: 1px solid #F1F5F9;
-    padding: 10px 20px;
-    display: flex; align-items: center; gap: 8px;
-    font-size: 13px; font-weight: 700; color: var(--text-primary);
-    flex-shrink: 0;
-  }
-  .welcome-emoji { font-size: 16px; line-height: 1; }
-  .welcome-msg { flex: 1; }
-  .welcome-msg strong { color: var(--chon-orange-dark); font-weight: 900; }
-  .welcome-user {
-    background: transparent;
-    border: none;
-    padding: 0;
-    margin: 0;
-    font: inherit;
-    color: var(--chon-orange-dark);
-    font-weight: 900;
-    cursor: pointer;
-    text-decoration: underline;
-    text-underline-offset: 3px;
-    text-decoration-color: rgba(247, 147, 30, 0.35);
-    text-decoration-thickness: 1.5px;
-    transition: text-decoration-color 0.15s, transform 0.12s;
-  }
-  .welcome-user:hover { text-decoration-color: var(--chon-orange-dark); }
-  .welcome-user:active { transform: scale(0.97); }
-  .welcome-reset {
-    background: white;
-    border: 1px solid #F1F5F9;
-    color: var(--text-secondary);
-    padding: 4px 10px;
-    border-radius: 999px;
-    font-size: 11px; font-weight: 800;
-    cursor: pointer; font-family: inherit;
-    flex-shrink: 0;
-  }
-  .welcome-reset:active { transform: scale(0.96); }
-
-  /* ============================================
-     Add actions (그래프 아래 입력 진입 버튼)
-     ============================================ */
-  .add-actions {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 6px;
-    padding: 12px 16px 0;
-  }
-  .add-btn {
-    background: white;
-    border: 1.5px solid rgba(247,147,30,0.5);
-    color: var(--chon-orange-dark);
-    padding: 10px 6px;
-    border-radius: var(--radius-md);
-    font-size: 12px;
-    font-weight: 800;
-    cursor: pointer;
-    font-family: inherit;
-    transition: all 0.15s;
-  }
-  .add-btn:active { transform: scale(0.95); }
-  .add-btn:hover { background: var(--chon-yellow-soft, #FFF3D6); }
-
-  /* ============================================
-     Unified Bottom Nav (전체 페이지 통일)
-     ============================================ */
-  .bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100%;
-    max-width: 480px;
-    background: white;
-    border-top: 1px solid #E2E8F0;
-    padding: 8px 8px calc(8px + env(safe-area-inset-bottom, 0px));
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    align-items: end;
-    z-index: 40;
-    box-shadow: 0 -6px 24px rgba(0,0,0,0.05);
-  }
-  .nav-btn {
-    background: none;
-    border: none;
-    padding: 8px 4px 4px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 3px;
-    cursor: pointer;
-    font-family: inherit;
-    color: var(--text-tertiary);
-    border-radius: 12px;
-    transition: color 0.15s;
-  }
-  .nav-btn-icon { font-size: 22px; line-height: 1; }
-  .nav-btn-label { font-size: 10px; font-weight: 800; }
-  .nav-btn.active { color: var(--chon-orange-dark); }
-  .nav-btn.center { position: relative; padding-top: 0; }
-  .nav-btn.center .nav-circle {
-    width: 56px; height: 56px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #FFC300, var(--chon-orange));
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    box-shadow: 0 6px 16px rgba(247,147,30,0.4), 0 0 0 4px white;
-    margin-top: -20px;
-    transition: transform 0.18s;
-  }
-  .nav-btn.center:active .nav-circle { transform: scale(0.94); }
-  .nav-btn.center .nav-btn-label {
-    color: var(--chon-orange-dark);
-    margin-top: 4px;
-  }
-  .content { padding-bottom: 96px; }
+  .t-emoji { font-size: 16px; }
 </style>
 </head>
 <body>
 
-<div class="phone-screen" id="phone1">
-
-  <header class="unified-header">
-    <button class="uh-brand uh-brand-button" onclick="window.location.href='../main/home.html'" aria-label="홈으로 이동">
-      <div class="uh-brand-mark">P</div>
-      <div class="uh-brand-text">
-        <div class="uh-brand-name">PASS</div>
-        <div class="uh-brand-sub">관계형 SNS</div>
-      </div>
+<div class="app">
+  <header class="topbar">
+    <button class="icon-btn" type="button" onclick="goBack()" aria-label="뒤로">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
     </button>
-    <div class="uh-actions">
-      <button type="button" class="uh-icon-btn" onclick="openScanner()" aria-label="QR 스캔" title="QR 스캔"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7" y="7" width="10" height="10" rx="1.5"/></svg></button>
-      <button class="uh-icon-btn" onclick="window.location.href='../main/home.html?page=auth'" aria-label="알림">🔔<span class="uh-icon-dot"></span></button>
-    </div>
+    <h1>가족증 — 가계도</h1>
+    <span class="topbar-spacer" aria-hidden="true"></span>
   </header>
-  <div class="welcome-bar">
-    <span class="welcome-emoji">👋</span>
-    <span class="welcome-msg"><button type="button" class="welcome-user" onclick="location.href='../main/cert.html'">사용자</button>님 환영합니다 · 오늘도 즐거운 하루되세요</span>
-    <button class="welcome-reset" onclick="resetAll()">처음부터</button>
-  </div>
-  <button class="header-back-btn hidden" id="backBtn" onclick="navigateBack()">‹ 뒤로 (이전 시점으로)</button>
 
-  <div class="breadcrumb" id="breadcrumb"></div>
+  <nav class="stepper" role="tablist">
+    <button type="button" class="step active" data-step="1" onclick="goToStep(1)" role="tab">
+      <span class="step-num">1</span><span class="step-label">만들기</span>
+    </button>
+    <button type="button" class="step" data-step="2" onclick="goToStep(2)" role="tab">
+      <span class="step-num">2</span><span class="step-label">인증</span>
+    </button>
+    <button type="button" class="step" data-step="3" onclick="goToStep(3)" role="tab">
+      <span class="step-num">3</span><span class="step-label">전체보기</span>
+    </button>
+    <button type="button" class="step" data-step="4" onclick="goToStep(4)" role="tab">
+      <span class="step-num">4</span><span class="step-label">발급</span>
+    </button>
+  </nav>
 
-  <div class="content">
+  <main class="content">
 
-    <div class="summary-card" id="summaryCard">
-      <div class="summary-avatar" id="summaryAvatar">홍</div>
-      <div class="summary-info">
-        <div class="summary-name" id="summaryName">홍길순 님의 가계도</div>
-        <div class="summary-stats">
-          <span>👥 <strong id="statTotal">5</strong>명</span>
-          <span>✓ <strong id="statConfirmed">4</strong>명</span>
+    <!-- Stage 1 — 만들기 -->
+    <section class="stage" id="stageBuild" hidden>
+      <div class="hint">
+        사람을 탭하면 <strong>＋부모 / ＋형제 / ＋배우자 / ＋자녀</strong> 옵션이 나타나요. 무한히 확장됩니다.
+      </div>
+      <div id="treeView"></div>
+    </section>
+
+    <!-- Stage 2 — 인증 -->
+    <section class="stage" id="stageVerify" hidden>
+      <div class="summary-cards" id="verifySummary"></div>
+      <div id="verifyList"></div>
+    </section>
+
+    <!-- Stage 3 — 전체보기 -->
+    <section class="stage" id="stageView" hidden>
+      <div class="summary-cards" id="viewSummary"></div>
+      <div class="graph-wrap">
+        <svg id="graphSvg" viewBox="0 0 360 560" preserveAspectRatio="xMidYMid meet">
+          <g id="graphEdges"></g>
+          <g id="graphNodes"></g>
+        </svg>
+      </div>
+      <div class="graph-legend">
+        <div class="gl-item"><span class="gl-line gl-line--confirmed"></span> 인증됨</div>
+        <div class="gl-item gl-item--pending"><span class="gl-dash"></span> 응답 대기</div>
+        <div class="gl-item gl-item--spouse"><span class="gl-dash"></span> 부부</div>
+      </div>
+      <div class="stage-cta">
+        <button class="next-step-btn" type="button" onclick="goToStep(4)">다음: 증명서 발급 →</button>
+      </div>
+    </section>
+
+    <!-- Stage 4 — 증명서 발급 -->
+    <section class="stage" id="stageIssue" hidden>
+      <div class="summary-cards" id="issueSummary"></div>
+      <div class="issue-form" id="issueForm"></div>
+      <div id="issuePreview"></div>
+      <button class="issue-btn" id="issueBtn" type="button" onclick="issueCertificate()">증명서 발급하기</button>
+      <p class="issue-hint" id="issueHint"></p>
+      <div id="issuedList"></div>
+    </section>
+
+  </main>
+
+  <!-- Modal: 가족 추가 / 편집 -->
+  <div class="modal" id="personModal" role="dialog" aria-modal="true">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <button class="modal-close" type="button" onclick="closeModal()" aria-label="닫기">✕</button>
+        <h2 id="modalTitle">가족 추가</h2>
+        <button class="modal-save" type="button" onclick="confirmModal()">완료</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-intro" id="modalIntro">새 가족을 등록합니다.</div>
+
+        <div class="m-section">
+          <div class="m-label">이름</div>
+          <input type="text" class="m-input" id="modalName" placeholder="홍길동" autocomplete="off"/>
+        </div>
+
+        <div class="m-section">
+          <div class="m-label">연락처 <span class="hint">(선택 — 입력 시 인증 초대가 발송됩니다)</span></div>
+          <input type="tel" class="m-input" id="modalPhone" placeholder="010-1234-5678" autocomplete="off" inputmode="tel"/>
+        </div>
+
+        <div class="m-section">
+          <div class="m-label">성별</div>
+          <div class="gender-toggle" id="modalGender">
+            <button type="button" class="g-opt selected" data-gender="male" onclick="selectGender('male')">♂ 남성</button>
+            <button type="button" class="g-opt" data-gender="female" onclick="selectGender('female')">♀ 여성</button>
+          </div>
+        </div>
+
+        <div class="m-section">
+          <div class="m-label">관계</div>
+          <div class="rel-grid" id="modalRelGrid"></div>
+          <input type="text" class="m-input mt8" id="modalRel" placeholder="직접 입력" autocomplete="off"/>
         </div>
       </div>
     </div>
-
-    <div class="graph-canvas-wrap">
-      <svg id="graphSvg" viewBox="0 0 360 600" preserveAspectRatio="xMidYMid meet">
-        <g id="graphEdges"></g>
-        <g id="graphNodes"></g>
-      </svg>
-    </div>
-    <div class="graph-legend">
-      <div class="gl-item"><span class="gl-line gl-line--confirmed"></span> 인증됨</div>
-      <div class="gl-item"><span class="gl-line dashed gl-line--pending"></span> 대기</div>
-      <div class="gl-item"><span class="gl-line dashed gl-line--drill"></span> 외부 결혼자</div>
-    </div>
-    <div class="add-actions">
-      <button class="add-btn" onclick="openFamilyAdd('grandparents')">＋ 조부모</button>
-      <button class="add-btn" onclick="openFamilyAdd('parents')">＋ 부모</button>
-      <button class="add-btn" onclick="openFamilyAdd('siblings')">＋ 형제</button>
-      <button class="add-btn" onclick="openFamilyAdd('children')">＋ 자녀</button>
-    </div>
-    <div class="spacer-30"></div>
-
   </div>
 
-          <!-- Modal -->
-          <div class="modal-fs" id="modalFs1">
-            <div class="modal-fs-header">
-              <button class="modal-fs-close" onclick="closeFsModal()">✕</button>
-              <div class="modal-fs-title" id="modalFsTitle1">새 가족 추가</div>
-              <button class="modal-fs-save" onclick="confirmFsAdd()">완료</button>
-            </div>
-            <div class="modal-fs-body">
-              <div class="modal-intro">
-                <span class="intro-emoji">💡</span>
-                <div>
-                  <strong id="modalIntroTitle1">안내</strong>
-                  <span id="modalIntroText1">새 가족을 등록하세요.</span>
-                </div>
-              </div>
-              <div class="modal-section">
-                <div class="modal-section-label">이름</div>
-                <input type="text" class="modal-input" id="modalFsName1" placeholder="홍길동" autocomplete="off"/>
-              </div>
-              <div class="modal-section" id="modalGenderSection">
-                <div class="modal-section-label">성별</div>
-                <div class="gender-toggle">
-                  <div class="gender-option male selected" onclick="selectFsGender('male')">
-                    <span class="gender-icon">♂</span> 남성
-                  </div>
-                  <div class="gender-option female" onclick="selectFsGender('female')">
-                    <span class="gender-icon">♀</span> 여성
-                  </div>
-                </div>
-              </div>
-              <div class="modal-section" id="modalOrderSection">
-                <div class="modal-section-label">출생 순서</div>
-                <div class="order-stepper">
-                  <button class="order-stepper-btn" onclick="changeOrder(-1)" id="orderDownBtn">−</button>
-                  <div class="order-stepper-value">
-                    <span id="orderValue">1</span>째
-                  </div>
-                  <button class="order-stepper-btn" onclick="changeOrder(1)" id="orderUpBtn">＋</button>
-                </div>
-                <div class="order-hint">맏이일수록 왼쪽에 배치</div>
-              </div>
-              <div class="modal-section">
-                <div class="modal-section-label">관계</div>
-                <div class="relation-grid" id="relationGrid1"></div>
-                <input type="text" class="modal-input modal-input--mt8" id="modalFsRel1" placeholder="직접 입력" autocomplete="off"/>
-              </div>
-            </div>
-          </div>
-
-  <div class="toast" id="toast1"><span id="toastEmoji1">✓</span><span id="toastText1"></span></div>
-
-  <nav class="bottom-nav">
-    <button class="nav-btn" onclick="window.location.href='../main/home.html'">
-      <div class="nav-btn-icon">🏠</div>
-      <div class="nav-btn-label">홈</div>
-    </button>
-    <button class="nav-btn" onclick="window.location.href='../main/contact.html'">
-      <div class="nav-btn-icon">📰</div>
-      <div class="nav-btn-label">연락처</div>
-    </button>
-    <button class="nav-btn center active" onclick="window.location.href='../main/cert.html'">
-      <div class="nav-circle">🆔</div>
-      <div class="nav-btn-label">증명서</div>
-    </button>
-    <button class="nav-btn" onclick="window.location.href='../main/home.html?page=auth'">
-      <div class="nav-btn-icon">🤝</div>
-      <div class="nav-btn-label">인증</div>
-    </button>
-    <button type="button" class="nav-btn" onclick="location.href='../main/all.html'">
-      <div class="nav-btn-icon">☰</div>
-      <div class="nav-btn-label">전체</div>
-    </button>
-  </nav>
+  <div class="toast" id="toast"></div>
 
 </div>
 
 <script>
 // ============================================================
-// State
+// State & Persistence
+// 데이터는 localStorage에 JSON으로 저장 — 백엔드 동기화는 추후
 // ============================================================
-const initialMe = {
-  id: 'me', name: '홍길순', gender: 'female', isSelf: true, confirmed: true, married: false, point: 0,
-  birthOrder: 3
-};
+const STORAGE_KEY = 'pass_family_tree';
 
-const initialPeople = [
-  { id: 'gpa1', name: '할아버지', gender: 'male', tier: 'grandparents', isPaternalBlood: true, rel: '친할아버지', confirmed: true, married: true, spouseId: 'gma1', point: 5, birthOrder: 2 },
-  { id: 'gma1', name: '할머니', gender: 'female', tier: 'grandparents', isInLawIn: true, rel: '친할머니', confirmed: false, married: true, spouseId: 'gpa1', point: 0, birthOrder: 1 },
+function defaultData() {
+  const now = Date.now();
+  return {
+    meta: { version: 1, createdAt: now, updatedAt: now },
+    me: { id: 'me', name: '나', gender: 'female', spouseId: null },
+    myParentIds: ['dad', 'mom'],
+    people: {
+      dad: { id: 'dad', name: '아버지', gender: 'male', relation: '아버지', parentIds: [], spouseId: 'mom', phone: null, invitedAt: null, confirmed: false, addedAt: now },
+      mom: { id: 'mom', name: '어머니', gender: 'female', relation: '어머니', parentIds: [], spouseId: 'dad', phone: null, invitedAt: null, confirmed: false, addedAt: now + 1 }
+    }
+  };
+}
 
-  { id: 'uncle1', name: '큰아버지', gender: 'male', tier: 'parents_siblings', isPaternalBlood: true, rel: '큰아버지', confirmed: false, point: 0, parentId: 'gpa1', birthOrder: 1 },
-  { id: 'aunt1', name: '고모', gender: 'female', tier: 'parents_siblings', isPaternalBlood: true, rel: '고모', confirmed: false, point: 0, parentId: 'gpa1', birthOrder: 2 },
-  { id: 'dad', name: '아버지', gender: 'male', tier: 'parents', isPaternalBlood: true, rel: '아버지', confirmed: true, married: true, spouseId: 'mom', point: 8, parentId: 'gpa1', birthOrder: 3 },
-  { id: 'mom', name: '어머니', gender: 'female', tier: 'parents', isInLawIn: true, rel: '어머니', confirmed: true, married: true, spouseId: 'dad', point: 8, birthOrder: 1 },
+let data = loadData();
+let currentStep = 1;
+let pendingModal = null; // { mode: 'add'|'edit', targetId, addType }
 
-  { id: 'sib1', name: '큰형', gender: 'male', tier: 'siblings', isPaternalBlood: true, rel: '큰형', confirmed: true, married: false, point: 4, birthOrder: 1 },
-  { id: 'sib2', name: '누나', gender: 'female', tier: 'siblings', isPaternalBlood: true, rel: '누나', confirmed: true, married: false, point: 4, birthOrder: 2 },
-  { id: 'sib3', name: '남동생', gender: 'male', tier: 'siblings', isPaternalBlood: true, rel: '남동생', confirmed: true, married: false, point: 4, birthOrder: 4 },
-];
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && parsed.me && parsed.people) return parsed;
+    }
+  } catch (e) {}
+  return defaultData();
+}
 
-let perspectiveStack = [{
-  rootId: 'me', rootName: '홍길순',
-  me: { ...initialMe },
-  people: JSON.parse(JSON.stringify(initialPeople))
-}];
+function saveData() {
+  data.meta.updatedAt = Date.now();
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+  catch (e) { console.warn('saveData failed', e); }
+}
 
-let selectedNodeId = null;
-let pendingAction = null;
-let pendingGender = 'male';
-let pendingBirthOrder = 1;
-let currentView = 'graph';
+function newId() {
+  return 'p_' + Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-4);
+}
 
-function getCurrentPerspective() { return perspectiveStack[perspectiveStack.length - 1]; }
+// ============================================================
+// Person helpers
+// ============================================================
+function isMe(id) { return id === 'me'; }
+
 function getPerson(id) {
-  const p = getCurrentPerspective();
-  if (id === p.me.id || id === 'me') return p.me;
-  return p.people.find(x => x.id === id);
-}
-function isMarried(personId) {
-  const p = getPerson(personId);
-  return p && (!!p.married || !!p.spouseId);
-}
-function isCurrentGeneration(personId) {
-  const p = getPerson(personId);
-  if (!p) return false;
-  if (p.isSelf) return true;
-  return p.tier === 'siblings';
-}
-function isInLawIn(p) { return !!p.isInLawIn; }
-
-function sortByBirthOrder(arr) {
-  return [...arr].sort((a, b) => (a.birthOrder || 999) - (b.birthOrder || 999));
-}
-
-function getSiblingGroup(person) {
-  const persp = getCurrentPerspective();
-  if (!person) return [];
-  if (person.id === persp.me.id || (person.tier === 'siblings' && !person.isInLaw)) {
-    return sortByBirthOrder([persp.me, ...persp.people.filter(p => p.tier === 'siblings' && !p.isInLaw)]);
+  if (isMe(id)) {
+    return {
+      id: 'me',
+      name: data.me.name || '나',
+      gender: data.me.gender || 'female',
+      spouseId: data.me.spouseId || null,
+      relation: '본인',
+      parentIds: data.myParentIds || [],
+      addedAt: 0,
+      isSelf: true,
+      confirmed: true
+    };
   }
-  if (person.tier === 'parents' && person.isPaternalBlood) {
-    return sortByBirthOrder([person, ...persp.people.filter(p => p.tier === 'parents_siblings')]);
-  }
-  if (person.tier === 'parents_siblings') {
-    const dad = persp.people.find(p => p.tier === 'parents' && p.isPaternalBlood);
-    return sortByBirthOrder([dad, ...persp.people.filter(p => p.tier === 'parents_siblings')].filter(Boolean));
-  }
-  if (person.tier === 'children') {
-    return sortByBirthOrder(persp.people.filter(p => p.tier === 'children' && p.parentId === person.parentId));
-  }
-  return [person];
+  return data.people[id] || null;
 }
 
-// ============================================================
-// View toggle (단일 화면: 그래프 뷰만 존재)
-// ============================================================
-function switchView(_view) {
-  renderGraph();
-  document.querySelectorAll('.action-panel').forEach(p => p.remove());
+function getAllPeople() {
+  return [getPerson('me'), ...Object.values(data.people)];
 }
 
-// ============================================================
-// BOX-CONTAINMENT TREE Rendering
-// ============================================================
-function renderTree() {
-  const persp = getCurrentPerspective();
-  const canvas = document.getElementById('treeCanvas');
-  if (!canvas) return;
-  canvas.innerHTML = '';
-
-  // Get all people grouped logically
-  const gpa = persp.people.find(p => p.id === 'gpa1');
-  const gma = persp.people.find(p => p.id === 'gma1');
-  const dad = persp.people.find(p => p.id === 'dad');
-  const mom = persp.people.find(p => p.id === 'mom');
-  const parentsSiblings = persp.people.filter(p => p.tier === 'parents_siblings');
-  const siblings = persp.people.filter(p => p.tier === 'siblings' && !p.isInLaw);
-  const meSpouse = persp.people.find(p => p.tier === 'spouse_of_me');
-
-  // ===========================================
-  // OUTERMOST: Grandparents' family box
-  // Contains: grandparents (couple) + their children's families
-  // ===========================================
-  const gpaFamilyBox = document.createElement('div');
-  gpaFamilyBox.className = 'family-box gen-1';
-  gpaFamilyBox.innerHTML = `<div class="family-box-label">👴 조부모 가족</div>`;
-
-  // Grandparents couple row
-  const gpaCouple = document.createElement('div');
-  gpaCouple.className = 'couple-row';
-  if (gpa) gpaCouple.appendChild(makePersonNode(gpa));
-  else gpaCouple.appendChild(makeEmptySlot({ slotLabel: '+할아버지', slotTier: 'grandparents', slotGender: 'male', slotIsPaternalBlood: true }));
-
-  if (gpa && gma) {
-    const m = document.createElement('span');
-    m.className = 'marriage-symbol';
-    m.textContent = '💍';
-    gpaCouple.appendChild(m);
-  }
-
-  if (gma) gpaCouple.appendChild(makePersonNode(gma));
-  else if (gpa) gpaCouple.appendChild(makeEmptySlot({ slotLabel: '+할머니', slotTier: 'grandparents', slotGender: 'female', slotIsInLawIn: true }));
-
-  gpaFamilyBox.appendChild(gpaCouple);
-
-  // Grandparents' children (= parents tier with their siblings)
-  if (dad) {
-    const parentsChildrenBox = document.createElement('div');
-    parentsChildrenBox.className = 'children-box';
-
-    // Sort dad + his siblings by birth order
-    const dadGroup = sortByBirthOrder([dad, ...parentsSiblings]);
-
-    dadGroup.forEach(member => {
-      if (member.id === 'dad') {
-        // 부모 가족 box (dad + mom + their children = me + siblings)
-        const parentsFamilyBox = makeNestedFamilyBox({
-          label: '👨‍👩 부모 가족',
-          colorClass: 'gen-2',
-          coupleA: dad,
-          coupleB: mom,
-          childrenContainer: () => renderMyGenerationChildren(siblings, meSpouse, persp)
-        });
-        parentsChildrenBox.appendChild(parentsFamilyBox);
-      } else {
-        // Uncle/aunt — show as single person, or as their own family if married
-        if (isMarried(member.id)) {
-          // Future: nested family box for them
-          parentsChildrenBox.appendChild(makePersonNode(member));
-        } else {
-          parentsChildrenBox.appendChild(makePersonNode(member));
-        }
-      }
-    });
-
-    // Empty slot for adding more parent siblings
-    parentsChildrenBox.appendChild(makeEmptySlot({
-      slotLabel: '+부모 형제', slotTier: 'parents_siblings', slotGender: 'male', slotIsPaternalBlood: true
-    }));
-
-    gpaFamilyBox.appendChild(parentsChildrenBox);
-  } else {
-    // No dad yet - empty slot
-    const emptyChildren = document.createElement('div');
-    emptyChildren.className = 'children-box';
-    emptyChildren.appendChild(makeEmptySlot({
-      slotLabel: '+아버지 (자녀)', slotTier: 'parents', slotGender: 'male', slotIsPaternalBlood: true
-    }));
-    gpaFamilyBox.appendChild(emptyChildren);
-  }
-
-  canvas.appendChild(gpaFamilyBox);
+function getParents(id) {
+  const p = getPerson(id);
+  if (!p) return [];
+  return (p.parentIds || []).map(getPerson).filter(Boolean);
 }
 
-/**
- * Renders the "my generation children" box that goes inside parents' family.
- * Contains: me + siblings (with their own families if married) + spouse + my children
- */
-function renderMyGenerationChildren(siblings, meSpouse, persp) {
-  const container = document.createElement('div');
-  container.className = 'children-box';
+function getSpouse(id) {
+  const p = getPerson(id);
+  if (!p || !p.spouseId) return null;
+  return getPerson(p.spouseId);
+}
 
-  // Sort me + siblings by birth order
-  const myGen = sortByBirthOrder([persp.me, ...siblings]);
+// id의 자녀 = 그 id를 parentIds에 가진 사람들
+function getChildren(id) {
+  const result = [];
+  if ((data.myParentIds || []).includes(id)) result.push(getPerson('me'));
+  for (const p of Object.values(data.people)) {
+    if (p.parentIds && p.parentIds.includes(id)) result.push(p);
+  }
+  return result;
+}
 
-  myGen.forEach(member => {
-    if (member.id === persp.me.id || member.id === 'me') {
-      // My family box
-      const meChildren = sortByBirthOrder(persp.people.filter(p => p.tier === 'children' && p.parentId === persp.me.id));
+// me 기준 세대 오프셋 계산 — BFS로 모든 도달 가능 인물에 세대 부여
+function computeGenerations() {
+  const gens = {};
+  const visited = new Set(['me']);
+  const queue = [{ id: 'me', gen: 0 }];
+  gens['me'] = 0;
 
-      if (persp.me.married && meSpouse) {
-        const myFamilyBox = makeNestedFamilyBox({
-          label: '👤 나의 가족',
-          colorClass: 'self-fam',
-          coupleA: persp.me,
-          coupleB: meSpouse,
-          childrenContainer: () => {
-            const cb = document.createElement('div');
-            cb.className = 'children-box';
-            if (meChildren.length === 0) {
-              const empty = document.createElement('span');
-              empty.className = 'children-box-empty';
-              empty.textContent = '자녀를 추가하세요';
-              cb.appendChild(empty);
-            }
-            meChildren.forEach(c => cb.appendChild(makePersonNode(c)));
-            cb.appendChild(makeEmptySlot({
-              slotLabel: '+자녀', slotTier: 'children', slotGender: 'male', parentId: persp.me.id, slotIsPaternalBlood: true
-            }));
-            return cb;
-          }
-        });
-        container.appendChild(myFamilyBox);
-      } else {
-        // Not married yet — just me as a node
-        container.appendChild(makePersonNode(persp.me));
-      }
-    } else {
-      // Sibling
-      if (isMarried(member.id)) {
-        // Sibling's family box
-        const sibSpouse = persp.people.find(p => p.id === member.spouseId);
-        const sibChildren = sortByBirthOrder(persp.people.filter(p => p.tier === 'children' && p.parentId === member.id));
+  while (queue.length) {
+    const { id, gen } = queue.shift();
+    const p = getPerson(id);
+    if (!p) continue;
 
-        const sibFamilyBox = makeNestedFamilyBox({
-          label: `👨 ${member.name} 가족`,
-          colorClass: 'sibling-fam',
-          coupleA: member,
-          coupleB: sibSpouse,
-          childrenContainer: () => {
-            const cb = document.createElement('div');
-            cb.className = 'children-box';
-            if (sibChildren.length === 0) {
-              const empty = document.createElement('span');
-              empty.className = 'children-box-empty';
-              empty.textContent = '+조카';
-              empty.style.cursor = 'pointer';
-              empty.onclick = () => openModalForSlot({
-                slotLabel: '+조카', slotTier: 'children', slotGender: 'male', parentId: member.id, slotIsPaternalBlood: true
-              });
-              cb.appendChild(empty);
-            }
-            sibChildren.forEach(c => cb.appendChild(makePersonNode(c)));
-            return cb;
-          }
-        });
-        container.appendChild(sibFamilyBox);
-      } else {
-        // Sibling alone
-        container.appendChild(makePersonNode(member));
+    // 부모 (gen - 1)
+    for (const pid of (p.parentIds || [])) {
+      if (visited.has(pid) || !getPerson(pid)) continue;
+      visited.add(pid);
+      gens[pid] = gen - 1;
+      queue.push({ id: pid, gen: gen - 1 });
+    }
+    // 배우자 (동세대)
+    if (p.spouseId && !visited.has(p.spouseId) && getPerson(p.spouseId)) {
+      visited.add(p.spouseId);
+      gens[p.spouseId] = gen;
+      queue.push({ id: p.spouseId, gen });
+    }
+    // 자녀 (gen + 1) — 누군가가 이 id를 parentIds에 가지고 있으면 자녀
+    for (const other of getAllPeople()) {
+      if (visited.has(other.id)) continue;
+      if (other.parentIds && other.parentIds.includes(id)) {
+        visited.add(other.id);
+        gens[other.id] = gen + 1;
+        queue.push({ id: other.id, gen: gen + 1 });
       }
     }
-  });
-
-  // Empty slot for adding sibling
-  container.appendChild(makeEmptySlot({
-    slotLabel: '+형제', slotTier: 'siblings', slotGender: 'male', slotIsPaternalBlood: true
-  }));
-
-  return container;
-}
-
-/**
- * Creates a nested family box (couple + their children inside)
- */
-function makeNestedFamilyBox({ label, colorClass, coupleA, coupleB, childrenContainer }) {
-  const wrap = document.createElement('div');
-  wrap.className = `family-box ${colorClass}`;
-  wrap.innerHTML = `<div class="family-box-label">${label}</div>`;
-
-  const couple = document.createElement('div');
-  couple.className = 'couple-row';
-
-  if (coupleA) couple.appendChild(makePersonNode(coupleA));
-
-  if (coupleA && coupleB) {
-    const m = document.createElement('span');
-    m.className = 'marriage-symbol';
-    m.textContent = '💍';
-    couple.appendChild(m);
   }
 
-  if (coupleB) couple.appendChild(makePersonNode(coupleB));
-
-  wrap.appendChild(couple);
-
-  if (childrenContainer) {
-    wrap.appendChild(childrenContainer());
-  }
-
-  return wrap;
+  return gens;
 }
 
-/**
- * Creates a person node (box only, no lines)
- */
-function makePersonNode(person) {
-  const node = document.createElement('div');
-  node.className = 'person-node';
-  if (person.gender === 'female') node.classList.add('female');
-  if (person.isSelf) node.classList.add('self');
-  if (isInLawIn(person)) node.classList.add('in-law');
-  if (!person.confirmed && !person.isSelf) node.classList.add('pending');
-  if (person.id === selectedNodeId) node.classList.add('selected');
+// ============================================================
+// Navigation
+// ============================================================
+function goBack() {
+  if (history.length > 1) history.back();
+  else location.href = '../main/cert.html';
+}
 
-  let nameHtml = person.name;
-  if (person.isSelf) nameHtml += ' <span class="self-tag">(나)</span>';
+function goToStep(n) {
+  currentStep = n;
+  document.querySelectorAll('.step').forEach(b =>
+    b.classList.toggle('active', Number(b.dataset.step) === n)
+  );
+  document.querySelectorAll('.stage').forEach(s => s.hidden = true);
+  const map = { 1: 'stageBuild', 2: 'stageVerify', 3: 'stageView', 4: 'stageIssue' };
+  document.getElementById(map[n]).hidden = false;
+  closeActionPanel();
+  rerender();
+}
 
-  node.innerHTML = `
-    <div class="person-node-name">${nameHtml}</div>
-    <div class="person-node-rel">${person.rel || ''}</div>
-    <div class="person-confirm-badge ${person.confirmed || person.isSelf ? '' : 'pending'}">${person.isSelf || person.confirmed ? '✓' : '!'}</div>
-    ${isInLawIn(person) ? '<div class="person-drill-badge">🔀</div>' : ''}
+function rerender() {
+  if (currentStep === 1) renderBuild();
+  else if (currentStep === 2) renderVerify();
+  else if (currentStep === 3) renderView();
+  else if (currentStep === 4) renderIssue();
+}
+
+// ============================================================
+// Stage 1 — 만들기
+// ============================================================
+function renderBuild() {
+  const root = document.getElementById('treeView');
+  root.innerHTML = '';
+
+  const gens = computeGenerations();
+  const byGen = {};
+  for (const [id, g] of Object.entries(gens)) (byGen[g] = byGen[g] || []).push(id);
+  const genNumbers = Object.keys(byGen).map(Number).sort((a, b) => a - b);
+
+  for (const g of genNumbers) {
+    const ids = byGen[g];
+    ids.sort((a, b) => (getPerson(a).addedAt || 0) - (getPerson(b).addedAt || 0));
+    const row = document.createElement('div');
+    row.className = 'gen-row';
+    row.innerHTML = `
+      <div class="gen-header">
+        <span class="gen-num">${g >= 0 ? '+' + g : g}</span>
+        <span class="gen-name">${genLabel(g)}</span>
+      </div>
+      <div class="person-row"></div>
+    `;
+    const pr = row.querySelector('.person-row');
+    for (const id of ids) pr.appendChild(makeBuildCard(id));
+    root.appendChild(row);
+  }
+
+  const cta = document.createElement('div');
+  cta.className = 'stage-cta';
+  cta.innerHTML = `
+    <p class="cta-hint">가족을 다 추가했다면 다음 단계로 이동하세요.</p>
+    <button class="next-step-btn" type="button" onclick="goToStep(2)">다음: 연락처 인증 →</button>
   `;
-
-  node.onclick = (e) => {
-    e.stopPropagation();
-    selectNode(person.id);
-  };
-
-  return node;
+  root.appendChild(cta);
 }
 
-function makeEmptySlot(slotData) {
-  const slot = document.createElement('div');
-  slot.className = 'empty-slot-node';
-  slot.textContent = slotData.slotLabel;
-  slot.onclick = (e) => {
+function genLabel(g) {
+  if (g === 0) return '나·동세대';
+  if (g === -1) return '부모';
+  if (g === -2) return '조부모';
+  if (g <= -3) return `${-g}대 위 조상`;
+  if (g === 1) return '자녀';
+  if (g === 2) return '손주';
+  if (g >= 3) return `${g}대 아래`;
+  return '';
+}
+
+function makeBuildCard(id) {
+  const p = getPerson(id);
+  const card = document.createElement('button');
+  card.type = 'button';
+  card.className = 'person-card';
+  card.dataset.id = id;
+  card.classList.add(p.gender === 'female' ? 'female' : 'male');
+  if (p.isSelf) card.classList.add('self');
+  if (p.confirmed && !p.isSelf) card.classList.add('confirmed');
+  const married = p.spouseId ? ' 💍' : '';
+  card.innerHTML = `
+    <span class="pc-avatar">${escapeHtml((p.name || '?').charAt(0))}</span>
+    <span class="pc-info">
+      <span class="pc-name">${escapeHtml(p.name || '?')}${married}</span>
+      <span class="pc-rel">${escapeHtml(p.relation || (p.isSelf ? '본인' : ''))}</span>
+    </span>
+  `;
+  card.onclick = (e) => {
     e.stopPropagation();
-    openModalForSlot(slotData);
+    showActionPanel(id, card);
   };
-  return slot;
+  return card;
 }
 
 // ============================================================
-// Selection & Action Panel
+// Action panel (popover) — Stage 1에서 사람 탭 시 표시
 // ============================================================
-function selectNode(id) {
-  if (selectedNodeId === id) selectedNodeId = null;
-  else selectedNodeId = id;
-  renderTree();
-  if (selectedNodeId) {
-    setTimeout(() => showActionPanelForSelected(), 50);
-  }
-}
-
-function showActionPanelForSelected() {
-  if (!selectedNodeId) return;
-  const persp = getCurrentPerspective();
-  const person = selectedNodeId === persp.me.id ? persp.me : persp.people.find(p => p.id === selectedNodeId);
-  if (!person) return;
-
-  // Find the rendered node
-  const nodes = document.querySelectorAll('.person-node.selected');
-  if (nodes.length === 0) return;
-  const node = nodes[0];
-  const canvas = document.getElementById('treeCanvas');
-  const nodeRect = node.getBoundingClientRect();
-  const canvasRect = canvas.getBoundingClientRect();
-
-  document.querySelectorAll('.action-panel').forEach(p => p.remove());
+function showActionPanel(personId, anchorEl) {
+  closeActionPanel();
+  const p = getPerson(personId);
+  if (!p) return;
 
   const panel = document.createElement('div');
   panel.className = 'action-panel';
+  panel.dataset.for = personId;
 
+  const parents = getParents(personId);
+  const spouse = getSpouse(personId);
   const buttons = [];
 
-  if (isInLawIn(person)) {
-    buttons.push({ label: `🔀 ${person.name} 시점으로`, className: 'drill', onClick: () => drillDown(person) });
+  if (parents.length < 2) {
+    buttons.push({ label: '＋ 부모 추가', cls: 'add', click: () => openAddModal(personId, 'parent') });
   }
-  if (isCurrentGeneration(person.id) && !isMarried(person.id)) {
-    buttons.push({ label: '💍 결혼', className: 'marriage', onClick: () => initMarriage(person.id) });
+  if (parents.length > 0) {
+    buttons.push({ label: '＋ 형제 추가', cls: 'add', click: () => openAddModal(personId, 'sibling') });
   }
-  if (isCurrentGeneration(person.id) && isMarried(person.id)) {
-    buttons.push({ label: '👶 자녀 추가', className: 'child', onClick: () => initAddChild(person.id) });
-  } else if (isCurrentGeneration(person.id) && !isMarried(person.id)) {
-    buttons.push({ label: '👶 자녀 (결혼 먼저)', disabled: true });
+  if (!spouse) {
+    buttons.push({ label: '＋ 배우자 추가', cls: 'add', click: () => openAddModal(personId, 'spouse') });
   }
-  const sg = getSiblingGroup(person);
-  if (sg.length > 1 && !isInLawIn(person)) {
-    const ord = sg.findIndex(s => s.id === person.id) + 1;
-    buttons.push({ label: `↕ 순서 변경 (현재 ${ord}째)`, className: 'order', onClick: () => initChangeOrder(person) });
-  }
-  if (!person.isSelf) {
-    buttons.push({ label: person.confirmed ? '⏱ 대기로' : '✓ 인증', className: 'confirm', onClick: () => toggleConfirm(person.id) });
-  }
-  if (!person.isSelf) {
-    buttons.push({ label: '🗑 삭제', className: 'delete', onClick: () => deletePerson(person.id) });
+  buttons.push({ label: '＋ 자녀 추가', cls: 'add', click: () => openAddModal(personId, 'child') });
+  buttons.push({ label: p.isSelf ? '✏ 내 이름 편집' : '✏ 이름·관계 편집', cls: 'edit', click: () => openEditModal(personId) });
+  if (!p.isSelf) {
+    buttons.push({ label: '🗑 가계도에서 제거', cls: 'danger', click: () => deletePerson(personId) });
   }
 
-  buttons.forEach(b => {
-    const btn = document.createElement('button');
-    btn.className = `ap-btn ${b.className || ''}`;
-    btn.innerHTML = b.label;
-    if (b.disabled) btn.disabled = true;
-    else btn.onclick = b.onClick;
-    panel.appendChild(btn);
-  });
+  for (const b of buttons) {
+    const el = document.createElement('button');
+    el.type = 'button';
+    el.className = `ap-btn ${b.cls || ''}`;
+    el.textContent = b.label;
+    el.onclick = () => { closeActionPanel(); b.click(); };
+    panel.appendChild(el);
+  }
 
-  // Position below the node
-  const nodeCenterX = nodeRect.left + nodeRect.width / 2 - canvasRect.left;
-  const nodeBottomY = nodeRect.bottom - canvasRect.top + 12;
-  panel.style.left = `${nodeCenterX - 75}px`;
-  panel.style.top = `${nodeBottomY}px`;
-  panel.style.position = 'absolute';
-
-  // Set canvas relative
-  canvas.style.position = 'relative';
-  canvas.appendChild(panel);
-
-  // Adjust if out of bounds
-  setTimeout(() => {
-    const pr = panel.getBoundingClientRect();
-    const cr = canvas.getBoundingClientRect();
-    if (pr.right > cr.right - 8) panel.style.left = `${cr.right - pr.width - 8 - cr.left}px`;
-    if (pr.left < cr.left + 8) panel.style.left = `8px`;
-  }, 10);
+  document.body.appendChild(panel);
+  positionPanel(panel, anchorEl);
 }
+
+function positionPanel(panel, anchor) {
+  const r = anchor.getBoundingClientRect();
+  const pw = panel.offsetWidth;
+  const ph = panel.offsetHeight;
+  let left = r.left + r.width / 2 - pw / 2;
+  let top = r.bottom + 8;
+  const maxLeft = window.innerWidth - pw - 8;
+  if (left < 8) left = 8;
+  if (left > maxLeft) left = maxLeft;
+  if (top + ph > window.innerHeight - 12) {
+    top = r.top - ph - 8;
+    if (top < 8) top = 8;
+  }
+  panel.style.left = `${left}px`;
+  panel.style.top = `${top}px`;
+}
+
+function closeActionPanel() {
+  document.querySelectorAll('.action-panel').forEach(p => p.remove());
+}
+
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.action-panel') && !e.target.closest('.person-card')) {
+    closeActionPanel();
+  }
+});
 
 // ============================================================
-// Actions
+// Modal — 가족 추가/편집
 // ============================================================
-function drillDown(person) {
-  perspectiveStack.push({
-    rootId: person.id + '_' + Date.now(),
-    rootName: person.name,
-    me: {
-      id: 'me', name: person.name, gender: person.gender,
-      isSelf: true, confirmed: person.confirmed,
-      married: true, point: person.point || 0, birthOrder: 1
-    },
-    people: []
-  });
-  selectedNodeId = null;
-  renderAll();
-  showToast('🔀', `${person.name}님 시점`);
-}
+const MODAL_PRESETS = {
+  parent: {
+    title: '부모 추가',
+    male: { chips: ['아버지', '시아버지', '장인'], def: '아버지' },
+    female: { chips: ['어머니', '시어머니', '장모'], def: '어머니' },
+  },
+  sibling: {
+    title: '형제 추가',
+    male: { chips: ['형', '오빠', '남동생'], def: '남동생' },
+    female: { chips: ['누나', '언니', '여동생'], def: '여동생' },
+  },
+  spouse: {
+    title: '배우자 추가',
+    male: { chips: ['남편'], def: '남편' },
+    female: { chips: ['아내'], def: '아내' },
+  },
+  child: {
+    title: '자녀 추가',
+    male: { chips: ['아들'], def: '아들' },
+    female: { chips: ['딸'], def: '딸' },
+  },
+};
 
-function navigateBack() {
-  if (perspectiveStack.length <= 1) return;
-  perspectiveStack.pop();
-  selectedNodeId = null;
-  renderAll();
-}
+function openAddModal(targetId, addType) {
+  pendingModal = { mode: 'add', targetId, addType };
+  const preset = MODAL_PRESETS[addType];
+  const target = getPerson(targetId);
 
-function initChangeOrder(person) {
-  const sg = getSiblingGroup(person);
-  const n = prompt(`${person.name}님의 새 순서 (1~${sg.length}):`, person.birthOrder);
-  if (!n) return;
-  const num = parseInt(n);
-  if (isNaN(num) || num < 1 || num > sg.length) {
-    showToast('⚠️', `1~${sg.length} 사이`); return;
+  document.getElementById('modalTitle').textContent = preset.title;
+  document.getElementById('modalIntro').textContent = `${target.name || '?'}님의 ${preset.title.replace(' 추가', '')}를 등록합니다.`;
+  document.getElementById('modalName').value = '';
+  document.getElementById('modalPhone').value = '';
+
+  // 기본 성별: 부모/배우자는 추론, 그 외는 male
+  let g = 'male';
+  if (addType === 'parent') {
+    // 첫 번째 부모 없으면 같은 성별, 두 번째라면 반대 성별 추천 (배우자 페어링)
+    const parents = getParents(targetId);
+    if (parents.length === 1) g = parents[0].gender === 'male' ? 'female' : 'male';
+    else g = target.gender === 'male' ? 'male' : 'female';
+  } else if (addType === 'spouse') {
+    g = target.gender === 'male' ? 'female' : 'male';
   }
-  const persp = getCurrentPerspective();
-  const oldOrder = person.birthOrder;
-  if (num === oldOrder) return;
-  sg.forEach(member => {
-    const target = member.id === 'me' || member.id === persp.me.id ? persp.me : persp.people.find(p => p.id === member.id);
-    if (!target) return;
-    if (member.id === person.id) target.birthOrder = num;
-    else {
-      if (num < oldOrder) {
-        if (member.birthOrder >= num && member.birthOrder < oldOrder) target.birthOrder = member.birthOrder + 1;
-      } else {
-        if (member.birthOrder <= num && member.birthOrder > oldOrder) target.birthOrder = member.birthOrder - 1;
+  selectGender(g);
+  renderRelationChips(addType, g);
+
+  document.getElementById('personModal').classList.add('visible');
+  setTimeout(() => document.getElementById('modalName').focus(), 250);
+}
+
+function openEditModal(targetId) {
+  pendingModal = { mode: 'edit', targetId, addType: null };
+  const target = getPerson(targetId);
+
+  document.getElementById('modalTitle').textContent = '이름 / 관계 편집';
+  document.getElementById('modalIntro').textContent = target.isSelf ? '내 정보를 수정합니다.' : `${target.name}님 정보를 수정합니다.`;
+  document.getElementById('modalName').value = target.name || '';
+  document.getElementById('modalPhone').value = target.phone || '';
+  selectGender(target.gender || 'male');
+
+  // 편집 모드에서는 chip preset 없음 — 자유 입력만
+  document.getElementById('modalRelGrid').innerHTML = '';
+  document.getElementById('modalRel').value = target.relation || '';
+
+  document.getElementById('personModal').classList.add('visible');
+  setTimeout(() => document.getElementById('modalName').focus(), 250);
+}
+
+function renderRelationChips(addType, gender) {
+  const grid = document.getElementById('modalRelGrid');
+  grid.innerHTML = '';
+  const preset = MODAL_PRESETS[addType];
+  if (!preset) return;
+  const { chips, def } = preset[gender] || preset.male;
+  document.getElementById('modalRel').value = def || '';
+  for (const c of chips) {
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'rel-chip';
+    if (c === def) chip.classList.add('selected');
+    chip.textContent = c;
+    chip.onclick = () => {
+      grid.querySelectorAll('.rel-chip').forEach(x => x.classList.remove('selected'));
+      chip.classList.add('selected');
+      document.getElementById('modalRel').value = c;
+    };
+    grid.appendChild(chip);
+  }
+}
+
+function selectGender(g) {
+  document.querySelectorAll('#modalGender .g-opt').forEach(opt => {
+    opt.classList.toggle('selected', opt.dataset.gender === g);
+  });
+  if (pendingModal && pendingModal.addType) {
+    renderRelationChips(pendingModal.addType, g);
+  }
+}
+
+function closeModal() {
+  document.getElementById('personModal').classList.remove('visible');
+  pendingModal = null;
+}
+
+function confirmModal() {
+  if (!pendingModal) return;
+  const name = document.getElementById('modalName').value.trim();
+  const phoneRaw = document.getElementById('modalPhone').value.trim();
+  const phone = phoneRaw ? phoneRaw.replace(/[^0-9+\-]/g, '') : '';
+  const rel = document.getElementById('modalRel').value.trim();
+  const gender = document.querySelector('#modalGender .g-opt.selected')?.dataset.gender || 'male';
+
+  if (!name) { showToast('⚠️', '이름을 입력하세요'); return; }
+
+  // ----- Edit mode -----
+  if (pendingModal.mode === 'edit') {
+    const id = pendingModal.targetId;
+    if (id === 'me') {
+      data.me.name = name;
+      data.me.gender = gender;
+    } else {
+      const p = data.people[id];
+      if (p) {
+        p.name = name;
+        p.gender = gender;
+        if (rel) p.relation = rel;
+        // 연락처가 명시적으로 비워졌으면 초대/인증도 리셋, 새 번호면 invitedAt 갱신
+        const oldPhone = p.phone || '';
+        if (phoneRaw === '') {
+          p.phone = null;
+          p.invitedAt = null;
+          p.confirmed = false;
+        } else if (phone !== oldPhone) {
+          p.phone = phone;
+          p.invitedAt = Date.now();
+          p.confirmed = false;
+        }
       }
     }
-  });
-  selectedNodeId = null;
-  renderAll();
-  showToast('↕', `${num}째로 변경`);
-}
-
-function initMarriage(targetId) {
-  pendingAction = { type: 'marriage', targetId };
-  const t = getPerson(targetId);
-  pendingGender = t.gender === 'male' ? 'female' : 'male';
-  pendingBirthOrder = 1;
-  openModal({
-    title: `💍 ${t.name}의 배우자 추가`,
-    intro: `<strong>결혼 등록</strong><span>${t.name}님의 배우자를 등록합니다.</span>`,
-    relations: pendingGender === 'male' ? ['남편', '매형'] : ['아내', '형수'],
-    defaultRel: pendingGender === 'male' ? '남편' : '아내',
-    gender: pendingGender,
-    lockGender: true,
-    showOrder: false
-  });
-}
-
-function initAddChild(parentId) {
-  pendingAction = { type: 'child', targetId: parentId };
-  pendingGender = 'male';
-  const persp = getCurrentPerspective();
-  const existing = persp.people.filter(p => p.tier === 'children' && p.parentId === parentId).length;
-  pendingBirthOrder = existing + 1;
-  const parent = getPerson(parentId);
-  openModal({
-    title: `👶 ${parent.name}의 자녀 추가`,
-    intro: `<strong>자녀 등록</strong><span>${parent.name}님의 자녀를 등록합니다.</span>`,
-    relations: ['아들', '딸'],
-    gender: 'male',
-    lockGender: false,
-    showOrder: true
-  });
-}
-
-// 그래프 아래 + 버튼 → openModalForSlot 래퍼
-function openFamilyAdd(tier) {
-  const persp = getCurrentPerspective();
-  const meId = persp.me ? persp.me.id : 'me';
-  const slots = {
-    grandparents: { slotTier: 'grandparents', slotGender: 'male', slotIsPaternalBlood: true },
-    parents:      { slotTier: 'parents',      slotGender: persp.people.find(p => p.id === 'dad') ? 'female' : 'male' },
-    siblings:     { slotTier: 'siblings',     slotGender: 'male', slotIsInLawIn: false },
-    children:     { slotTier: 'children',     slotGender: 'male', parentId: meId }
-  };
-  const slot = slots[tier];
-  if (!slot) return;
-  openModalForSlot(slot);
-}
-
-function openModalForSlot(slot) {
-  pendingAction = {
-    type: 'slot', tier: slot.slotTier,
-    slotFamily: slot.slotFamily, parentId: slot.parentId,
-    slotIsPaternalBlood: slot.slotIsPaternalBlood,
-    slotIsInLawIn: slot.slotIsInLawIn
-  };
-  pendingGender = slot.slotGender || 'male';
-
-  const persp = getCurrentPerspective();
-  let existing = 0;
-  const cfgs = {
-    grandparents: { title: '👴 조부모', intro: '조부모를 등록합니다.', relations: pendingGender === 'male' ? ['할아버지'] : ['할머니'], needsOrder: pendingGender === 'male' },
-    parents: { title: '👨 부모', intro: '부모를 등록합니다.', relations: pendingGender === 'male' ? ['아버지'] : ['어머니'], needsOrder: pendingGender === 'male' },
-    parents_siblings: { title: '👨 부모 형제', intro: '부모의 형제자매를 등록합니다.', relations: ['큰아버지', '작은아버지', '고모', '삼촌'], needsOrder: true },
-    siblings: { title: '👫 형제자매', intro: '형제자매를 등록합니다.', relations: ['형', '오빠', '누나', '언니', '남동생', '여동생'], needsOrder: true },
-    children: { title: '👶 자녀', intro: '자녀를 등록합니다.', relations: ['아들', '딸'], needsOrder: true }
-  };
-  const cfg = cfgs[slot.slotTier];
-  if (!cfg) return;
-
-  if (slot.slotTier === 'siblings') existing = persp.people.filter(p => p.tier === 'siblings' && !p.isInLaw).length + 1;
-  else if (slot.slotTier === 'parents_siblings') existing = persp.people.filter(p => p.tier === 'parents_siblings').length + (persp.people.find(p => p.id === 'dad') ? 1 : 0);
-  else if (slot.slotTier === 'children') existing = persp.people.filter(p => p.tier === 'children' && p.parentId === slot.parentId).length;
-  pendingBirthOrder = existing + 1;
-
-  openModal({
-    title: cfg.title + ' 추가',
-    intro: `<strong>${cfg.title}</strong><span>${cfg.intro}</span>`,
-    relations: cfg.relations,
-    gender: pendingGender,
-    lockGender: false,
-    showOrder: cfg.needsOrder
-  });
-}
-
-function openModal(opts) {
-  document.getElementById('modalFsTitle1').textContent = opts.title;
-  document.getElementById('modalIntroText1').innerHTML = opts.intro;
-  document.getElementById('modalFsName1').value = '';
-  document.getElementById('modalFsRel1').value = opts.defaultRel || '';
-  pendingGender = opts.gender;
-  document.querySelectorAll('#modalFs1 .gender-option').forEach(g => g.classList.remove('selected'));
-  document.querySelector(`#modalFs1 .gender-option.${pendingGender}`).classList.add('selected');
-  const gs = document.getElementById('modalGenderSection');
-  if (opts.lockGender) { gs.style.opacity = '0.5'; gs.style.pointerEvents = 'none'; }
-  else { gs.style.opacity = '1'; gs.style.pointerEvents = 'auto'; }
-
-  const os = document.getElementById('modalOrderSection');
-  if (opts.showOrder) {
-    os.style.display = 'block';
-    updateOrderUI();
-  } else {
-    os.style.display = 'none';
+    saveData();
+    closeModal();
+    rerender();
+    showToast('✓', '저장됨');
+    return;
   }
 
-  const cc = document.getElementById('relationGrid1');
-  cc.innerHTML = '';
-  (opts.relations || []).forEach(rel => {
-    const chip = document.createElement('div');
-    chip.className = 'relation-chip';
-    if (rel === opts.defaultRel) chip.classList.add('selected');
-    chip.textContent = rel;
-    chip.onclick = () => {
-      document.querySelectorAll('#relationGrid1 .relation-chip').forEach(c => c.classList.remove('selected'));
-      chip.classList.add('selected');
-      document.getElementById('modalFsRel1').value = rel;
-      if (['할아버지','아버지','큰아버지','작은아버지','삼촌','형','오빠','남동생','아들','남편','매형'].includes(rel)) selectFsGender('male');
-      if (['할머니','어머니','고모','이모','누나','언니','여동생','딸','아내','형수'].includes(rel)) selectFsGender('female');
-    };
-    cc.appendChild(chip);
-  });
-  document.getElementById('modalFs1').classList.add('visible');
-  setTimeout(() => document.getElementById('modalFsName1').focus(), 350);
-}
+  // ----- Add mode -----
+  const { targetId, addType } = pendingModal;
+  const preset = MODAL_PRESETS[addType];
+  const defaultRel = preset?.[gender]?.def || '';
+  const id = newId();
+  const now = Date.now();
+  const person = {
+    id, name, gender,
+    relation: rel || defaultRel,
+    parentIds: [],
+    spouseId: null,
+    phone: phone || null,
+    invitedAt: phone ? now : null,
+    confirmed: false,
+    addedAt: now,
+  };
 
-function selectFsGender(g) {
-  pendingGender = g;
-  document.querySelectorAll('#modalFs1 .gender-option').forEach(opt => opt.classList.remove('selected'));
-  document.querySelector(`#modalFs1 .gender-option.${g}`).classList.add('selected');
-}
+  const target = getPerson(targetId);
 
-function changeOrder(delta) {
-  pendingBirthOrder = Math.max(1, pendingBirthOrder + delta);
-  updateOrderUI();
-}
-
-function updateOrderUI() {
-  const ords = ['', '첫', '둘', '셋', '넷', '다섯', '여섯', '일곱', '여덟', '아홉', '열'];
-  document.getElementById('orderValue').textContent = pendingBirthOrder <= 10 ? ords[pendingBirthOrder] : pendingBirthOrder;
-  document.getElementById('orderDownBtn').disabled = pendingBirthOrder <= 1;
-}
-
-function closeFsModal() {
-  document.getElementById('modalFs1').classList.remove('visible');
-  pendingAction = null;
-}
-
-function confirmFsAdd() {
-  const persp = getCurrentPerspective();
-  const name = document.getElementById('modalFsName1').value.trim();
-  const rel = document.getElementById('modalFsRel1').value.trim();
-  if (!name) { showToast('⚠️', '이름을 입력'); return; }
-  if (!pendingAction) return;
-  const newId = 'p' + Date.now();
-
-  if (pendingAction.type === 'marriage') {
-    const t = getPerson(pendingAction.targetId);
-    if (pendingAction.targetId === persp.me.id || pendingAction.targetId === 'me') {
-      persp.me.married = true; persp.me.spouseId = newId;
-      persp.people.push({
-        id: newId, name, gender: pendingGender, tier: 'spouse_of_me',
-        rel: rel || (pendingGender === 'male' ? '남편' : '아내'),
-        confirmed: false, married: true, spouseId: persp.me.id, point: 0,
-        isInLawIn: true, birthOrder: 1
-      });
+  if (addType === 'parent') {
+    data.people[id] = person;
+    if (targetId === 'me') {
+      if (!data.myParentIds.includes(id)) data.myParentIds.push(id);
     } else {
-      t.married = true; t.spouseId = newId;
-      persp.people.push({
-        id: newId, name, gender: pendingGender, tier: 'siblings',
-        rel: rel || (pendingGender === 'male' ? '매형' : '형수'),
-        confirmed: false, married: true, spouseId: t.id, point: 0,
-        isInLaw: true, isInLawIn: true, birthOrder: 1
-      });
+      const t = data.people[targetId];
+      if (t) {
+        t.parentIds = t.parentIds || [];
+        if (!t.parentIds.includes(id)) t.parentIds.push(id);
+      }
     }
-    showToast('💍', '결혼 등록됨');
-  } else if (pendingAction.type === 'child') {
-    persp.people.push({
-      id: newId, name, gender: pendingGender, tier: 'children',
-      parentId: pendingAction.targetId,
-      rel: rel || (pendingGender === 'male' ? '아들' : '딸'),
-      confirmed: false, point: 0, isPaternalBlood: true,
-      birthOrder: pendingBirthOrder
-    });
-    showToast('👶', `${name}님 추가됨`);
-  } else if (pendingAction.type === 'slot') {
-    if (pendingAction.tier === 'parents' && pendingGender === 'male') {
-      persp.people.push({
-        id: 'dad', name, gender: 'male', tier: 'parents',
-        isPaternalBlood: true, rel: rel || '아버지',
-        confirmed: false, point: 0, birthOrder: pendingBirthOrder, parentId: 'gpa1'
-      });
-    } else if (pendingAction.tier === 'grandparents' && pendingGender === 'male') {
-      persp.people.push({
-        id: 'gpa1', name, gender: 'male', tier: 'grandparents',
-        isPaternalBlood: true, rel: rel || '할아버지',
-        confirmed: false, point: 0, birthOrder: pendingBirthOrder
-      });
-    } else if (pendingAction.tier === 'grandparents' && pendingGender === 'female') {
-      persp.people.push({
-        id: 'gma1', name, gender: 'female', tier: 'grandparents',
-        isInLawIn: true, rel: rel || '할머니',
-        confirmed: false, point: 0, birthOrder: 1
-      });
-    } else if (pendingAction.tier === 'parents' && pendingGender === 'female') {
-      persp.people.push({
-        id: 'mom', name, gender: 'female', tier: 'parents',
-        isInLawIn: true, rel: rel || '어머니',
-        confirmed: false, point: 0, birthOrder: 1
-      });
-    } else {
-      persp.people.push({
-        id: newId, name, gender: pendingGender, tier: pendingAction.tier,
-        parentId: pendingAction.parentId,
-        rel: rel || pendingAction.tier,
-        confirmed: false, point: 0,
-        isPaternalBlood: pendingAction.slotIsPaternalBlood,
-        isInLawIn: pendingAction.slotIsInLawIn,
-        birthOrder: pendingBirthOrder
-      });
+    // 부부 자동 연결: 추가된 부모가 두 번째라면 첫 번째와 spouse로 묶기
+    const allParents = (targetId === 'me' ? data.myParentIds : data.people[targetId]?.parentIds) || [];
+    if (allParents.length === 2) {
+      const [a, b] = allParents;
+      const pa = data.people[a], pb = data.people[b];
+      if (pa && pb && !pa.spouseId && !pb.spouseId) {
+        pa.spouseId = b; pb.spouseId = a;
+      }
     }
-    showToast('✓', `${name}님 추가됨`);
+  } else if (addType === 'sibling') {
+    const tParents = targetId === 'me' ? data.myParentIds : (target.parentIds || []);
+    person.parentIds = [...tParents];
+    data.people[id] = person;
+  } else if (addType === 'spouse') {
+    person.spouseId = targetId;
+    data.people[id] = person;
+    if (targetId === 'me') data.me.spouseId = id;
+    else {
+      const t = data.people[targetId];
+      if (t) t.spouseId = id;
+    }
+  } else if (addType === 'child') {
+    person.parentIds = [targetId];
+    if (target.spouseId) person.parentIds.push(target.spouseId);
+    data.people[id] = person;
   }
 
-  closeFsModal();
-  selectedNodeId = null;
-  renderAll();
+  saveData();
+  closeModal();
+  rerender();
+  showToast(phone ? '✉' : '✓', phone ? `${name}님에게 인증 초대 발송` : `${name}님 추가됨`);
 }
 
-function toggleConfirm(id) {
-  const p = getPerson(id);
-  if (!p) return;
-  p.confirmed = !p.confirmed;
-  if (p.confirmed) p.point = Math.max(p.point || 0, 2);
-  selectedNodeId = null;
-  renderAll();
-}
-
+// ============================================================
+// Delete (가계도에서 제거)
+// 이 인물을 다른 인물의 parentIds, spouseId에서 모두 제거
+// ============================================================
 function deletePerson(id) {
-  const persp = getCurrentPerspective();
+  if (id === 'me') { showToast('⚠️', '본인은 삭제할 수 없어요'); return; }
   const p = getPerson(id);
   if (!p) return;
-  if (!confirm(`${p.name}님을 삭제?`)) return;
-  persp.people = persp.people.filter(x => x.id !== id);
-  selectedNodeId = null;
-  renderAll();
+  if (!confirm(`${p.name}님을 가계도에서 제거할까요?\n(자녀가 있다면 부모 링크만 끊어집니다)`)) return;
+  for (const other of Object.values(data.people)) {
+    if (other.parentIds) other.parentIds = other.parentIds.filter(x => x !== id);
+    if (other.spouseId === id) other.spouseId = null;
+  }
+  data.myParentIds = (data.myParentIds || []).filter(x => x !== id);
+  if (data.me.spouseId === id) data.me.spouseId = null;
+  delete data.people[id];
+  saveData();
+  rerender();
+  showToast('🗑', '제거됨');
+}
+
+// ============================================================
+// Stage 2 — 인증
+// ============================================================
+function renderVerify() {
+  const root = document.getElementById('verifyList');
+  const sum = document.getElementById('verifySummary');
+  root.innerHTML = '';
+
+  const gens = computeGenerations();
+  const ids = Object.keys(gens).filter(id => id !== 'me');
+
+  const total = ids.length;
+  const confirmedCount = ids.filter(id => getPerson(id)?.confirmed).length;
+  const pendingCount = ids.filter(id => {
+    const p = getPerson(id); return p && !p.confirmed && p.invitedAt;
+  }).length;
+  const notStartedCount = total - confirmedCount - pendingCount;
+
+  sum.innerHTML = `
+    <div class="summary-card"><div class="sc-num">${total}</div><div class="sc-label">전체</div></div>
+    <div class="summary-card confirmed"><div class="sc-num confirmed">${confirmedCount}</div><div class="sc-label">✓ 인증</div></div>
+    <div class="summary-card pending"><div class="sc-num pending">${pendingCount}</div><div class="sc-label">⏱ 대기</div></div>
+    <div class="summary-card"><div class="sc-num">${notStartedCount}</div><div class="sc-label">미시작</div></div>
+  `;
+
+  if (ids.length === 0) {
+    root.innerHTML = `<div class="empty">먼저 [1 만들기]에서 가족을 추가하세요.</div>`;
+    return;
+  }
+
+  const byGen = {};
+  for (const id of ids) (byGen[gens[id]] = byGen[gens[id]] || []).push(id);
+  const genNumbers = Object.keys(byGen).map(Number).sort((a, b) => a - b);
+
+  for (const g of genNumbers) {
+    const groupIds = byGen[g];
+    groupIds.sort((a, b) => (getPerson(a).addedAt || 0) - (getPerson(b).addedAt || 0));
+    const group = document.createElement('div');
+    group.className = 'verify-group';
+    group.innerHTML = `<h3 class="vg-title">${genLabel(g)} <span class="vg-count">${groupIds.length}명</span></h3>`;
+    for (const id of groupIds) group.appendChild(makeVerifyRow(id));
+    root.appendChild(group);
+  }
+
+  const cta = document.createElement('div');
+  cta.className = 'stage-cta';
+  cta.innerHTML = `<button class="next-step-btn" type="button" onclick="goToStep(3)">다음: 전체보기 →</button>`;
+  root.appendChild(cta);
+}
+
+function makeVerifyRow(id) {
+  const p = getPerson(id);
+  const row = document.createElement('div');
+  row.className = 'verify-row';
+  if (p.confirmed) row.classList.add('confirmed');
+  else if (p.invitedAt) row.classList.add('pending');
+
+  let statusBadge, actionBtn;
+  if (p.confirmed) {
+    statusBadge = `<span class="vb confirmed">✓ 인증 완료</span>`;
+    actionBtn = `<button class="vrow-btn" type="button" onclick="revertConfirm('${id}')">↩ 해제</button>`;
+  } else if (p.invitedAt) {
+    statusBadge = `<span class="vb pending">⏱ 응답 대기</span>`;
+    actionBtn = `<button class="vrow-btn primary" type="button" onclick="markConfirmed('${id}')">✓ 완료 처리</button>`;
+  } else if (p.phone) {
+    statusBadge = `<span class="vb">📱 연락처 등록됨</span>`;
+    actionBtn = `<button class="vrow-btn primary" type="button" onclick="sendInvite('${id}')">✉ 초대 발송</button>`;
+  } else {
+    statusBadge = `<span class="vb">⚪ 연락처 미등록</span>`;
+    actionBtn = `<button class="vrow-btn primary" type="button" onclick="openContactPrompt('${id}')">📱 연락처</button>`;
+  }
+  const phoneText = p.phone ? `<span class="vrow-phone">${escapeHtml(p.phone)}</span>` : '';
+
+  row.innerHTML = `
+    <div class="vrow-avatar ${p.gender === 'female' ? 'female' : 'male'}">${escapeHtml((p.name || '?').charAt(0))}</div>
+    <div class="vrow-info">
+      <div class="vrow-name">${escapeHtml(p.name)} <span class="vrow-rel">${escapeHtml(p.relation || '')}</span></div>
+      <div class="vrow-meta">${statusBadge}${phoneText}</div>
+    </div>
+    <div class="vrow-actions">${actionBtn}</div>
+  `;
+  return row;
+}
+
+function openContactPrompt(id) {
+  const p = getPerson(id);
+  if (!p) return;
+  const input = prompt(`${p.name}님의 전화번호를 입력하세요 (예: 010-1234-5678):`, p.phone || '');
+  if (input === null) return;
+  const phone = input.trim().replace(/[^0-9+\-]/g, '');
+  const target = data.people[id];
+  if (!target) return;
+  if (!phone) {
+    target.phone = null; target.invitedAt = null; target.confirmed = false;
+    saveData(); rerender();
+    showToast('📱', '연락처 제거됨');
+    return;
+  }
+  target.phone = phone;
+  target.invitedAt = Date.now();
+  target.confirmed = false;
+  saveData(); rerender();
+  showToast('✉', `${p.name}님에게 인증 초대 발송`);
+}
+
+function sendInvite(id) {
+  const p = data.people[id];
+  if (!p) return;
+  if (!p.phone) { showToast('⚠️', '연락처 먼저 추가'); return; }
+  p.invitedAt = Date.now();
+  saveData(); rerender();
+  showToast('✉', `${p.name}님에게 인증 초대 발송`);
+}
+
+function markConfirmed(id) {
+  const p = data.people[id];
+  if (!p) return;
+  p.confirmed = true;
+  saveData(); rerender();
+  showToast('✓', `${p.name}님 인증 완료`);
+}
+
+function revertConfirm(id) {
+  const p = data.people[id];
+  if (!p) return;
+  p.confirmed = false;
+  saveData(); rerender();
+  showToast('⏱', '대기 상태로 되돌림');
+}
+
+// ============================================================
+// Stage 4 — 증명서 발급
+// 인증된 가족 ≥2명일 때 활성화. 발급 시 cert.html에서 슬라이드로 노출됨.
+// ============================================================
+const CERT_STORAGE_KEY = 'pass_family_certificates';
+
+function loadCertificates() {
+  try {
+    const raw = localStorage.getItem(CERT_STORAGE_KEY);
+    if (raw) {
+      const arr = JSON.parse(raw);
+      if (Array.isArray(arr)) return arr;
+    }
+  } catch (e) {}
+  return [];
+}
+
+function saveCertificates(certs) {
+  // throw할 수 있어 호출자가 try/catch 처리
+  localStorage.setItem(CERT_STORAGE_KEY, JSON.stringify(certs));
+}
+
+// 발급 폼 임시 상태 (다른 탭으로 이동해도 유지, 발급 성공 시 리셋)
+let pendingCertTitle = null; // null이면 default 사용
+let pendingCertImage = null; // dataURL or null
+
+function defaultCertTitle() {
+  return `${data.me.name || '나'}의 가족증`;
+}
+
+// 이미지를 최대 240px로 리사이즈하고 JPEG dataURL 반환 (~20KB)
+function resizeImageToDataUrl(file, maxDim = 240) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        let w = img.width, h = img.height;
+        if (w > h) { if (w > maxDim) { h = (h * maxDim) / w; w = maxDim; } }
+        else      { if (h > maxDim) { w = (w * maxDim) / h; h = maxDim; } }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', 0.75));
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function handleImageUpload(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+  if (!/^image\//.test(file.type)) { showToast('⚠️', '이미지 파일을 선택하세요'); return; }
+  try {
+    pendingCertImage = await resizeImageToDataUrl(file, 240);
+    renderIssueForm();
+    renderIssuePreview();
+  } catch (err) {
+    console.warn('image upload failed', err);
+    showToast('⚠️', '이미지를 불러오지 못했어요');
+  }
+}
+
+function clearCustomImage() {
+  pendingCertImage = null;
+  const f = document.getElementById('customImageFile');
+  if (f) f.value = '';
+  renderIssueForm();
+  renderIssuePreview();
+}
+
+function renderIssue() {
+  if (pendingCertTitle === null) pendingCertTitle = defaultCertTitle();
+  renderIssueSummary();
+  renderIssueForm();
+  renderIssuePreview();
+  renderIssueButtonState();
+  renderIssuedList();
+}
+
+function renderIssueSummary() {
+  const sum = document.getElementById('issueSummary');
+  const all = getAllPeople();
+  const confirmedOthers = all.filter(p => p.confirmed && !p.isSelf);
+  const includedMembers = [getPerson('me'), ...confirmedOthers];
+  sum.innerHTML = `
+    <div class="summary-card"><div class="sc-num">${all.length}</div><div class="sc-label">전체</div></div>
+    <div class="summary-card confirmed"><div class="sc-num confirmed">${confirmedOthers.length}</div><div class="sc-label">✓ 인증된 가족</div></div>
+    <div class="summary-card"><div class="sc-num">${includedMembers.length}</div><div class="sc-label">증명서 포함</div></div>
+  `;
+}
+
+function renderIssueForm() {
+  const formEl = document.getElementById('issueForm');
+  const imgHtml = pendingCertImage
+    ? `<img class="img-preview-thumb" src="${pendingCertImage}" alt="">`
+    : '<div class="img-preview-empty">📷</div>';
+  formEl.innerHTML = `
+    <div class="m-section">
+      <div class="m-label">증명서 이름</div>
+      <input type="text" class="m-input" id="customTitleInput" value="${escapeHtml(pendingCertTitle || '')}" placeholder="${escapeHtml(defaultCertTitle())}">
+    </div>
+    <div class="m-section">
+      <div class="m-label">대표 이미지 <span class="hint">(선택 — 미선택 시 본인 사진 사용)</span></div>
+      <div class="image-picker">
+        ${imgHtml}
+        <div class="image-picker-actions">
+          <button class="img-pick-btn" type="button" onclick="document.getElementById('customImageFile').click()">${pendingCertImage ? '변경' : '사진 선택'}</button>
+          ${pendingCertImage ? '<button class="img-clear-btn" type="button" onclick="clearCustomImage()">제거</button>' : ''}
+        </div>
+      </div>
+      <input type="file" id="customImageFile" accept="image/*" hidden onchange="handleImageUpload(event)">
+    </div>
+  `;
+  const titleInput = document.getElementById('customTitleInput');
+  if (titleInput) {
+    titleInput.oninput = (e) => {
+      pendingCertTitle = e.target.value;
+      renderIssuePreview();
+    };
+  }
+}
+
+function renderIssuePreview() {
+  const preview = document.getElementById('issuePreview');
+  const all = getAllPeople();
+  const confirmedOthers = all.filter(p => p.confirmed && !p.isSelf);
+  const includedMembers = [getPerson('me'), ...confirmedOthers];
+  const title = (pendingCertTitle || '').trim() || defaultCertTitle();
+  preview.innerHTML = `
+    <div class="cert-preview">
+      ${pendingCertImage ? `<img class="cp-image" src="${pendingCertImage}" alt="">` : ''}
+      <div class="cp-title">${escapeHtml(title)}</div>
+      <div class="cp-subtitle">${escapeHtml(data.me.name || '나')}님의 인증된 가족 (${includedMembers.length}명)</div>
+      <div class="cp-members">
+        ${includedMembers.map(m => `<div class="cp-member">
+          <span class="cp-avatar">${escapeHtml((m.name || '?').charAt(0))}</span>
+          <span>${escapeHtml(m.name || '?')} <small>${escapeHtml(m.relation || (m.isSelf ? '본인' : ''))}</small></span>
+        </div>`).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderIssueButtonState() {
+  const btn = document.getElementById('issueBtn');
+  const hint = document.getElementById('issueHint');
+  const confirmedOthers = getAllPeople().filter(p => p.confirmed && !p.isSelf);
+  const includedMembers = [getPerson('me'), ...confirmedOthers];
+  if (confirmedOthers.length >= 2) {
+    btn.disabled = false;
+    btn.textContent = `증명서 발급하기 (${includedMembers.length}명 포함)`;
+    hint.textContent = '발급된 증명서는 증명서 화면(가족증 슬라이드)에 추가됩니다.';
+  } else {
+    btn.disabled = true;
+    const need = 2 - confirmedOthers.length;
+    btn.textContent = `인증된 가족 ${need}명 더 필요`;
+    hint.textContent = '인증 단계에서 가족을 ✓ 완료 처리하면 활성화됩니다.';
+  }
+}
+
+function renderIssuedList() {
+  const listEl = document.getElementById('issuedList');
+  const certs = loadCertificates();
+  if (certs.length === 0) { listEl.innerHTML = ''; return; }
+  const rows = certs.slice().reverse().map(c => {
+    const d = new Date(c.issuedAt);
+    const ds = `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+    const thumb = c.customImage ? `<img class="ir-thumb" src="${c.customImage}" alt="">` : '';
+    const displayTitle = c.customTitle || c.title || '가족증';
+    return `
+      <div class="issued-row">
+        ${thumb}
+        <div class="ir-info">
+          <div class="ir-title">${escapeHtml(displayTitle)}</div>
+          <div class="ir-meta">${ds} · ${(c.members || []).length}명</div>
+        </div>
+        <button class="vrow-btn" type="button" onclick="deleteCertificate('${c.id}')">🗑 삭제</button>
+      </div>
+    `;
+  }).join('');
+  listEl.innerHTML = `<h3 class="issued-title">발급 내역 (${certs.length})</h3>${rows}`;
+}
+
+function issueCertificate() {
+  const confirmedOthers = getAllPeople().filter(p => p.confirmed && !p.isSelf);
+  if (confirmedOthers.length < 2) {
+    showToast('⚠️', '인증된 가족 2명 이상 필요');
+    return;
+  }
+  const me = getPerson('me');
+  const members = [me, ...confirmedOthers].map(p => ({
+    id: p.id, name: p.name, gender: p.gender,
+    relation: p.relation || (p.isSelf ? '본인' : ''),
+    confirmed: true,
+  }));
+  const customTitle = (pendingCertTitle || '').trim() || defaultCertTitle();
+  const cert = {
+    id: 'fam_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+    kind: 'family',
+    title: '가족증',
+    customTitle,
+    customImage: pendingCertImage || null,
+    issuedAt: Date.now(),
+    issuedFor: { id: 'me', name: me.name, gender: me.gender },
+    members,
+  };
+  const certs = loadCertificates();
+  certs.push(cert);
+  try {
+    saveCertificates(certs);
+  } catch (err) {
+    showToast('⚠️', '저장 공간 부족 — 이미지를 작게 하거나 제거 후 다시 시도');
+    return;
+  }
+  // 다음 발급을 위해 draft 리셋
+  pendingCertTitle = null;
+  pendingCertImage = null;
+  renderIssue();
+  showToast('🎉', `${customTitle} 발급 완료 (${members.length}명)`);
+}
+
+function deleteCertificate(id) {
+  if (!confirm('이 증명서를 삭제할까요? 증명서 화면에서도 사라집니다.')) return;
+  let certs = loadCertificates();
+  certs = certs.filter(c => c.id !== id);
+  try { saveCertificates(certs); } catch (e) {}
+  renderIssue();
   showToast('🗑', '삭제됨');
 }
 
-function resetAll() {
-  if (!confirm('초기화?')) return;
-  perspectiveStack = [{
-    rootId: 'me', rootName: '홍길순',
-    me: { ...initialMe },
-    people: JSON.parse(JSON.stringify(initialPeople))
-  }];
-  selectedNodeId = null;
-  renderAll();
+// ============================================================
+// Stage 3 — 전체보기 (SVG 그래프)
+// ============================================================
+function renderView() {
+  const sum = document.getElementById('viewSummary');
+  const all = getAllPeople();
+  const confirmedCount = all.filter(p => p.confirmed).length;
+  const pendingCount = all.filter(p => !p.confirmed && p.invitedAt).length;
+  sum.innerHTML = `
+    <div class="summary-card"><div class="sc-num">${all.length}</div><div class="sc-label">전체</div></div>
+    <div class="summary-card confirmed"><div class="sc-num confirmed">${confirmedCount}</div><div class="sc-label">✓ 인증</div></div>
+    <div class="summary-card pending"><div class="sc-num pending">${pendingCount}</div><div class="sc-label">⏱ 대기</div></div>
+  `;
+  renderGraphSvg();
 }
 
-// ============================================================
-// Graph View (관계도)
-// ============================================================
-function renderGraph() {
-  const persp = getCurrentPerspective();
+function renderGraphSvg() {
   const svg = document.getElementById('graphSvg');
-  if (!svg) return;
   const edgesG = document.getElementById('graphEdges');
   const nodesG = document.getElementById('graphNodes');
   edgesG.innerHTML = '';
   nodesG.innerHTML = '';
 
-  // 모든 인물 수집
-  const allPeople = [persp.me, ...persp.people];
+  const gens = computeGenerations();
+  const byGen = {};
+  for (const [id, g] of Object.entries(gens)) (byGen[g] = byGen[g] || []).push(id);
+  const genNumbers = Object.keys(byGen).map(Number).sort((a, b) => a - b);
 
-  // tier별 분류
-  const grandparents = persp.people.filter(p => p.tier === 'grandparents');
-  const parentsSiblings = persp.people.filter(p => p.tier === 'parents_siblings');
-  const parents = persp.people.filter(p => p.tier === 'parents');
-  const siblings = persp.people.filter(p => p.tier === 'siblings' && !p.isInLaw);
-  const siblingsInLaw = persp.people.filter(p => p.tier === 'siblings' && p.isInLaw);
-  const spouseOfMe = persp.people.filter(p => p.tier === 'spouse_of_me');
-  const children = persp.people.filter(p => p.tier === 'children');
-
-  // 위치 계산 (세대별 y 위치)
-  const positions = {};
   const W = 360;
-  const yGen = {
-    grandparents: 60,
-    parents: 180,
-    siblings: 320,
-    children: 460
-  };
+  const rowH = 80;
+  const startY = 40;
+  const positions = {};
 
-  // ----- Grandparents -----
-  if (grandparents.length > 0) {
-    const sorted = [...grandparents].sort((a, b) => (a.birthOrder || 99) - (b.birthOrder || 99));
-    const startX = W / 2 - (sorted.length - 1) * 30;
-    sorted.forEach((p, i) => positions[p.id] = { x: startX + i * 60, y: yGen.grandparents });
-  }
-
-  // ----- Parents tier (부모 + 부모형제 부계) -----
-  // 부계 부모형제 + 부 + 모 순으로 배치
-  const paternalDad = parents.find(p => p.isPaternalBlood);
-  const maternalMom = parents.find(p => p.isInLawIn);
-  const parentTierSorted = [
-    ...parentsSiblings.map(p => ({ ...p, _sortKey: p.birthOrder || 99 })),
-    paternalDad ? { ...paternalDad, _sortKey: paternalDad.birthOrder || 99 } : null
-  ].filter(Boolean).sort((a, b) => a._sortKey - b._sortKey);
-
-  const allParentRow = [...parentTierSorted];
-  if (maternalMom) allParentRow.push(maternalMom);
-
-  const startX1 = Math.max(30, W / 2 - (allParentRow.length - 1) * 35);
-  allParentRow.forEach((p, i) => positions[p.id] = { x: startX1 + i * 70, y: yGen.parents });
-
-  // ----- My generation (siblings + me + spouse) -----
-  const myGenAll = [];
-  // siblings sorted by birth order, with me inserted by birth order
-  const meWithOrder = { ...persp.me, birthOrder: persp.me.birthOrder || 99 };
-  const myGenCombined = [...siblings, meWithOrder].sort((a, b) => (a.birthOrder || 99) - (b.birthOrder || 99));
-  myGenCombined.forEach(p => {
-    // 배우자가 있다면 옆에 추가
-    const spouse = siblingsInLaw.find(s => s.spouseId === p.id);
-    if (spouse) myGenAll.push(spouse, p);
-    else myGenAll.push(p);
-  });
-  // 내 배우자
-  if (spouseOfMe.length > 0) myGenAll.push(...spouseOfMe);
-
-  const startX2 = Math.max(30, W / 2 - (myGenAll.length - 1) * 28);
-  myGenAll.forEach((p, i) => positions[p.id] = { x: startX2 + i * 56, y: yGen.siblings });
-
-  // ----- Children -----
-  if (children.length > 0) {
-    const sorted = [...children].sort((a, b) => (a.birthOrder || 99) - (b.birthOrder || 99));
-    const startX3 = Math.max(30, W / 2 - (sorted.length - 1) * 28);
-    sorted.forEach((p, i) => positions[p.id] = { x: startX3 + i * 56, y: yGen.children });
-  }
-
-  // 세대 라벨 (좌측)
-  const genLabels = [
-    { y: yGen.grandparents, label: '조부모', cond: grandparents.length > 0 },
-    { y: yGen.parents, label: '부모', cond: parents.length > 0 || parentsSiblings.length > 0 },
-    { y: yGen.siblings, label: '나·형제', cond: true },
-    { y: yGen.children, label: '자녀', cond: children.length > 0 }
-  ];
-  genLabels.forEach(gl => {
-    if (!gl.cond) return;
-    const lbl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    lbl.classList.add('graph-node-gen-label');
-    lbl.setAttribute('x', 8);
-    lbl.setAttribute('y', gl.y - 32);
-    lbl.textContent = gl.label;
-    nodesG.appendChild(lbl);
-  });
-
-  // ----- Edges -----
-  const edges = [];
-
-  // 조부모 부부
-  if (grandparents.length >= 2) {
-    const [g1, g2] = grandparents;
-    edges.push({ from: g1.id, to: g2.id, type: 'spouse', status: g1.confirmed && g2.confirmed ? 'confirmed' : 'pending' });
-  }
-
-  // 조부모 → 부모/부모형제 (부계만)
-  const paternalGpa = grandparents.find(g => g.isPaternalBlood);
-  if (paternalGpa) {
-    parentTierSorted.forEach(p => {
-      edges.push({ from: paternalGpa.id, to: p.id, type: 'parent', status: p.confirmed ? 'confirmed' : 'pending' });
+  genNumbers.forEach((g, gi) => {
+    const ids = byGen[g];
+    ids.sort((a, b) => (getPerson(a).addedAt || 0) - (getPerson(b).addedAt || 0));
+    const n = ids.length;
+    const minGap = 70;
+    const maxRow = W - 30;
+    const gap = n > 1 ? Math.min(minGap, maxRow / (n - 1)) : 0;
+    const totalW = (n - 1) * gap;
+    const startX = W / 2 - totalW / 2;
+    ids.forEach((id, i) => {
+      positions[id] = { x: startX + i * gap, y: startY + gi * rowH };
     });
+  });
+
+  // Edges
+  for (const p of getAllPeople()) {
+    if (!positions[p.id]) continue;
+    const from = positions[p.id];
+    // parent edges (this person → each parent)
+    for (const pid of (p.parentIds || [])) {
+      const to = positions[pid];
+      if (!to) continue;
+      const status = p.confirmed ? 'confirmed' : (p.invitedAt ? 'pending' : 'inactive');
+      edgesG.appendChild(makeEdge(from, to, status, 'parent'));
+    }
+    // spouse edges — draw once
+    if (p.spouseId && p.id < p.spouseId) {
+      const to = positions[p.spouseId];
+      if (to) edgesG.appendChild(makeEdge(from, to, 'spouse', 'spouse'));
+    }
   }
 
-  // 부모 부부
-  if (paternalDad && maternalMom) {
-    edges.push({ from: paternalDad.id, to: maternalMom.id, type: 'spouse', status: maternalMom.confirmed ? 'confirmed' : 'pending', isInLaw: true });
+  // Nodes
+  for (const p of getAllPeople()) {
+    const pos = positions[p.id];
+    if (!pos) continue;
+    nodesG.appendChild(makeGraphNode(p, pos));
   }
 
-  // 부모 → 나·형제
-  if (paternalDad) {
-    [...siblings, persp.me].forEach(p => {
-      edges.push({ from: paternalDad.id, to: p.id, type: 'parent', status: p.confirmed ? 'confirmed' : 'pending' });
-    });
-  }
-
-  // 형제 ↔ 배우자(in-law)
-  siblingsInLaw.forEach(inlaw => {
-    if (inlaw.spouseId && positions[inlaw.spouseId]) {
-      edges.push({ from: inlaw.spouseId, to: inlaw.id, type: 'spouse', status: inlaw.confirmed ? 'confirmed' : 'pending', isInLaw: true });
-    }
-  });
-
-  // 나 ↔ 배우자
-  spouseOfMe.forEach(sp => {
-    edges.push({ from: persp.me.id, to: sp.id, type: 'spouse', status: sp.confirmed ? 'confirmed' : 'pending', isInLaw: true });
-  });
-
-  // 나·형제 → 자녀
-  children.forEach(c => {
-    if (c.parentId && positions[c.parentId]) {
-      edges.push({ from: c.parentId, to: c.id, type: 'parent', status: c.confirmed ? 'confirmed' : 'pending' });
-    }
-  });
-
-  // ----- Render edges -----
-  edges.forEach(e => {
-    const from = positions[e.from];
-    const to = positions[e.to];
-    if (!from || !to) return;
-
-    let path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    let d;
-    if (e.type === 'spouse') {
-      // 부부: 박스 모서리 사이 수평선 (텍스트 영역 침범 X)
-      const lx = Math.min(from.x, to.x), rx = Math.max(from.x, to.x);
-      d = `M ${lx + 25} ${from.y} L ${rx - 25} ${to.y}`;
-    } else {
-      // 부모-자녀: 라벨(이름+관계) 아래에서 시작, 다음 박스 상단까지
-      const fromBottom = from.y + 58; // 박스(25) + 이름(13) + 관계(12) 아래
-      const toTop = to.y - 25;        // 새 박스 상단
-      const midY = (fromBottom + toTop) / 2;
-      d = `M ${from.x} ${fromBottom} L ${from.x} ${midY} L ${to.x} ${midY} L ${to.x} ${toTop}`;
-    }
-    path.setAttribute('d', d);
-    path.setAttribute('fill', 'none');
-
-    let color = '#10B981'; // confirmed
-    let dasharray = null;
-    if (e.status !== 'confirmed') {
-      color = '#F59E0B';
-      dasharray = '4 3';
-    }
-    if (e.isInLaw) {
-      color = '#8B5CF6';
-      dasharray = '4 3';
-    }
-    path.setAttribute('stroke', color);
-    path.setAttribute('stroke-width', e.status === 'confirmed' && !e.isInLaw ? 2 : 1.5);
-    if (dasharray) path.setAttribute('stroke-dasharray', dasharray);
-    path.setAttribute('stroke-linecap', 'round');
-    edgesG.appendChild(path);
-  });
-
-  // 토폴로지: 가계도 — 친가/외가 + 세대 라벨 자동 산출
-  function getRelationLabel(p) {
-    if (p.isSelf) return '본인';
-    // 측 라벨은 조부모/부모/부모형제 세대에만 적용 (형제·자녀·배우자는 양쪽 공유)
-    let side = '';
-    if (p.tier === 'grandparents' || p.tier === 'parents' || p.tier === 'parents_siblings') {
-      if (p.isPaternalBlood) side = '친가';
-      else if (p.tier === 'grandparents' && p.isInLawIn) side = '친가';
-      else if (p.tier === 'parents' && p.isInLawIn) side = '외가';
-      else if (p.tier === 'parents_siblings') side = '친가';
-    }
-    let gen = '';
-    if (p.tier === 'grandparents') gen = '조부모';
-    else if (p.tier === 'parents') gen = '부모';
-    else if (p.tier === 'parents_siblings') gen = '부모형제';
-    else if (p.tier === 'siblings') gen = p.isInLaw ? '형제 배우자' : '형제';
-    else if (p.tier === 'spouse_of_me') gen = '배우자';
-    else if (p.tier === 'children') gen = '자녀';
-    return side && gen ? `${side}·${gen}` : gen;
-  }
-
-  // ----- Render nodes -----
-  Object.entries(positions).forEach(([id, pos]) => {
-    const person = id === persp.me.id ? persp.me : persp.people.find(x => x.id === id);
-    if (!person) return;
-
-    const grp = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    grp.classList.add('graph-node-group');
-    if (person.isSelf) grp.classList.add('me-glow');
-
-    // 정사각형 박스 (50×50) — 아바타/프로필 사진 자리
-    const w = 50, h = 50;
-    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-    rect.classList.add('graph-node-rect');
-    rect.setAttribute('x', pos.x - w/2);
-    rect.setAttribute('y', pos.y - h/2);
-    rect.setAttribute('width', w);
-    rect.setAttribute('height', h);
-    rect.setAttribute('rx', 10);
-
-    let fill, stroke, sw = 1.5, avatarColor = '#94A3B8';
-    if (person.isSelf) {
-      fill = '#FFFFFF'; stroke = 'var(--node-self-border)'; sw = 2.5;
-      avatarColor = '#F7931E';
-    } else if (person.gender === 'male') {
-      fill = 'var(--node-male)'; stroke = 'var(--node-male-border)';
-      avatarColor = '#4A78A8';
-    } else {
-      fill = 'var(--node-female)'; stroke = 'var(--node-female-border)';
-      avatarColor = '#C76A7E';
-    }
-    if (person.isInLawIn || person.isInLaw) {
-      stroke = 'var(--drill-color)';
-      rect.setAttribute('stroke-dasharray', '3 2');
-    } else if (!person.confirmed && !person.isSelf) {
-      rect.setAttribute('stroke-dasharray', '3 2');
-    }
-    rect.setAttribute('fill', fill);
-    rect.setAttribute('stroke', stroke);
-    rect.setAttribute('stroke-width', sw);
-    grp.appendChild(rect);
-
-    // 박스 안 인물 실루엣 아바타 (실제 프로필 사진 자리)
-    const avatar = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    avatar.classList.add('graph-node-avatar');
-    const head = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    head.setAttribute('cx', pos.x);
-    head.setAttribute('cy', pos.y - 7);
-    head.setAttribute('r', 7);
-    head.setAttribute('fill', avatarColor);
-    head.setAttribute('opacity', '0.9');
-    avatar.appendChild(head);
-    const body = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    body.setAttribute('d', `M ${pos.x - 13} ${pos.y + 17} Q ${pos.x - 13} ${pos.y + 3} ${pos.x} ${pos.y + 3} Q ${pos.x + 13} ${pos.y + 3} ${pos.x + 13} ${pos.y + 17} Z`);
-    body.setAttribute('fill', avatarColor);
-    body.setAttribute('opacity', '0.9');
-    avatar.appendChild(body);
-    grp.appendChild(avatar);
-
-    // 박스 바로 아래: 이름 (1행)
-    const nameText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    nameText.classList.add('graph-node-name-below');
-    nameText.setAttribute('x', pos.x);
-    nameText.setAttribute('y', pos.y + 38);
-    nameText.setAttribute('text-anchor', 'middle');
-    nameText.setAttribute('font-size', '10.5');
-    nameText.setAttribute('font-weight', person.isSelf ? '900' : '700');
-    nameText.setAttribute('fill', '#1F1F1F');
-    nameText.textContent = person.name;
-    grp.appendChild(nameText);
-
-    // 이름 아래: 관계 (2행, 더 작고 옅게)
-    const relLabel = getRelationLabel(person);
-    if (relLabel) {
-      const relText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      relText.classList.add('graph-node-rel-below');
-      relText.setAttribute('x', pos.x);
-      relText.setAttribute('y', pos.y + 50);
-      relText.setAttribute('text-anchor', 'middle');
-      relText.setAttribute('font-size', '8.5');
-      relText.setAttribute('font-weight', '500');
-      relText.setAttribute('fill', '#64748B');
-      relText.textContent = relLabel;
-      grp.appendChild(relText);
-    }
-
-    // 출생순서 뱃지 (작은 숫자) — 박스 우상단
-    if (person.birthOrder && person.tier !== 'spouse_of_me') {
-      const bo = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      bo.setAttribute('x', pos.x + w/2 - 4);
-      bo.setAttribute('y', pos.y - h/2 + 10);
-      bo.setAttribute('font-size', '8');
-      bo.setAttribute('font-weight', '700');
-      bo.setAttribute('fill', 'var(--text-tertiary)');
-      bo.setAttribute('text-anchor', 'end');
-      bo.textContent = person.birthOrder;
-      grp.appendChild(bo);
-    }
-
-    // 단일 클릭: 그래프 위에서 액션 패널 표시
-    // 더블클릭: 추가하기 탭으로 점프 + 노드 선택
-    let clickTimer = null;
-    grp.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (clickTimer) return;
-      clickTimer = setTimeout(() => {
-        clickTimer = null;
-        selectedNodeId = id;
-        showGraphActionPanel(id, e);
-      }, 250);
-    });
-    grp.addEventListener('dblclick', (e) => {
-      e.stopPropagation();
-      if (clickTimer) { clearTimeout(clickTimer); clickTimer = null; }
-      selectedNodeId = id;
-      showGraphActionPanel(id, e);
-    });
-
-    nodesG.appendChild(grp);
-  });
-
-  // viewBox 조정 (자녀가 있으면 더 길게)
-  const maxY = children.length > 0 ? 540 : 400;
-  svg.setAttribute('viewBox', `0 0 ${W} ${maxY}`);
+  const maxY = startY + (genNumbers.length - 1) * rowH + 40;
+  svg.setAttribute('viewBox', `0 0 ${W} ${Math.max(360, maxY)}`);
 }
 
-// 그래프 위에서 액션 패널 표시 (클릭 이벤트에서 호출)
-function showGraphActionPanel(personId, evt) {
-  const persp = getCurrentPerspective();
-  const person = personId === persp.me.id ? persp.me : persp.people.find(p => p.id === personId);
-  if (!person) return;
-
-  // 기존 패널 제거
-  document.querySelectorAll('.action-panel').forEach(p => p.remove());
-
-  const panel = document.createElement('div');
-  panel.className = 'action-panel';
-
-  const buttons = [];
-  if (isInLawIn(person)) {
-    buttons.push({ label: `🔀 ${person.name} 시점으로`, className: 'drill', onClick: () => { drillDown(person); } });
-  }
-  if (!person.isSelf) {
-    buttons.push({ label: person.confirmed ? '⏱ 대기로' : '✓ 인증', className: 'confirm', onClick: () => { toggleConfirm(person.id); closeGraphPanel(); } });
-  }
-  if (!person.isSelf) {
-    buttons.push({ label: '🗑 삭제', className: 'delete', onClick: () => { deletePerson(person.id); closeGraphPanel(); } });
-  }
-
-  buttons.forEach(b => {
-    const btn = document.createElement('button');
-    btn.className = `ap-btn ${b.className || ''}`;
-    btn.innerHTML = b.label;
-    if (b.disabled) btn.disabled = true;
-    else btn.onclick = b.onClick;
-    panel.appendChild(btn);
-  });
-
-  // SVG 좌표 → 화면 좌표 변환
-  const svgEl = document.getElementById('graphSvg');
-  const wrap = svgEl.closest('.graph-canvas-wrap');
-  if (!wrap) return;
-  const wrapRect = wrap.getBoundingClientRect();
-  const targetRect = evt.target.getBoundingClientRect();
-  const x = targetRect.left + targetRect.width / 2 - wrapRect.left;
-  const y = targetRect.bottom - wrapRect.top + 12;
-
-  panel.style.position = 'absolute';
-  panel.style.left = `${x - 75}px`;
-  panel.style.top = `${y}px`;
-  wrap.style.position = 'relative';
-  wrap.appendChild(panel);
-}
-
-function closeGraphPanel() {
-  document.querySelectorAll('.action-panel').forEach(p => p.remove());
-}
-
-// ============================================================
-// List
-// ============================================================
-function renderList() {
-  const persp = getCurrentPerspective();
-  const container = document.getElementById('resultList1');
-  const summaryEl = document.getElementById('verifySummary');
-  if (!container) return;
-  container.innerHTML = '';
-
-  // 인증 카운트 요약
-  const allPeople = [persp.me, ...persp.people];
-  const confirmedCount = allPeople.filter(p => p.confirmed || p.isSelf).length;
-  const pendingCount = allPeople.length - confirmedCount;
-  if (summaryEl) {
-    summaryEl.innerHTML = `
-      <div class="verify-stat-card">
-        <div class="verify-stat-value total">${allPeople.length}</div>
-        <div class="verify-stat-label">전체</div>
-      </div>
-      <div class="verify-stat-card confirmed">
-        <div class="verify-stat-value confirmed">${confirmedCount}</div>
-        <div class="verify-stat-label">✓ 인증</div>
-      </div>
-      <div class="verify-stat-card pending">
-        <div class="verify-stat-value pending">${pendingCount}</div>
-        <div class="verify-stat-label">⏱ 미인증</div>
-      </div>
-    `;
-  }
-
-  const tierOrder = [
-    { key: 'grandparents', label: '조부모', emoji: '👴👵' },
-    { key: 'parents', label: '부모', emoji: '👨‍👩' },
-    { key: 'parents_siblings', label: '부모 형제', emoji: '👨' },
-    { key: 'spouse_of_me', label: '배우자', emoji: '💑' },
-    { key: 'children', label: '자녀', emoji: '👶' }
-  ];
-
-  // Me + siblings
-  const myGen = sortByBirthOrder([persp.me, ...persp.people.filter(p => p.tier === 'siblings' && !p.isInLaw)]);
-  const myGenDiv = document.createElement('div');
-  myGenDiv.className = 'list-tier';
-  myGenDiv.innerHTML = `<div class="list-tier-header"><span class="tier-badge">👤 나의 세대</span><span class="tier-count">${myGen.length}명</span></div>`;
-  myGen.forEach((p, idx) => {
-    const item = makeListItem(p, idx + 1, myGen.length);
-    myGenDiv.appendChild(item);
-  });
-  container.appendChild(myGenDiv);
-
-  tierOrder.forEach(tier => {
-    const arr = sortByBirthOrder(persp.people.filter(p => p.tier === tier.key));
-    if (arr.length === 0) return;
-    const div = document.createElement('div');
-    div.className = 'list-tier';
-    div.innerHTML = `<div class="list-tier-header"><span class="tier-badge">${tier.emoji} ${tier.label}</span><span class="tier-count">${arr.length}명</span></div>`;
-    arr.forEach((p, idx) => div.appendChild(makeListItem(p, idx + 1, arr.length)));
-    container.appendChild(div);
-  });
-}
-
-function makeListItem(p, ordIdx, total) {
-  const item = document.createElement('div');
-  item.className = `list-item ${p.gender}${p.isSelf ? ' self' : ''}${isInLawIn(p) ? ' drill-target' : ''}`;
-  item.onclick = () => {
-    if (isInLawIn(p)) drillDown(p);
-    else { selectedNodeId = p.id; switchView('tree'); }
-  };
-  const ordinals = ['', '첫째', '둘째', '셋째', '넷째', '다섯째', '여섯째', '일곱째', '여덟째', '아홉째', '열째'];
-  const ordText = total > 1 ? `<span class="order-hint-pill">${ordinals[ordIdx] || ordIdx + '째'}</span>` : '';
-  const drillText = isInLawIn(p) ? '<span class="drill-pill">🔀</span>' : '';
-  const quickBtn = !p.confirmed && !p.isSelf
-    ? `<button class="verify-quick-btn" onclick="event.stopPropagation(); quickConfirmList('${p.id}')">✓ 인증</button>`
-    : '';
-  item.innerHTML = `
-    <div class="list-item-avatar">${p.name.charAt(0)}</div>
-    <div class="list-item-info">
-      <div class="list-item-name">${p.name} ${p.isSelf ? '<span class="name-self">(나)</span>' : ''} ${ordText} ${drillText}</div>
-      <div class="list-item-rel">${p.rel || (p.isSelf ? '본인' : '')}${p.married ? ' · 💍' : ''}</div>
-    </div>
-    ${quickBtn}
-    <div class="list-item-status ${p.confirmed || p.isSelf ? 'confirmed' : 'pending'}">
-      ${p.confirmed || p.isSelf ? '✓' : '⏱'}
-    </div>
-  `;
-  return item;
-}
-
-// 인증현황 탭에서 빠른 인증
-function quickConfirmList(personId) {
-  const persp = getCurrentPerspective();
-  const p = personId === 'me' || personId === persp.me.id
-    ? persp.me
-    : persp.people.find(x => x.id === personId);
-  if (!p) return;
-  p.confirmed = true;
-  p.point = Math.max(p.point || 0, 2);
-  renderAll();
-  showToast('✓', `${p.name} 인증됨`);
-}
-
-function updateBreadcrumb() {
-  const bc = document.getElementById('breadcrumb');
-  const bb = document.getElementById('backBtn');
-  const at = document.getElementById('appTitle');
-  const sc = document.getElementById('summaryCard');
-
-  if (perspectiveStack.length === 1) {
-    bc.innerHTML = '';
-    bb.classList.add('hidden');
-    at.textContent = '👨‍👩‍👧‍👦 가계도';
-    sc.classList.remove('drill-mode');
+function makeEdge(from, to, status, type) {
+  const NS = 'http://www.w3.org/2000/svg';
+  const path = document.createElementNS(NS, 'path');
+  let d;
+  if (type === 'spouse') {
+    d = `M ${from.x} ${from.y} L ${to.x} ${to.y}`;
   } else {
-    bb.classList.remove('hidden');
-    const cur = perspectiveStack[perspectiveStack.length - 1];
-    at.textContent = `🔀 ${cur.rootName} 시점`;
-    sc.classList.add('drill-mode');
-    bc.innerHTML = '';
-    perspectiveStack.forEach((p, i) => {
-      const item = document.createElement('span');
-      item.className = `breadcrumb-item ${i === perspectiveStack.length - 1 ? 'current' : ''}`;
-      item.textContent = p.rootName;
-      if (i < perspectiveStack.length - 1) {
-        item.onclick = () => {
-          perspectiveStack = perspectiveStack.slice(0, i + 1);
-          selectedNodeId = null;
-          renderAll();
-        };
-      }
-      bc.appendChild(item);
-      if (i < perspectiveStack.length - 1) {
-        const sep = document.createElement('span');
-        sep.textContent = '›';
-        sep.style.color = 'var(--text-tertiary)';
-        bc.appendChild(sep);
-      }
-    });
+    // parent edge: from (child) up to parent through midpoint
+    const midY = (from.y + to.y) / 2;
+    const childY = from.y - 14;
+    const parentY = to.y + 14;
+    d = `M ${from.x} ${childY} L ${from.x} ${midY} L ${to.x} ${midY} L ${to.x} ${parentY}`;
   }
+  path.setAttribute('d', d);
+  path.setAttribute('fill', 'none');
+  let stroke = '#94A3B8', dasharray = null, width = 1.5;
+  if (status === 'confirmed') { stroke = '#10B981'; width = 2; }
+  else if (status === 'pending') { stroke = '#F59E0B'; dasharray = '4 3'; }
+  else if (status === 'spouse') { stroke = '#DC2626'; dasharray = '3 3'; }
+  path.setAttribute('stroke', stroke);
+  path.setAttribute('stroke-width', width);
+  path.setAttribute('stroke-linecap', 'round');
+  if (dasharray) path.setAttribute('stroke-dasharray', dasharray);
+  return path;
 }
 
-function updateSummary() {
-  const persp = getCurrentPerspective();
-  const total = persp.people.length + 1;
-  const confirmed = persp.people.filter(p => p.confirmed).length + 1;
-  document.getElementById('statTotal').textContent = total;
-  document.getElementById('statConfirmed').textContent = confirmed;
-  document.getElementById('summaryAvatar').textContent = persp.me.name.charAt(0);
-  document.getElementById('summaryName').textContent = `${persp.me.name} 님의 가계도`;
+function makeGraphNode(p, pos) {
+  const NS = 'http://www.w3.org/2000/svg';
+  const g = document.createElementNS(NS, 'g');
+  const w = 58, h = 28;
+  const rect = document.createElementNS(NS, 'rect');
+  rect.setAttribute('x', pos.x - w / 2);
+  rect.setAttribute('y', pos.y - h / 2);
+  rect.setAttribute('width', w);
+  rect.setAttribute('height', h);
+  rect.setAttribute('rx', 7);
+  let fill = '#DBEAFE', stroke = '#6FA8DC', sw = 1.5;
+  if (p.isSelf) { fill = '#FFFFFF'; stroke = '#F7931E'; sw = 2.5; }
+  else if (p.gender === 'female') { fill = '#FCE7F3'; stroke = '#E89BAA'; }
+  rect.setAttribute('fill', fill);
+  rect.setAttribute('stroke', stroke);
+  rect.setAttribute('stroke-width', sw);
+  if (!p.confirmed && !p.isSelf) rect.setAttribute('stroke-dasharray', '3 2');
+  g.appendChild(rect);
+
+  const text = document.createElementNS(NS, 'text');
+  text.setAttribute('x', pos.x);
+  text.setAttribute('y', pos.y + 4);
+  text.setAttribute('text-anchor', 'middle');
+  text.setAttribute('font-size', '10.5');
+  text.setAttribute('font-weight', '800');
+  text.setAttribute('fill', '#1F1F1F');
+  text.textContent = (p.name || '?').slice(0, 4);
+  g.appendChild(text);
+
+  // status dot
+  const dot = document.createElementNS(NS, 'circle');
+  dot.setAttribute('cx', pos.x + w / 2 - 5);
+  dot.setAttribute('cy', pos.y - h / 2 + 5);
+  dot.setAttribute('r', 3.5);
+  dot.setAttribute('fill', p.confirmed ? '#10B981' : (p.invitedAt ? '#F59E0B' : '#CBD5E1'));
+  g.appendChild(dot);
+
+  return g;
 }
 
+// ============================================================
+// Toast
+// ============================================================
 function showToast(emoji, text) {
-  const toast = document.getElementById('toast1');
-  document.getElementById('toastEmoji1').textContent = emoji;
-  document.getElementById('toastText1').textContent = text;
-  toast.classList.add('visible');
+  const t = document.getElementById('toast');
+  t.innerHTML = `<span class="t-emoji">${emoji}</span><span>${escapeHtml(text)}</span>`;
+  t.classList.add('visible');
   clearTimeout(window._toastT);
-  window._toastT = setTimeout(() => toast.classList.remove('visible'), 2400);
+  window._toastT = setTimeout(() => t.classList.remove('visible'), 2200);
 }
 
-function renderAll() {
-  updateBreadcrumb();
-  updateSummary();
-  renderGraph();
+function escapeHtml(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
 }
 
-// 그래프 SVG 빈 영역 클릭 시 액션 패널 닫기
-document.getElementById('graphSvg').addEventListener('click', e => {
-  if (e.target.tagName === 'svg' || e.target.id === 'graphEdges' || e.target.id === 'graphNodes') {
-    closeGraphPanel();
-    selectedNodeId = null;
+// ============================================================
+// Modal: 바깥 클릭 닫기 + Enter 키
+// ============================================================
+document.getElementById('personModal').addEventListener('click', (e) => {
+  if (e.target.id === 'personModal') closeModal();
+});
+document.getElementById('modalName').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    document.getElementById('modalPhone').focus();
+  }
+});
+document.getElementById('modalPhone').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    confirmModal();
   }
 });
 
-document.getElementById('modalFs1').addEventListener('click', e => {
-  if (e.target.id === 'modalFs1') closeFsModal();
-});
-
-document.getElementById('modalFsName1').addEventListener('keypress', e => {
-  if (e.key === 'Enter') confirmFsAdd();
-});
-
-renderAll();
-
-(function applyWelcomeName() {
+// ============================================================
+// Init — ?step=N (1~4) 지원: cert.html의 "관계도 보기" 등에서 진입
+// ============================================================
+function getInitialStep() {
   try {
-    const u = JSON.parse(localStorage.getItem('passUser') || '{}');
-    const nick = u.name || (u.email ? u.email.split('@')[0] : '데모 사용자');
-    const wn = document.getElementById('welcomeName');
-    if (wn) wn.textContent = nick;
+    const params = new URLSearchParams(location.search);
+    const s = parseInt(params.get('step') || '', 10);
+    if (Number.isFinite(s) && s >= 1 && s <= 4) return s;
   } catch (e) {}
-})();
+  return 1;
+}
+goToStep(getInitialStep());
 </script>
-
-<!-- 백엔드 그래프 영속 연동 (CHON graphs API) — 비로그인 시 데모로 동작 -->
-<script>
-(function () {
-  if (!window.PassAPI || !PassAPI.isLoggedIn()) return;
-  var KIND = 'family';
-  function getGraph() { return perspectiveStack; }
-  function setGraph(d) { perspectiveStack = d; }
-  var saveTimer = null, ready = false;
-  function scheduleSave() {
-    if (!ready) return;
-    clearTimeout(saveTimer);
-    saveTimer = setTimeout(function () {
-      PassAPI.graphs.save(KIND, getGraph()).catch(function () {});
-    }, 800);
-  }
-  var _origRender = renderAll;
-  renderAll = function () { _origRender.apply(this, arguments); scheduleSave(); };
-  PassAPI.graphs.get(KIND).then(function (res) {
-    if (res && res.data) setGraph(res.data);
-    renderAll();
-    ready = true;
-  }).catch(function () { ready = true; });
-})();
-</script>
-<script src="../lib/welcome-name.js"></script>
 
 </body>
 </html>

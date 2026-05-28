@@ -207,30 +207,57 @@
     flex-direction: column;
   }
 
-  /* 하단 dot 인디케이터 */
-  .pager {
+  /* 좌·우 이동 화살표 — 카드 양옆에 딱 붙여 배치
+     id-card 폭 260px → 중앙에서 158px 떨어진 곳(카드 가장자리 + 28px 여백)에 위치.
+     화면이 좁으면 가장자리에서 6px 안쪽까지만 들어옴 (floor). */
+  .nav-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    padding: 0;
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.14), 0 1px 3px rgba(0, 0, 0, 0.08);
+    cursor: pointer;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-primary);
+    transition: opacity 0.18s, transform 0.12s, box-shadow 0.18s;
+  }
+  .nav-arrow svg { width: 18px; height: 18px; display: block; }
+  .nav-arrow.prev { left:  max(6px, calc(50% - 158px)); }
+  .nav-arrow.next { right: max(6px, calc(50% - 158px)); }
+  .nav-arrow:hover  { box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18); }
+  .nav-arrow:active { transform: translateY(-50%) scale(0.92); }
+  .nav-arrow[disabled] {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* 하단 카드 수량 카운터 (1 / 2) */
+  .slide-counter {
     position: fixed;
     bottom: calc(var(--nav-h) + var(--safe-bottom) + 14px);
     left: 50%;
     transform: translateX(-50%);
-    display: flex;
-    gap: 8px;
     z-index: 25;
-  }
-  .pager-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: rgba(247, 147, 30, 0.25);
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    transition: width 0.2s, background 0.2s;
-  }
-  .pager-dot.active {
-    width: 24px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    letter-spacing: 0.4px;
+    background: rgba(255, 255, 255, 0.78);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    padding: 5px 14px;
     border-radius: var(--radius-pill);
-    background: var(--chon-orange);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   }
+  .slide-counter .current { color: var(--chon-orange-dark); }
 
   /* ============================================
      Slide 1 — CHON ID 카드
@@ -368,6 +395,187 @@
     box-shadow: var(--shadow-sm);
     border: 1px solid var(--border-light);
   }
+
+  /* ============================================
+     발급된 가족증 — CHON ID 카드와 동일 디자인
+     · 외부 wrapper: .slide-1-inner (CHON ID와 공유)
+     · 카드 사이즈/패딩/그림자/그라데이션 모두 .id-card와 일치
+     · 내부 레이아웃: 타이틀 → 사진영역 → 이름 → 보조 → QR → 푸터 (CHON ID와 동일 순서)
+     · 3D 플립으로 뒷면에 구성원 리스트 + 관계도 링크
+     ============================================ */
+  .fam-cert-card {
+    width: 260px;
+    height: 430px; /* CHON ID 자연 높이와 일치 */
+    perspective: 1100px;
+  }
+  .fcc-flip {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+  }
+  .fcc-flip[data-flipped="true"] { transform: rotateY(180deg); }
+  .fcc-face {
+    position: absolute;
+    inset: 0;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    /* 가족증(기본): CHON ID(주황)와 구분되는 에메랄드 그린 */
+    background: linear-gradient(165deg, #6EE7B7 0%, #10B981 55%, #047857 100%);
+    border-radius: 24px;
+    padding: 24px 22px 20px;
+    color: white;
+    text-align: center;
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+  }
+  /* 동호회증: 가족증과 다른 블루 계열 */
+  .fcc-face.fcc-face--club {
+    background: linear-gradient(165deg, #93C5FD 0%, #3B82F6 55%, #1E40AF 100%);
+  }
+  .fcc-face::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 80% 20%, rgba(255,255,255,0.15) 0%, transparent 45%),
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40'><path d='M20 0 L40 12 L40 28 L20 40 L0 28 L0 12 Z' fill='none' stroke='%23ffffff' stroke-opacity='0.07'/></svg>");
+    pointer-events: none;
+  }
+  .fcc-face > * { position: relative; }
+  .fcc-back {
+    transform: rotateY(180deg);
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* --- 앞면: CHON ID 내부 레이아웃과 동일 매핑 --- */
+  .fcc-card-title {
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: -0.4px;
+    margin-bottom: 14px;
+  }
+  /* CHON ID의 .id-card-photo와 동일한 사진 영역 + 가족증 표식 배지 */
+  .fcc-photo {
+    width: 110px; height: 134px;
+    background: white;
+    border-radius: 12px;
+    margin: 0 auto 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 64px;
+    color: var(--chon-orange-dark);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    overflow: hidden;
+    position: relative;
+  }
+  .fcc-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 12px;
+  }
+  .fcc-photo-badge {
+    position: absolute;
+    right: 6px;
+    bottom: 6px;
+    background: var(--chon-orange);
+    color: white;
+    border-radius: 999px;
+    padding: 2px 8px;
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0.3px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+  }
+  .fcc-card-name { font-size: 24px; font-weight: 900; }
+  .fcc-card-sub { font-size: 12px; opacity: 0.92; margin-top: 2px; font-weight: 600; }
+  .fcc-card-qr {
+    width: 110px; height: 110px;
+    background: white;
+    border-radius: 8px;
+    margin: 12px auto 10px;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-template-rows: repeat(7, 1fr);
+    padding: 6px;
+    gap: 1px;
+  }
+  .fcc-card-qr span { background: #1F1F1F; border-radius: 1px; }
+  .fcc-card-qr span.off { background: transparent; }
+  .fcc-card-footer { font-size: 11px; font-weight: 800; letter-spacing: 0.5px; opacity: 0.95; }
+
+  /* --- 뒷면: 구성원 리스트 + 관계도 링크 --- */
+  .fcc-back-header { margin-bottom: 10px; }
+  .fcc-back-title {
+    font-size: 20px;
+    font-weight: 900;
+    letter-spacing: -0.3px;
+    margin-bottom: 3px;
+  }
+  .fcc-back-sub {
+    font-size: 11px;
+    opacity: 0.88;
+    font-weight: 600;
+  }
+  .fcc-back-members {
+    flex: 1;
+    min-height: 0;
+    background: rgba(255,255,255,0.18);
+    border-radius: 12px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    overflow-y: auto;
+    -webkit-backdrop-filter: blur(3px);
+    backdrop-filter: blur(3px);
+  }
+  .fcc-member {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .fccm-avatar {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.40);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 900;
+    flex-shrink: 0;
+  }
+  .fccm-avatar.female { background: rgba(255,193,213,0.55); }
+  .fccm-name { flex: 1; }
+  .fccm-rel {
+    font-size: 10px;
+    opacity: 0.85;
+    font-weight: 500;
+  }
+  .fcc-tree-link {
+    display: block;
+    margin-top: 10px;
+    background: rgba(255,255,255,0.95);
+    color: var(--chon-orange-dark);
+    text-align: center;
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 800;
+    text-decoration: none;
+    transition: transform 0.12s, background 0.15s;
+  }
+  .fcc-tree-link:active { transform: scale(0.97); background: #FFF7E6; }
   .moim-plus {
     width: 56px; height: 56px;
     margin: 0 auto 16px;
@@ -650,12 +858,19 @@
         </div>
       </section>
     </div>
+
+    <!-- 좌·우 이동 버튼 -->
+    <button type="button" class="nav-arrow prev" id="navPrev" onclick="goSlide(currentSlide - 1)" aria-label="이전 카드" disabled>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+    </button>
+    <button type="button" class="nav-arrow next" id="navNext" onclick="goSlide(currentSlide + 1)" aria-label="다음 카드">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+    </button>
   </div>
 
-  <!-- 페이지 인디케이터 -->
-  <div class="pager" aria-label="화면 페이지">
-    <button type="button" class="pager-dot active" data-page="0" onclick="goSlide(0)" aria-label="CHON ID"></button>
-    <button type="button" class="pager-dot"        data-page="1" onclick="goSlide(1)" aria-label="인증 모임"></button>
+  <!-- 카드 수량 카운터 -->
+  <div class="slide-counter" aria-live="polite">
+    <span class="current" id="slideCurrent">1</span> / <span id="slideTotal">2</span>
   </div>
 
   <nav class="bottom-nav">
@@ -699,7 +914,7 @@
   </div>
 
   <div class="onboard-pager">1 / 2</div>
-  <div class="onboard-helper-bottom">하단 <span class="accent">점</span>을 눌러서도 이동할 수 있어요</div>
+  <div class="onboard-helper-bottom">양쪽 <span class="accent">화살표</span>를 눌러서도 이동할 수 있어요</div>
 
   <div class="onboard-bottom">
     <button type="button" class="onboard-dismiss" onclick="dismissForever(event)">✕ 다시보지않기</button>
@@ -714,7 +929,7 @@
 // State
 // =========================================================
 let currentSlide = 0;
-const totalSlides = 2;
+let totalSlides = 2; // CHON ID + 인증 모임 picker — 발급된 가족증이 있으면 그 사이에 주입되어 증가
 
 function hasSelfId() {
   try { return localStorage.getItem('selfIdCreated') === '1'; } catch (e) { return false; }
@@ -815,12 +1030,20 @@ function openMoim(kind) {
 // =========================================================
 const track = document.getElementById('slidesTrack');
 
+// stride% = 한 슬라이드가 차지하는 track 폭의 백분율 (= 100/N)
+function slideStride() { return 100 / totalSlides; }
+
 function goSlide(i) {
   currentSlide = Math.max(0, Math.min(totalSlides - 1, i));
-  track.style.transform = `translateX(${-currentSlide * 50}%)`;
-  document.querySelectorAll('.pager-dot').forEach((d, idx) => {
-    d.classList.toggle('active', idx === currentSlide);
-  });
+  track.style.transform = `translateX(${-currentSlide * slideStride()}%)`;
+  const cur = document.getElementById('slideCurrent');
+  if (cur) cur.textContent = String(currentSlide + 1);
+  const prev = document.getElementById('navPrev');
+  const next = document.getElementById('navNext');
+  if (prev) prev.toggleAttribute('disabled', currentSlide === 0);
+  if (next) next.toggleAttribute('disabled', currentSlide === totalSlides - 1);
+  // 슬라이드 전환 시 모든 가족증 카드는 앞면으로 리셋
+  document.querySelectorAll('.fcc-flip[data-flipped="true"]').forEach(f => f.dataset.flipped = 'false');
 }
 
 // 터치 스와이프
@@ -846,14 +1069,15 @@ track.addEventListener('touchmove', (e) => {
   if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 12) {
     touching = false;
     track.classList.remove('dragging');
-    track.style.transform = `translateX(${-currentSlide * 50}%)`;
+    track.style.transform = `translateX(${-currentSlide * slideStride()}%)`;
     return;
   }
   touchDeltaX = dx;
   const slideWidth = track.parentElement.clientWidth;
-  const pct = (-currentSlide * 50) + (dx / slideWidth * 50);
+  const stride = slideStride();
+  const pct = (-currentSlide * stride) + (dx / slideWidth * stride);
   // 가장자리에서 저항 효과
-  const clamped = Math.max(-50, Math.min(0, pct));
+  const clamped = Math.max(-stride * (totalSlides - 1), Math.min(0, pct));
   track.style.transform = `translateX(${clamped}%)`;
 }, { passive: true });
 
@@ -913,7 +1137,153 @@ function showToast(msg) {
 }
 
 function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// =========================================================
+// 증명서 동적 주입 — family-tree.html(가족증) / friends.html(동호회증)에서
+// 발급한 증명서를 CHON ID와 인증 모임 picker 사이에 슬라이드로 삽입
+// =========================================================
+const CERT_STORAGE = {
+  family: 'pass_family_certificates',
+  club:   'pass_club_certificates',
+};
+
+const CERT_KINDS = {
+  family: {
+    title:        '가족증',
+    subtitle:     'CHON 인증 가족 증명서',
+    footerPrefix: '⊕ CHON 가족증',
+    treeUrl:      '../views/family-tree.html?step=3',
+    backTitle:    '가족 구성원',
+    treeLinkText: '관계도 전체 보기 →',
+    faceMod:      '', // 기본 그린 그라데이션
+  },
+  club: {
+    title:        '동호회증',
+    subtitle:     'CHON 인증 모임 증명서',
+    footerPrefix: '⊕ CHON 동호회증',
+    treeUrl:      '../views/friends.html?step=3',
+    backTitle:    '모임원',
+    treeLinkText: '모임 전체 보기 →',
+    faceMod:      'fcc-face--club', // 블루 그라데이션
+  },
+};
+
+function loadCerts(key) {
+  try {
+    const raw = localStorage.getItem(key);
+    if (raw) {
+      const arr = JSON.parse(raw);
+      if (Array.isArray(arr)) return arr;
+    }
+  } catch (e) {}
+  return [];
+}
+
+function certSlideHtml(cert, kind) {
+  const opts = CERT_KINDS[kind];
+  if (!opts) return '';
+  const d = new Date(cert.issuedAt || Date.now());
+  const ds = `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
+  const members = Array.isArray(cert.members) ? cert.members : [];
+  const qrCells = qrPattern(cert.id || cert.title || kind);
+
+  // CHON ID와 동일한 본인 정보 소스 — selfId/passUser 라이브 조회
+  const selfId = getSelfId() || {};
+  const u = getUser() || {};
+  const name = selfId.name || (cert.issuedFor && cert.issuedFor.name) || '홍길순';
+  const roman = romanize(name);
+  const gender = selfId.gender || (cert.issuedFor && cert.issuedFor.gender);
+
+  // 발급 시 사용자가 지정한 이름·이미지 우선
+  const cardTitle = (cert.customTitle && cert.customTitle.trim()) || opts.title;
+  const photoHtml = cert.customImage
+    ? `<img src="${escapeHtml(cert.customImage)}" alt=""/>`
+    : (u.photo
+        ? `<img src="${escapeHtml(u.photo)}" alt=""/>`
+        : (gender === 'female' ? '👩' : '👨'));
+
+  const memberRows = members.map(m => `
+    <div class="fcc-member">
+      <span class="fccm-avatar ${m.gender === 'female' ? 'female' : 'male'}">${escapeHtml((m.name || '?').charAt(0))}</span>
+      <span class="fccm-name">${escapeHtml(m.name || '?')}</span>
+      <span class="fccm-rel">${escapeHtml(m.relation || (m.id === 'me' ? '본인' : ''))}</span>
+    </div>
+  `).join('');
+
+  return `
+    <div class="slide-title-row">
+      <div class="slide-title-main">${escapeHtml(cardTitle)}</div>
+      <div class="slide-title-sub">${escapeHtml(opts.subtitle)}</div>
+    </div>
+    <div class="fam-cert-card">
+      <div class="fcc-flip" data-flipped="false" onclick="flipFamCard(event, this)">
+        <div class="fcc-face fcc-front ${opts.faceMod}">
+          <div class="fcc-card-title">${escapeHtml(cardTitle)}</div>
+          <div class="fcc-photo">
+            ${photoHtml}
+            <span class="fcc-photo-badge">${members.length}명</span>
+          </div>
+          <div class="fcc-card-name">${escapeHtml(name)}</div>
+          <div class="fcc-card-sub">${escapeHtml(roman)}</div>
+          <div class="fcc-card-qr">${qrCells}</div>
+          <div class="fcc-card-footer">${escapeHtml(opts.footerPrefix)} · ${ds}</div>
+        </div>
+        <div class="fcc-face fcc-back ${opts.faceMod}">
+          <div class="fcc-back-header">
+            <div class="fcc-back-title">${escapeHtml(opts.backTitle)}</div>
+            <div class="fcc-back-sub">${ds} 발급 · ${members.length}명 · ↻ 탭하여 뒤집기</div>
+          </div>
+          <div class="fcc-back-members">${memberRows}</div>
+          <a class="fcc-tree-link" href="${opts.treeUrl}" onclick="event.stopPropagation();">${escapeHtml(opts.treeLinkText)}</a>
+        </div>
+      </div>
+    </div>
+    <button type="button" class="point-pill point-pill-below" onclick="event.stopPropagation(); location.href='./trust.html'" aria-label="인증 포인트 · 레벨 보기">
+      <span class="dot">P</span>
+      <span>500</span>
+      <span class="point-pill-label">인증 포인트</span>
+    </button>
+  `;
+}
+
+// 카드 플립 — 스와이프 중이었으면 무시
+function flipFamCard(e, flipEl) {
+  if (Math.abs(touchDeltaX) > 10) return;
+  flipEl.dataset.flipped = flipEl.dataset.flipped === 'true' ? 'false' : 'true';
+}
+
+function injectAllCertSlides() {
+  // 이전에 주입된 증명서 슬라이드 제거 (재실행 안전)
+  track.querySelectorAll('.slide.fam-cert-slide').forEach(s => s.remove());
+
+  const allSlides = track.querySelectorAll('.slide');
+  if (allSlides.length < 2) return;
+  // 마지막 슬라이드(인증 모임 picker) 앞에 삽입
+  const pickerSlide = allSlides[allSlides.length - 1];
+
+  // 가족증 → 동호회증 순으로 삽입
+  for (const kind of ['family', 'club']) {
+    const certs = loadCerts(CERT_STORAGE[kind]);
+    for (const cert of certs) {
+      const slide = document.createElement('section');
+      slide.className = `slide fam-cert-slide ${kind}-cert-slide`;
+      slide.dataset.certId = cert.id || '';
+      slide.dataset.certKind = kind;
+      slide.innerHTML = `<div class="slide-1-inner">${certSlideHtml(cert, kind)}</div>`;
+      track.insertBefore(slide, pickerSlide);
+    }
+  }
+
+  totalSlides = track.querySelectorAll('.slide').length;
+  track.style.width = `${totalSlides * 100}%`;
+  track.querySelectorAll('.slide').forEach(s => {
+    s.style.width = `${100 / totalSlides}%`;
+  });
+  const totalEl = document.getElementById('slideTotal');
+  if (totalEl) totalEl.textContent = String(totalSlides);
+  goSlide(currentSlide);
 }
 
 // =========================================================
@@ -924,15 +1294,29 @@ function escapeHtml(s) {
   const wn = document.getElementById('welcomeName');
   if (wn && u?.name) wn.textContent = u.name;
   renderIdCard();
+  injectAllCertSlides();
   showOnboardIfNeeded();
 
-  // ?slide=1 로 진입 시 인증 모임 picker(슬라이드 2)로 바로 이동
+  // ?slide=picker → 인증 모임 picker(항상 마지막 슬라이드)로 이동
+  // ?slide=N → 명시적 인덱스, 범위 초과 시 클램프
   try {
     const params = new URLSearchParams(location.search);
-    const s = parseInt(params.get('slide') || '', 10);
-    if (Number.isFinite(s) && s > 0) goSlide(s);
+    const raw = params.get('slide');
+    if (raw === 'picker' || raw === 'last') {
+      goSlide(totalSlides - 1);
+    } else {
+      const s = parseInt(raw || '', 10);
+      if (Number.isFinite(s) && s > 0) goSlide(Math.min(s, totalSlides - 1));
+    }
   } catch (e) {}
 })();
+
+// 다른 탭/페이지에서 가족증·동호회증이 발급/삭제되면 즉시 반영
+window.addEventListener('storage', (e) => {
+  if (e.key === 'pass_family_certificates' || e.key === 'pass_club_certificates') {
+    injectAllCertSlides();
+  }
+});
 </script>
 <script src="../lib/welcome-name.js"></script>
 </body>
